@@ -1,120 +1,101 @@
 ---
 name: querydsl-ktx
-description: QueryDSL Kotlin null-safe infix extensions for dynamic queries
+description: QueryDSL Kotlin null-safe infix extension usage guide. Use when writing QueryDSL dynamic queries, repository implementations, or debugging null-safety issues.
+triggers:
+  - querydsl
+  - QueryDSL
+  - dynamic query
+  - BooleanExpression
+  - null-safe
+  - querydsl-ktx
+  - QuerydslRepository
 ---
 
-# querydsl-ktx
+## Quick Reference
 
-Null-safe infix Kotlin extensions for QueryDSL. Eliminates BooleanBuilder boilerplate.
-
-Trigger: "querydsl", "QueryDSL", "dynamic query", "BooleanExpression", "null-safe", "querydsl-ktx"
-
-## Core Concept
-
-Implement an extension interface → infix functions become available in that scope.
+Implement an extension interface to use infix functions in that scope:
 
 ```kotlin
-class MyRepository : QuerydslRepository<MyEntity>() {
-    // All 7 extension interfaces available via infix
-    fun search(name: String?, status: String?) =
-        selectFrom(entity)
-            .where(entity.name contains name, entity.status eq status)
+@Repository
+class MemberRepository : QuerydslRepository<Member>() {
+    private val member = QMember.member
+
+    fun search(name: String?, status: String?, pageable: Pageable): Page<Member> =
+        selectFrom(member)
+            .where(member.name contains name, member.status eq status)
             .page(pageable)
 }
 ```
 
-## Null-Safety Rules
+## Null Rules (CRITICAL)
 
-| Function type | this null | arg null | both null |
-|--------------|-----------|----------|-----------|
-| `and` / `or` | returns arg | returns this | null |
-| `between(Pair)` | null | one-sided (goe/loe) | null |
-| All others (`eq`, `gt`, `contains`, ...) | null | null | null |
-
-Key: `and`/`or` preserve the non-null side. `between` degrades to one-sided comparison. Everything else skips on any null.
-
-## 7 Extension Interfaces
-
-### BooleanExpressionExtensions
-```kotlin
-condition1 and condition2       // AND, null side ignored
-condition1 or condition2        // OR, null side ignored
-entity.active eq true           // active = true
+```
+and/or:       null side ignored, non-null side preserved
+between(Pair): one side null → goe/loe, both null → skip
+everything else: any null → skip (return null)
 ```
 
-### SimpleExpressionExtensions
+## Infix Cheat Sheet
+
 ```kotlin
-entity.status eq "ACTIVE"              // status = 'ACTIVE'
-entity.status ne "DELETED"             // status != 'DELETED'
-entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
-entity.status notIn listOf("C")       // status NOT IN ('C')
+// Boolean
+condition and condition     // AND, null-safe
+condition or condition      // OR, null-safe
+
+// Equality (SimpleExpression — all types)
+entity.field eq value       // =
+entity.field ne value       // !=
+entity.field `in` list      // IN (backticks required)
+entity.field notIn list     // NOT IN
+
+// Comparison (Comparable / Number)
+entity.field gt value       // >
+entity.field goe value      // >=
+entity.field lt value       // <
+entity.field loe value      // <=
+entity.field between (a to b)   // BETWEEN (Pair, one-sided OK)
+entity.field between (a..b)     // BETWEEN (ClosedRange)
+
+// String
+entity.field contains str           // LIKE '%str%'
+entity.field containsIgnoreCase str // case-insensitive
+entity.field startsWith str         // LIKE 'str%'
+entity.field endsWith str           // LIKE '%str'
+entity.field like pattern           // LIKE pattern
+entity.field equalsIgnoreCase str   // case-insensitive =
+
+// Temporal
+entity.field after date     // >
+entity.field before date    // <
+
+// Collection
+entity.field contains value // IN
 ```
 
-### ComparableExpressionExtensions
+## Pagination
+
 ```kotlin
-entity.date gt startDate               // date > ?
-entity.date goe startDate              // date >= ?
-entity.date lt endDate                 // date < ?
-entity.date loe endDate                // date <= ?
-entity.date between (from to to)       // BETWEEN (Pair, one-sided OK)
-entity.age between (20..60)            // BETWEEN (ClosedRange)
+query.page(pageable)                    // Page (auto count)
+query.page(pageable) { countQuery() }   // Page (custom count)
+query.slice(pageable)                   // Slice (pageSize+1)
+query.page(page = 0, size = 20)         // value-based
+query.fetch(offset = 0, limit = 20)     // raw List
+query.applySort(sort) { fallback() }    // sort with fallback
+query.fetchSorted(sort)                 // sort + fetch
 ```
 
-### NumberExpressionExtensions
-Same API as Comparable, separate interface because `NumberExpression` does not extend `ComparableExpression`.
+## Bulk DML
 
-### StringExpressionExtensions
-```kotlin
-entity.name contains keyword           // LIKE '%keyword%'
-entity.name containsIgnoreCase keyword // case-insensitive
-entity.name startsWith prefix         // LIKE 'prefix%'
-entity.name endsWith suffix           // LIKE '%suffix'
-entity.name like pattern              // LIKE pattern
-entity.name matches regex             // REGEXP
-entity.name equalsIgnoreCase value    // case-insensitive =
-```
-
-### TemporalExpressionExtensions
-```kotlin
-entity.createdAt after startDate      // created_at > ?
-entity.createdAt before endDate       // created_at < ?
-```
-
-### CollectionExpressionExtensions
-```kotlin
-entity.roles contains "ADMIN"         // 'ADMIN' IN (roles)
-```
-
-## QuerydslRepository Helpers
-
-### Pagination
-```kotlin
-query.page(pageable)                   // Page with auto count
-query.page(pageable) { countQuery() }  // Page with custom count
-query.slice(pageable)                  // Slice with accurate hasNext
-query.page(page = 0, size = 20)        // value-based overloads
-query.fetch(offset = 0, limit = 20)    // raw fetch
-```
-
-### Sorting
-```kotlin
-query.applySort(sort) { entity.id.desc() }  // with fallback
-query.fetchSorted(sort)                      // sort + fetch
-```
-
-### Bulk DML
 ```kotlin
 modifying {
-    update(entity).set(entity.active, false).where(...).execute()
+    update(entity).set(...).where(...).execute()
 }
-// flush before + clear after (default: both true)
-// Same flags as @Modifying: flushAutomatically, clearAutomatically
+// flushAutomatically=true, clearAutomatically=true by default
 ```
 
-## Common Mistakes
+## Pitfalls
 
-1. **Don't use `BooleanBuilder`** — use `and`/`or` infix chaining instead
-2. **`in` is a Kotlin keyword** — use backticks: `` entity.status `in` list ``
-3. **`between` with one null** — degrades to `>=` or `<=`, doesn't skip entirely
-4. **`NumberExpression` needs separate interface** — `ComparableExpressionExtensions` won't work for numbers
-5. **`modifying` defaults to flush+clear** — unlike `@Modifying` which defaults to both false
+- `in` is a Kotlin keyword — always use backticks: `` `in` ``
+- `NumberExpression` does NOT extend `ComparableExpression` — use `NumberExpressionExtensions`
+- `modifying` defaults differ from `@Modifying` (ours: both true, JPA: both false)
+- `between(null to null)` returns null, `between(value to null)` returns `goe(value)`
