@@ -1,19 +1,19 @@
 [versions]
-kotlin = "1.9.25"
-spring-boot = "3.5.0"
+kotlin = "1.7.21"
 querydsl = "5.1.0"
+spring-boot = "3.0.0"
+spring-data = "3.0.0"
+jakarta-persistence = "3.1.0"
+jakarta-annotation = "2.1.1"
 
 [libraries]
-querydsl-jpa = { module = "com.querydsl:querydsl-jpa" }
-querydsl-core = { module = "com.querydsl:querydsl-core" }
-spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure" }
-spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
-spring-data-commons = { module = "org.springframework.data:spring-data-commons" }
-spring-data-jpa = { module = "org.springframework.data:spring-data-jpa" }
-jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api" }
-jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
+querydsl-jpa = { module = "com.querydsl:querydsl-jpa", version.ref = "querydsl" }
+querydsl-core = { module = "com.querydsl:querydsl-core", version.ref = "querydsl" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
+spring-data-commons = { module = "org.springframework.data:spring-data-commons", version.ref = "spring-data" }
+spring-data-jpa = { module = "org.springframework.data:spring-data-jpa", version.ref = "spring-data" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence" }
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
-spring-dependency-management = { id = "io.spring.dependency-management", version = "1.1.7" }

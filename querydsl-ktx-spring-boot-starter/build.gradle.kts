@@ -5,7 +5,4 @@ plugins {
 dependencies {
     api(projects.querydslKtx)
     api(projects.querydslKtxSpringBoot)
-    api(libs.querydsl.jpa) {
-        artifact { classifier = "jakarta" }
-    }
 }
