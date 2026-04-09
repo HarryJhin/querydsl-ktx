@@ -140,6 +140,30 @@ abstract class QuerydslSupport<T : Any> {
     }
 
     /**
+     * Performs slice-based pagination with [SortSpec]-based sorting.
+     *
+     * Sorting is resolved through [spec] instead of the [Pageable]'s own sort,
+     * so client-supplied property names are validated against the explicit mapping.
+     *
+     * ```kotlin
+     * selectFrom(qMember)
+     *     .where(condition)
+     *     .slice(pageable, memberSort)
+     * ```
+     *
+     * @param pageable the page request (sort is ignored; use [spec] instead)
+     * @param spec the [SortSpec] mapping property names to expressions
+     * @param fallback optional default order when sort resolves to nothing
+     * @return a [Slice] with accurate hasNext information
+     */
+    protected fun <R> JPQLQuery<R>.slice(
+        pageable: Pageable,
+        spec: SortSpec,
+        fallback: (() -> OrderSpecifier<*>?)? = null,
+    ): Slice<R> =
+        this.applySort(pageable.sort, spec, fallback).slice(PageRequest.of(pageable.pageNumber, pageable.pageSize))
+
+    /**
      * Performs pagination with an auto-generated count query.
      *
      * **Warning: Do not use with fetch joins!**
@@ -162,6 +186,33 @@ abstract class QuerydslSupport<T : Any> {
     }
 
     /**
+     * Performs pagination with [SortSpec]-based sorting and an auto-generated count query.
+     *
+     * ```kotlin
+     * selectFrom(qMember)
+     *     .where(condition)
+     *     .page(pageable, memberSort)
+     * ```
+     *
+     * @param pageable the page request (sort is ignored; use [spec] instead)
+     * @param spec the [SortSpec] mapping property names to expressions
+     * @param fallback optional default order when sort resolves to nothing
+     * @return a [Page] containing the current page data and total count
+     */
+    protected fun <R> JPAQuery<R>.page(
+        pageable: Pageable,
+        spec: SortSpec,
+        fallback: (() -> OrderSpecifier<*>?)? = null,
+    ): Page<R> {
+        val countQuery: JPAQuery<R> = this.clone()
+        val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+        val content: List<R> = this.applySort(pageable.sort, spec, fallback).fetch(unsorted)
+        return PageableExecutionUtils.getPage(content, pageable) {
+            countQuery.select(Wildcard.count).fetchOne() ?: 0L
+        }
+    }
+
+    /**
      * Performs pagination with a separate count query you provide.
      *
      * Use this overload when the main query contains fetch joins or other constructs
@@ -176,6 +227,36 @@ abstract class QuerydslSupport<T : Any> {
         countQuery: () -> Long?,
     ): Page<R> {
         val content: List<R> = this.fetch(pageable)
+        return PageableExecutionUtils.getPage(content, pageable) {
+            countQuery() ?: 0L
+        }
+    }
+
+    /**
+     * Performs pagination with [SortSpec]-based sorting and a separate count query.
+     *
+     * ```kotlin
+     * selectFrom(qMember)
+     *     .where(condition)
+     *     .page(pageable, memberSort) {
+     *         jpaQueryFactory.select(qMember.count()).from(qMember).where(condition).fetchOne() ?: 0L
+     *     }
+     * ```
+     *
+     * @param pageable the page request (sort is ignored; use [spec] instead)
+     * @param spec the [SortSpec] mapping property names to expressions
+     * @param fallback optional default order when sort resolves to nothing
+     * @param countQuery a lambda returning the total row count
+     * @return a [Page] containing the current page data and total count
+     */
+    protected fun <R> JPQLQuery<R>.page(
+        pageable: Pageable,
+        spec: SortSpec,
+        fallback: (() -> OrderSpecifier<*>?)? = null,
+        countQuery: () -> Long?,
+    ): Page<R> {
+        val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+        val content: List<R> = this.applySort(pageable.sort, spec, fallback).fetch(unsorted)
         return PageableExecutionUtils.getPage(content, pageable) {
             countQuery() ?: 0L
         }
@@ -250,14 +331,15 @@ abstract class QuerydslSupport<T : Any> {
      *
      * ```kotlin
      * private val memberSort = sortSpec {
-     *     "name"      by qMember.name
-     *     "createdAt" by qMember.createdAt
+     *     "name"       by qMember.name
+     *     "createdAt"  by qMember.createdAt
+     *     "department" by qDepartment.name   // join column — PathBuilder can't resolve this
      * }
      *
      * fun findAll(pageable: Pageable): Page<Member> =
      *     selectFrom(qMember)
-     *         .applySort(pageable.sort, memberSort) { qMember.createdAt.desc() }
-     *         .page(pageable)
+     *         .join(qMember.department, qDepartment)
+     *         .page(pageable, memberSort) { qMember.createdAt.desc() }
      * ```
      *
      * @param sort the Spring Data [Sort] from the client

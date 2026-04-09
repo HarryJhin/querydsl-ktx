@@ -12,16 +12,16 @@ import org.springframework.data.domain.Sort
  * Define a spec once and reuse it across queries:
  * ```kotlin
  * val memberSort = sortSpec {
- *     "name"      by qMember.name
- *     "createdAt" by qMember.createdAt
- *     "age"       by qMember.age
+ *     "name"       by qMember.name
+ *     "createdAt"  by qMember.createdAt
+ *     "department" by qDepartment.name   // join column — PathBuilder can't resolve this
  * }
  *
  * // In a query method:
  * selectFrom(qMember)
+ *     .join(qMember.department, qDepartment)
  *     .where(condition)
- *     .applySort(pageable.sort, memberSort)
- *     .fetch(pageable)
+ *     .page(pageable, memberSort)
  * ```
  *
  * Unknown property names in [Sort] are silently ignored,
