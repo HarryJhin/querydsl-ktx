@@ -1,0 +1,335 @@
+# querydsl-ktx
+
+> Null-safe infix Kotlin extensions for QueryDSL dynamic queries. Eliminates manual `BooleanBuilder` null checks by providing eight extension interfaces that turn `if (x != null) builder.and(...)` patterns into declarative infix expressions like `entity.name eq name`. Null arguments are automatically skipped. Works with Spring Boot 3.0+, QueryDSL 5.1.0+, Kotlin 1.7+, Java 17+.
+
+Documentation: https://harryjhin.github.io/querydsl-ktx/
+
+## The Problem
+
+QueryDSL dynamic queries require repetitive null checks for every optional filter:
+
+```kotlin
+val builder = BooleanBuilder()
+if (name != null) builder.and(member.name.contains(name))
+if (status != null) builder.and(member.status.eq(status))
+if (minAge != null && maxAge != null) builder.and(member.age.between(minAge, maxAge))
+else if (minAge != null) builder.and(member.age.goe(minAge))
+else if (maxAge != null) builder.and(member.age.loe(maxAge))
+```
+
+Each optional filter adds 1-3 lines. Range filters need 3 branches. querydsl-ktx eliminates this entirely.
+
+## Alternatives Comparison
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| `BooleanBuilder` | Built-in, no dependency | Verbose, error-prone with ranges |
+| `BooleanExpression` chaining | Slightly cleaner | Still manual null checks everywhere |
+| Spring Data `Specification` | Type-safe | Separate from QueryDSL, no infix syntax |
+| Top-level Kotlin extensions | Concise | Pollutes global scope; name clashes with stdlib |
+| Hand-rolled helper functions | Familiar | Duplicated per entity; partial coverage; no standard |
+| **querydsl-ktx** | Null-safe, concise, scoped, tested | Additional dependency |
+
+## Installation
+
+```kotlin
+// Gradle Kotlin DSL — starter (includes AutoConfiguration for JPAQueryFactory)
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
+
+// Or core only (extension interfaces + QuerydslRepository, no auto-config)
+implementation("io.github.harryjhin:querydsl-ktx:0.1.0")
+```
+
+## Core Concept
+
+Extensions are delivered as **interfaces**. Implement the interface on your repository class to bring infix operators into scope:
+
+```kotlin
+@Repository
+class MemberRepository : QuerydslRepository<Member>() {
+    // All 8 extension interfaces are active via QuerydslRepository
+}
+
+// Or selectively:
+class MyRepo : QuerydslSupport<MyEntity>(), BooleanExpressionExtensions, StringExpressionExtensions {
+    override val domainClass = MyEntity::class.java
+}
+```
+
+## Extension Interfaces
+
+### BooleanExpressionExtensions
+
+```kotlin
+infix fun BooleanExpression?.and(right: BooleanExpression?): BooleanExpression?
+infix fun BooleanExpression?.or(right: BooleanExpression?): BooleanExpression?
+infix fun BooleanExpression?.andAnyOf(predicates: List<BooleanExpression?>): BooleanExpression?
+infix fun BooleanExpression?.orAllOf(predicates: List<BooleanExpression?>): BooleanExpression?
+infix fun BooleanExpression?.eq(right: Boolean?): BooleanExpression?
+infix fun BooleanExpression?.nullif(other: Expression<Boolean>?): BooleanExpression?
+infix fun BooleanExpression?.nullif(other: Boolean?): BooleanExpression?
+infix fun BooleanExpression?.coalesce(expr: Expression<Boolean>?): BooleanExpression?
+infix fun BooleanExpression?.coalesce(arg: Boolean?): BooleanExpression?
+```
+
+Null behavior for `and`/`or`: null side is ignored, non-null side is preserved. Both null returns null.
+
+### SimpleExpressionExtensions
+
+```kotlin
+infix fun <T> SimpleExpression<T>?.eq(right: T?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eq(right: Expression<in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.ne(right: T?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.ne(right: Expression<in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.`in`(right: Collection<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.notIn(right: Collection<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?): BooleanExpression?
+fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression?
+```
+
+Null behavior: either side null returns null (condition skipped).
+
+### ComparableExpressionExtensions
+
+```kotlin
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gt(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gt(right: Expression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goe(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goe(right: Expression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.lt(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.lt(right: Expression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loe(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loe(right: Expression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.between(range: Pair<T?, T?>): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.between(range: ClosedRange<T>): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.notBetween(range: Pair<T, T>): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: Expression<T>?): ComparableExpression<T>?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: T?): ComparableExpression<T>?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(expr: Expression<T>?): ComparableExpression<T>?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(arg: T?): ComparableExpression<T>?
+```
+
+Null behavior for `between(Pair)`: both bounds present = BETWEEN, only from = `>=`, only to = `<=`, both null = null. This is the **one-sided survival** pattern.
+
+### NumberExpressionExtensions
+
+Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`.
+
+### StringExpressionExtensions
+
+```kotlin
+infix fun StringExpression?.contains(right: String?): BooleanExpression?
+infix fun StringExpression?.contains(right: Expression<String>?): BooleanExpression?
+infix fun StringExpression?.containsIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.startsWith(right: String?): BooleanExpression?
+infix fun StringExpression?.startsWithIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.endsWith(right: String?): BooleanExpression?
+infix fun StringExpression?.endsWithIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.equalsIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.notEqualsIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.like(right: String?): BooleanExpression?
+infix fun StringExpression?.likeIgnoreCase(right: String?): BooleanExpression?
+infix fun StringExpression?.notLike(right: String?): BooleanExpression?
+infix fun StringExpression?.matches(regex: String?): BooleanExpression?
+```
+
+Null behavior: either side null returns null (condition skipped).
+
+### TemporalExpressionExtensions
+
+```kotlin
+infix fun <T : Comparable<T>> TemporalExpression<T>?.after(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> TemporalExpression<T>?.after(right: Expression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> TemporalExpression<T>?.before(right: T?): BooleanExpression?
+infix fun <T : Comparable<T>> TemporalExpression<T>?.before(right: Expression<T>?): BooleanExpression?
+```
+
+Null behavior: either side null returns null (condition skipped).
+
+### CollectionExpressionExtensions
+
+```kotlin
+infix fun <T : Collection<E>, E> CollectionExpressionBase<T, E>?.contains(child: E?): BooleanExpression?
+infix fun <T : Collection<E>, E> CollectionExpressionBase<T, E>?.contains(child: Expression<E>?): BooleanExpression?
+```
+
+Null behavior: either side null returns null (condition skipped).
+
+### SubQueryExtensions
+
+```kotlin
+fun <T> EntityPath<T>.exists(vararg predicates: Predicate?): BooleanExpression
+fun <T> EntityPath<T>.notExists(vararg predicates: Predicate?): BooleanExpression
+```
+
+Builds EXISTS / NOT EXISTS sub-queries. Null predicates are filtered out.
+
+## QuerydslSupport Base Class
+
+Provides query factory wrappers and pagination helpers without extension interfaces.
+
+### Query Factory Wrappers
+
+```kotlin
+protected fun delete(path: EntityPath<*>): JPADeleteClause
+protected fun <R> select(expr: Expression<R>): JPAQuery<R>
+protected fun select(vararg exprs: Expression<*>): JPAQuery<Tuple>
+protected fun <R> selectDistinct(expr: Expression<R>): JPAQuery<R>
+protected fun selectDistinct(vararg exprs: Expression<*>): JPAQuery<Tuple>
+protected fun selectOne(): JPAQuery<Int>
+protected fun selectZero(): JPAQuery<Int>
+protected fun <R> selectFrom(from: EntityPath<R>): JPAQuery<R>
+protected fun <R> Expression<R>.from(arg: EntityPath<*>): JPAQuery<R>
+protected fun update(path: EntityPath<*>): JPAUpdateClause
+protected fun insert(path: EntityPath<*>): JPAInsertClause
+```
+
+### Pagination Helpers
+
+```kotlin
+// Slice (no count query, uses pageSize+1 trick for hasNext)
+protected fun <R> JPQLQuery<R>.slice(pageable: Pageable): Slice<R>
+protected fun <R> JPQLQuery<R>.slice(page: Int, size: Int): Slice<R>
+
+// Page (with count query)
+protected fun <R> JPAQuery<R>.page(pageable: Pageable): Page<R>                          // auto count
+protected fun <R> JPQLQuery<R>.page(pageable: Pageable, countQuery: () -> Long?): Page<R> // manual count
+protected fun <R> JPAQuery<R>.page(page: Int, size: Int): Page<R>
+protected fun <R> JPQLQuery<R>.page(page: Int, size: Int, countQuery: () -> Long?): Page<R>
+
+// Fetch with pagination
+protected fun <R> JPQLQuery<R>.fetch(pageable: Pageable): List<R>
+protected fun <R> JPQLQuery<R>.fetch(offset: Long, limit: Int): List<R>
+
+// Sorting
+protected fun <R> JPQLQuery<R>.applySort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>
+protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R>
+
+// SortSpec-based sorting + pagination
+protected fun <R> JPQLQuery<R>.slice(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Slice<R>
+protected fun <R> JPAQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Page<R>
+protected fun <R> JPQLQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }, countQuery: () -> Long?): Page<R>
+protected fun <R> JPQLQuery<R>.applySort(sort: Sort, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>
+
+// List to Page conversion
+protected fun <R> List<R>.page(pageable: Pageable, countQuery: () -> Long): Page<R>
+```
+
+### SortSpec
+
+```kotlin
+class SortSpec {
+    infix fun String.by(expression: Expression<out Comparable<*>>)
+    fun resolve(sort: Sort): List<OrderSpecifier<*>>
+}
+inline fun sortSpec(block: SortSpec.() -> Unit): SortSpec
+```
+
+Maps Spring Data Sort property names to QueryDSL expressions for type-safe dynamic ordering. Unknown properties are silently ignored (whitelist-based security).
+
+### Bulk DML Helper
+
+```kotlin
+protected fun <R> modifying(
+    flushAutomatically: Boolean = true,
+    clearAutomatically: Boolean = true,
+    block: () -> R,
+): R
+```
+
+Wraps DML operations with `entityManager.flush()` before and `entityManager.clear()` after, preventing stale persistence context.
+
+## QuerydslRepository
+
+Extends `QuerydslSupport` and implements all eight extension interfaces. Auto-resolves `domainClass` via `GenericTypeResolver` so no manual override is needed.
+
+```kotlin
+@Repository
+class MemberRepository : QuerydslRepository<Member>() {
+    private val member = QMember.member
+
+    fun search(name: String?, status: String?, pageable: Pageable): Page<Member> =
+        selectFrom(member)
+            .where(
+                member.name contains name,
+                member.status eq status,
+            )
+            .page(pageable)
+}
+```
+
+## Before / After Examples
+
+### Dynamic search
+
+```kotlin
+// Before
+val builder = BooleanBuilder()
+if (name != null) builder.and(entity.name.eq(name))
+if (status != null) builder.and(entity.status.eq(status))
+if (minAge != null) builder.and(entity.age.goe(minAge))
+if (maxAge != null) builder.and(entity.age.loe(maxAge))
+
+// After
+var where: BooleanExpression? = null
+where = where and (entity.name eq name)
+where = where and (entity.status eq status)
+where = where and (entity.age goe minAge)
+where = where and (entity.age loe maxAge)
+```
+
+### Date range (one-sided survival)
+
+```kotlin
+// Before
+if (from != null && to != null) builder.and(entity.createdAt.between(from, to))
+else if (from != null) builder.and(entity.createdAt.goe(from))
+else if (to != null) builder.and(entity.createdAt.loe(to))
+
+// After
+entity.createdAt between (from to to)
+```
+
+### Bulk DML
+
+```kotlin
+// Before
+queryFactory.update(member).set(member.active, false).where(...).execute()
+entityManager.flush()
+entityManager.clear()
+
+// After
+modifying {
+    update(member).set(member.active, false).where(...).execute()
+}
+```
+
+## Null-Safety Rules Summary
+
+| Function type | this null | arg null | both null | Pattern |
+|---|---|---|---|---|
+| `and` / `or` | returns arg | returns this | null | Both sides survive |
+| `between(Pair)` | null | one-sided comparison | null | One-sided survival |
+| All others (`eq`, `gt`, `contains`, ...) | null | null | null | Skip if any null |
+
+## Common Mistakes
+
+1. **`and`/`or` preserve the non-null side** -- they do NOT return null when one side is null. This is intentional for chaining: `null and condition` yields `condition`.
+2. **`between` with Pair degrades gracefully** -- `entity.date between (from to null)` becomes `entity.date >= from`, not null.
+3. **All other operators skip on any null** -- `entity.name eq null` returns null (the condition is omitted from the WHERE clause), it does NOT generate `name IS NULL`.
+4. **Use `where(vararg)` with commas** -- QueryDSL's `.where()` treats multiple arguments as AND. Combine with infix extensions: `.where(entity.name eq name, entity.status eq status)`. Null entries are ignored by QueryDSL.
+
+## AutoConfiguration
+
+The starter auto-registers a `JPAQueryFactory` bean:
+- `@ConditionalOnClass(JPAQueryFactory)` -- only when QueryDSL is on classpath
+- `@ConditionalOnMissingBean` -- respects your custom bean
+- Runs after `HibernateJpaAutoConfiguration`
+
+## Modules
+
+| Module | Artifact | Description |
+|---|---|---|
+| `querydsl-ktx` | `io.github.harryjhin:querydsl-ktx` | Core: extension interfaces + QuerydslRepository |
+| `querydsl-ktx-spring-boot` | `io.github.harryjhin:querydsl-ktx-spring-boot` | AutoConfiguration for JPAQueryFactory |
+| `querydsl-ktx-spring-boot-starter` | `io.github.harryjhin:querydsl-ktx-spring-boot-starter` | Starter: aggregates both modules |

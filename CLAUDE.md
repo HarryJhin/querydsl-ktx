@@ -35,10 +35,30 @@
 코드 변경 후 반드시 확인:
 
 - [ ] AGENTS.md — 아키텍처, 인터페이스 수, 시그니처
-- [ ] llms.txt — 시그니처, 버전 번호
+- [ ] llms.txt — 링크 목록 (내용 직접 포함 금지, llms-full.txt에 위임)
+- [ ] llms-full.txt — 전체 API 시그니처, 버전 번호
 - [ ] docs/guide/ — 해당 기능 EN/KO 페이지
 - [ ] README.md / README.ko.md — 버전, 기능 목록
 - [ ] KDoc — 예시 코드가 실제 API와 일치
+
+## llms.txt 작성 규칙
+
+llms.txt 스펙 (https://llmstxt.org/) 준수. API dump를 직접 넣지 말 것.
+
+```markdown
+# 프로젝트명
+> 한줄 요약 (blockquote)
+본문 (핵심 특징만 간결하게)
+## Docs
+- [페이지명](URL): 설명
+## Optional
+- [보조 자료](URL): 설명
+```
+
+- `llms.txt` — curated table of contents (링크 + 설명만)
+- `llms-full.txt` — 전체 API 시그니처, 코드 예시 포함
+- H2 섹션은 `[Name](url): description` 링크 리스트로 구성
+- `## Optional` 섹션은 특별한 의미 — 컨텍스트가 부족할 때 생략 가능한 자료
 
 ## Conventions
 
