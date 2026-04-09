@@ -40,13 +40,13 @@ Null conditions are automatically skipped. Only non-null conditions accumulate.
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.0.1")
 ```
 
 ### Gradle (Groovy DSL)
 
 ```groovy
-implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0'
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.0.1'
 ```
 
 ### Maven
@@ -55,7 +55,7 @@ implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0'
 <dependency>
     <groupId>io.github.harryjhin</groupId>
     <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-    <version>0.1.0</version>
+    <version>0.0.1</version>
 </dependency>
 ```
 
