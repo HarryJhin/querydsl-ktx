@@ -4,6 +4,23 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.StringExpression
 
+/**
+ * Null-safe string matching operators for [StringExpression].
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (keyword != null) builder.and(entity.name.contains(keyword))
+ * if (prefix != null)  builder.and(entity.code.startsWith(prefix))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = (entity.name contains keyword) and (entity.code startsWith prefix)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface StringExpressionExtensions {
 
     /**

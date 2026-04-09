@@ -4,6 +4,23 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.TemporalExpression
 
+/**
+ * Null-safe temporal comparison operators for [TemporalExpression].
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (startDate != null) builder.and(entity.createdAt.after(startDate))
+ * if (endDate != null)   builder.and(entity.createdAt.before(endDate))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = (entity.createdAt after startDate) and (entity.createdAt before endDate)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface TemporalExpressionExtensions {
 
     /**

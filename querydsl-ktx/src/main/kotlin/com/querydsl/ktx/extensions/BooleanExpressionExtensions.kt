@@ -3,6 +3,25 @@ package com.querydsl.ktx.extensions
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 
+/**
+ * Null-safe AND / OR combinators for [BooleanExpression], replacing manual `BooleanBuilder` juggling.
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * val builder = BooleanBuilder()
+ * if (active != null) builder.and(entity.active.eq(active))
+ * if (role != null)   builder.and(entity.role.eq(role))
+ * return builder
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = (entity.active eq active) and (entity.role eq role)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface BooleanExpressionExtensions {
 
     /**

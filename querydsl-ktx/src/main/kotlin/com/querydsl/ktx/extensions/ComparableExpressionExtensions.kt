@@ -4,6 +4,24 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.ComparableExpression
 
+/**
+ * Null-safe comparison and range operators for [ComparableExpression].
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (from != null && to != null) builder.and(entity.createdAt.between(from, to))
+ * else if (from != null)          builder.and(entity.createdAt.goe(from))
+ * else if (to != null)            builder.and(entity.createdAt.loe(to))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = entity.createdAt between (from to to)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface ComparableExpressionExtensions {
 
     /**

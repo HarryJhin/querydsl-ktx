@@ -4,6 +4,23 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.SimpleExpression
 
+/**
+ * Null-safe equality, inequality, and membership operators for [SimpleExpression].
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (status != null) builder.and(entity.status.eq(status))
+ * if (ids != null)    builder.and(entity.id.`in`(ids))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = (entity.status eq status) and (entity.id `in` ids)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface SimpleExpressionExtensions {
 
     /**

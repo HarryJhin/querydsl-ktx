@@ -4,6 +4,28 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.NumberExpression
 
+/**
+ * Null-safe comparison and range operators for [NumberExpression].
+ *
+ * [NumberExpression] does not extend [ComparableExpression][com.querydsl.core.types.dsl.ComparableExpression]
+ * in the QueryDSL type hierarchy, so this interface provides the same
+ * set of operators (`gt`, `goe`, `lt`, `loe`, `between`) specifically for numbers.
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (minPrice != null && maxPrice != null) builder.and(entity.price.between(minPrice, maxPrice))
+ * else if (minPrice != null)                builder.and(entity.price.goe(minPrice))
+ * else if (maxPrice != null)                builder.and(entity.price.loe(maxPrice))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = entity.price between (minPrice to maxPrice)
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface NumberExpressionExtensions {
 
     /**

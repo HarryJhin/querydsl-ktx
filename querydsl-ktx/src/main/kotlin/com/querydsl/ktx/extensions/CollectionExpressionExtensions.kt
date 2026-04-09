@@ -4,6 +4,22 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.CollectionExpressionBase
 
+/**
+ * Null-safe collection membership operators for [CollectionExpressionBase].
+ *
+ * **Before** -- vanilla QueryDSL:
+ * ```kotlin
+ * if (role != null) builder.and(entity.roles.contains(role))
+ * ```
+ *
+ * **After** -- with this interface:
+ * ```kotlin
+ * val predicate = entity.roles contains role
+ * ```
+ *
+ * Implement this interface (or use the pre-built scope object) to bring
+ * the infix operators into scope.
+ */
 interface CollectionExpressionExtensions {
 
     /**
