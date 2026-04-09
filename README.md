@@ -96,6 +96,41 @@ Extensions are scoped through **interface implementation** — no global namespa
 | Kotlin | 1.7+ |
 | Java | 17+ |
 
+## For LLMs
+
+This project provides an [`llms.txt`](llms.txt) for AI context via [GitMCP](https://gitmcp.io/).
+
+### Claude Code
+
+```bash
+claude mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### Codex
+
+```bash
+codex mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### Gemini CLI
+
+```bash
+gemini mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### JSON config (manual)
+
+```json
+{
+  "mcpServers": {
+    "querydsl-ktx": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-remote@latest", "https://gitmcp.io/HarryJhin/querydsl-ktx/sse"]
+    }
+  }
+}
+```
+
 ## License
 
 [Apache License 2.0](LICENSE)

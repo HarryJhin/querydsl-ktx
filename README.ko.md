@@ -96,6 +96,41 @@ class MemberRepository : QuerydslRepository<Member>() {
 | Kotlin | 1.7+ |
 | Java | 17+ |
 
+## For LLMs
+
+이 프로젝트는 AI 컨텍스트를 위한 [`llms.txt`](llms.txt)를 [GitMCP](https://gitmcp.io/)를 통해 제공합니다.
+
+### Claude Code
+
+```bash
+claude mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### Codex
+
+```bash
+codex mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### Gemini CLI
+
+```bash
+gemini mcp add querydsl-ktx -- mcp-remote https://gitmcp.io/HarryJhin/querydsl-ktx
+```
+
+### JSON config (수동 설정)
+
+```json
+{
+  "mcpServers": {
+    "querydsl-ktx": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-remote@latest", "https://gitmcp.io/HarryJhin/querydsl-ktx/sse"]
+    }
+  }
+}
+```
+
 ## 라이선스
 
 [Apache License 2.0](LICENSE)
