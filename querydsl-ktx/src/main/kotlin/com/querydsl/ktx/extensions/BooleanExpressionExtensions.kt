@@ -6,18 +6,21 @@ import com.querydsl.core.types.dsl.BooleanExpression
 interface BooleanExpressionExtensions {
 
     /**
-     * null-safe AND. null인 쪽은 무시하고 non-null인 쪽만 살린다.
+     * Combines two conditions with AND, skipping any null side.
+     *
+     * Use this to build dynamic WHERE clauses by chaining nullable conditions.
+     * If one side is null, the other side is returned as-is.
      *
      * ```sql
      * -- this = (active = true), right = (age > 20)
      * active = true AND age > 20
      *
-     * -- this = null, right = (age > 20) → right만 반환
+     * -- this = null, right = (age > 20) -> only right is returned
      * age > 20
      * ```
      *
-     * @param right 교집합의 오른쪽 피연산자
-     * @return `this AND right`, 둘 다 null이면 null
+     * @param right the condition to AND with, or null to skip
+     * @return combined condition, or the non-null side if one is null, or null if both are null
      */
     infix fun BooleanExpression?.and(right: BooleanExpression?): BooleanExpression? = when {
         this == null -> right
@@ -26,33 +29,39 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe AND + ANY. this와 predicates의 OR 결합을 AND로 묶는다.
-     * this가 null이면 OR 결과만 반환, predicates가 모두 null이면 this만 반환.
+     * Combines this condition with the OR-reduction of [predicates] using AND.
+     *
+     * Useful when you need "base condition AND (any of these)" logic.
+     * If this is null, only the OR-combined result is returned.
+     * If all predicates are null, only this is returned.
      *
      * ```sql
      * -- this = (active = true), predicates = [(role = 'ADMIN'), (role = 'MANAGER')]
      * active = true AND (role = 'ADMIN' OR role = 'MANAGER')
      * ```
      *
-     * @param predicates OR로 결합될 조건 목록
-     * @return `this AND (p1 OR p2 OR ...)`, 둘 다 null이면 null
+     * @param predicates conditions to be OR-combined
+     * @return `this AND (p1 OR p2 OR ...)`, or null if both sides resolve to null
      */
     infix fun BooleanExpression?.andAnyOf(predicates: List<BooleanExpression?>): BooleanExpression? =
         this and predicates.reduceOrNull { acc, expr -> acc or expr }
 
     /**
-     * null-safe OR. null인 쪽은 무시하고 non-null인 쪽만 살린다.
+     * Combines two conditions with OR, skipping any null side.
+     *
+     * Use this to build dynamic WHERE clauses where any matching condition suffices.
+     * If one side is null, the other side is returned as-is.
      *
      * ```sql
      * -- this = (role = 'ADMIN'), right = (role = 'MANAGER')
      * role = 'ADMIN' OR role = 'MANAGER'
      *
-     * -- this = null, right = (role = 'MANAGER') → right만 반환
+     * -- this = null, right = (role = 'MANAGER') -> only right is returned
      * role = 'MANAGER'
      * ```
      *
-     * @param right 합집합의 오른쪽 피연산자
-     * @return `this OR right`, 둘 다 null이면 null
+     * @param right the condition to OR with, or null to skip
+     * @return combined condition, or the non-null side if one is null, or null if both are null
      */
     infix fun BooleanExpression?.or(right: BooleanExpression?): BooleanExpression? = when {
         this == null -> right
@@ -61,32 +70,38 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe OR + ALL. this와 predicates의 AND 결합을 OR로 묶는다.
-     * this가 null이면 AND 결과만 반환, predicates가 모두 null이면 this만 반환.
+     * Combines this condition with the AND-reduction of [predicates] using OR.
+     *
+     * Useful when you need "base condition OR (all of these)" logic.
+     * If this is null, only the AND-combined result is returned.
+     * If all predicates are null, only this is returned.
      *
      * ```sql
      * -- this = (vip = true), predicates = [(age > 20), (active = true)]
      * vip = true OR (age > 20 AND active = true)
      * ```
      *
-     * @param predicates AND로 결합될 조건 목록
-     * @return `this OR (p1 AND p2 AND ...)`, 둘 다 null이면 null
+     * @param predicates conditions to be AND-combined
+     * @return `this OR (p1 AND p2 AND ...)`, or null if both sides resolve to null
      */
     infix fun BooleanExpression?.orAllOf(predicates: List<BooleanExpression?>): BooleanExpression? =
         this or predicates.reduceOrNull { acc, expr -> acc and expr }
 
     /**
-     * null-safe 동등 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe equality check for boolean expressions.
+     *
+     * Returns null (skips the condition) when either side is null,
+     * making it safe for dynamic query construction.
      *
      * ```sql
      * -- this = entity.active, right = true
      * active = true
      *
-     * -- right = null → 조건 생략
+     * -- right = null -> condition is skipped
      * ```
      *
-     * @param right 비교 대상 Boolean 값, null이면 조건을 건너뛴다
-     * @return `this = right`, 어느 쪽이든 null이면 null
+     * @param right the boolean value to compare against, or null to skip
+     * @return `this = right`, or null if either side is null
      */
     infix fun BooleanExpression?.eq(right: Boolean?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -94,15 +109,16 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe NULLIF. this가 other와 같으면 NULL을 반환한다.
-     * 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * NULLIF(active, is_deleted)
      * ```
      *
-     * @param other 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `NULLIF(this, other)`, 어느 쪽이든 null이면 null
+     * @param other the expression to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
      */
     infix fun BooleanExpression?.nullif(other: Expression<Boolean>?): BooleanExpression? = when {
         this == null || other == null -> null
@@ -110,15 +126,16 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe NULLIF. this가 other와 같으면 NULL을 반환한다.
-     * 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * NULLIF(active, true)
      * ```
      *
-     * @param other 비교 대상 Boolean 값, null이면 조건을 건너뛴다
-     * @return `NULLIF(this, other)`, 어느 쪽이든 null이면 null
+     * @param other the boolean value to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
      */
     infix fun BooleanExpression?.nullif(other: Boolean?): BooleanExpression? = when {
         this == null || other == null -> null
@@ -126,15 +143,16 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe COALESCE. SQL 상에서 this가 NULL이면 expr을 반환한다.
-     * 어느 쪽이든 Kotlin null이면 조건을 건너뛴다.
+     * Null-safe COALESCE that falls back to [expr] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * COALESCE(active, is_visible)
      * ```
      *
-     * @param expr 대체 표현식, null이면 조건을 건너뛴다
-     * @return `COALESCE(this, expr)`, 어느 쪽이든 null이면 null
+     * @param expr the fallback expression, or null to skip
+     * @return `COALESCE(this, expr)`, or null if either side is null
      */
     infix fun BooleanExpression?.coalesce(expr: Expression<Boolean>?): BooleanExpression? = when {
         this == null || expr == null -> null
@@ -142,15 +160,16 @@ interface BooleanExpressionExtensions {
     }
 
     /**
-     * null-safe COALESCE. SQL 상에서 this가 NULL이면 arg를 반환한다.
-     * 어느 쪽이든 Kotlin null이면 조건을 건너뛴다.
+     * Null-safe COALESCE that falls back to [arg] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * COALESCE(active, false)
      * ```
      *
-     * @param arg 대체 Boolean 값, null이면 조건을 건너뛴다
-     * @return `COALESCE(this, arg)`, 어느 쪽이든 null이면 null
+     * @param arg the fallback boolean value, or null to skip
+     * @return `COALESCE(this, arg)`, or null if either side is null
      */
     infix fun BooleanExpression?.coalesce(arg: Boolean?): BooleanExpression? = when {
         this == null || arg == null -> null

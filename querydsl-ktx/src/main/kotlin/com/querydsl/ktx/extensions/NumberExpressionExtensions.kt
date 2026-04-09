@@ -7,15 +7,15 @@ import com.querydsl.core.types.dsl.NumberExpression
 interface NumberExpressionExtensions {
 
     /**
-     * null-safe 초과 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe greater-than check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = 10000
      * price > 10000
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this > right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this > right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.gt(right: T?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -24,15 +24,17 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 초과 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe greater-than check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = entity.minPrice
      * price > min_price
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this > right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this > right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.gt(right: Expression<T>?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -41,15 +43,15 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 이상 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe greater-than-or-equal check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = 10000
      * price >= 10000
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this >= right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this >= right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.goe(right: T?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -58,15 +60,17 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 이상 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe greater-than-or-equal check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = entity.minPrice
      * price >= min_price
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this >= right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this >= right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.goe(right: Expression<T>?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -75,15 +79,15 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 미만 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe less-than check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = 50000
      * price < 50000
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this < right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this < right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.lt(right: T?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -92,15 +96,17 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 미만 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe less-than check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = entity.maxPrice
      * price < max_price
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this < right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this < right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.lt(right: Expression<T>?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -109,15 +115,15 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 이하 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe less-than-or-equal check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = 50000
      * price <= 50000
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this <= right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this <= right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.loe(right: T?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -126,15 +132,17 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe 이하 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe less-than-or-equal check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.price, right = entity.maxPrice
      * price <= max_price
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this <= right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this <= right`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.loe(right: Expression<T>?): BooleanExpression?
         where T : Number, T : Comparable<*> = when {
@@ -143,8 +151,11 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe BETWEEN. null인 쪽은 무시하고 non-null인 쪽만 살린다.
-     * 둘 다 non-null이면 BETWEEN, 한쪽만 있으면 `>=` 또는 `<=`, 둘 다 null이면 스킵.
+     * Null-safe BETWEEN with partial range support.
+     *
+     * Adapts to whichever bounds are present: both yields BETWEEN,
+     * only lower yields `>=`, only upper yields `<=`, neither skips.
+     * This makes it ideal for optional price/quantity range filters.
      *
      * ```sql
      * -- from = 10000, to = 50000
@@ -157,8 +168,8 @@ interface NumberExpressionExtensions {
      * price <= 50000
      * ```
      *
-     * @param range `from to to` 형태의 범위
-     * @return `this BETWEEN from AND to`, this가 null이거나 양쪽 모두 null이면 null
+     * @param range a `from to to` pair where either bound can be null
+     * @return `this BETWEEN from AND to`, or null if this is null or both bounds are null
      */
     infix fun <T> NumberExpression<T>?.between(range: Pair<T?, T?>): BooleanExpression?
         where T : Number, T : Comparable<*> {
@@ -173,46 +184,48 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe BETWEEN (ClosedRange). 양쪽 값이 확정된 범위에 사용한다.
-     * this가 null이면 조건을 건너뛴다.
+     * Null-safe BETWEEN using a Kotlin [ClosedRange] where both bounds are guaranteed present.
+     *
+     * Skips the condition when this is null.
      *
      * ```sql
      * -- this = entity.price, range = 10000..50000
      * price BETWEEN 10000 AND 50000
      * ```
      *
-     * @param range 닫힌 범위 (`from..to`)
-     * @return `this BETWEEN from AND to`, this가 null이면 null
+     * @param range a closed range (`from..to`)
+     * @return `this BETWEEN from AND to`, or null if this is null
      */
     infix fun <T> NumberExpression<T>?.between(range: ClosedRange<T>): BooleanExpression?
         where T : Number, T : Comparable<T> =
         this?.between(range.start, range.endInclusive)
 
     /**
-     * null-safe NOT BETWEEN. this가 null이면 조건을 건너뛴다.
+     * Null-safe NOT BETWEEN that skips the condition when this is null.
      *
      * ```sql
      * -- from = 10000, to = 50000
      * price NOT BETWEEN 10000 AND 50000
      * ```
      *
-     * @param range `from to to` 형태의 범위
-     * @return `this NOT BETWEEN from AND to`, this가 null이면 null
+     * @param range a `from to to` pair with both bounds required
+     * @return `this NOT BETWEEN from AND to`, or null if this is null
      */
     infix fun <T> NumberExpression<T>?.notBetween(range: Pair<T, T>): BooleanExpression?
         where T : Number, T : Comparable<*> =
         this?.notBetween(range.first, range.second)
 
     /**
-     * null-safe NULLIF. this가 other와 같으면 NULL을 반환한다.
-     * 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * NULLIF(price, 0)
      * ```
      *
-     * @param other 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `NULLIF(this, other)`, 어느 쪽이든 null이면 null
+     * @param other the expression to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.nullif(other: Expression<T>?): NumberExpression<T>?
         where T : Number, T : Comparable<*> = when {
@@ -221,15 +234,16 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe NULLIF. this가 other와 같으면 NULL을 반환한다.
-     * 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * NULLIF(price, 0)
      * ```
      *
-     * @param other 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `NULLIF(this, other)`, 어느 쪽이든 null이면 null
+     * @param other the value to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.nullif(other: T?): NumberExpression<T>?
         where T : Number, T : Comparable<*> = when {
@@ -238,15 +252,16 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe COALESCE. SQL 상에서 this가 NULL이면 expr을 반환한다.
-     * 어느 쪽이든 Kotlin null이면 조건을 건너뛴다.
+     * Null-safe COALESCE that falls back to [expr] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * COALESCE(price, default_price)
      * ```
      *
-     * @param expr 대체 표현식, null이면 조건을 건너뛴다
-     * @return `COALESCE(this, expr)`, 어느 쪽이든 null이면 null
+     * @param expr the fallback expression, or null to skip
+     * @return `COALESCE(this, expr)`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.coalesce(expr: Expression<T>?): NumberExpression<T>?
         where T : Number, T : Comparable<*> = when {
@@ -255,15 +270,16 @@ interface NumberExpressionExtensions {
     }
 
     /**
-     * null-safe COALESCE. SQL 상에서 this가 NULL이면 arg를 반환한다.
-     * 어느 쪽이든 Kotlin null이면 조건을 건너뛴다.
+     * Null-safe COALESCE that falls back to [arg] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
      *
      * ```sql
      * COALESCE(price, 0)
      * ```
      *
-     * @param arg 대체 값, null이면 조건을 건너뛴다
-     * @return `COALESCE(this, arg)`, 어느 쪽이든 null이면 null
+     * @param arg the fallback value, or null to skip
+     * @return `COALESCE(this, arg)`, or null if either side is null
      */
     infix fun <T> NumberExpression<T>?.coalesce(arg: T?): NumberExpression<T>?
         where T : Number, T : Comparable<*> = when {

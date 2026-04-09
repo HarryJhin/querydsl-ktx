@@ -11,10 +11,11 @@ import org.springframework.core.GenericTypeResolver
 import org.springframework.data.repository.NoRepositoryBean
 
 /**
- * 모든 QueryDSL Extensions를 포함하는 풀 베이스 클래스.
+ * Batteries-included base class with all QueryDSL extension interfaces.
  *
- * [QuerydslSupport]를 상속하며 7개의 Extensions 인터페이스를 모두 구현합니다.
- * 타입 파라미터 `T`는 [GenericTypeResolver]로 자동 해석되므로 [domainClass]를 직접 지정할 필요가 없습니다.
+ * Extends [QuerydslSupport] and implements all seven extension interfaces.
+ * The type parameter `T` is automatically resolved via [GenericTypeResolver],
+ * so you do not need to specify [domainClass] manually.
  *
  * ```kotlin
  * @Repository
@@ -24,7 +25,8 @@ import org.springframework.data.repository.NoRepositoryBean
  * }
  * ```
  *
- * 일부 Extensions만 필요하면 [QuerydslSupport]를 직접 상속하고 원하는 인터페이스만 implement하세요.
+ * If you only need a subset of extensions, extend [QuerydslSupport] directly
+ * and implement the desired interfaces yourself.
  */
 @NoRepositoryBean
 abstract class QuerydslRepository<T : Any> :

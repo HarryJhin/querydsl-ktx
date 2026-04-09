@@ -4,7 +4,6 @@ import com.querydsl.core.Tuple
 import com.querydsl.core.types.EntityPath
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.OrderSpecifier
-import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.PathBuilder
 import com.querydsl.core.types.dsl.Wildcard
 import com.querydsl.jpa.JPQLQuery
@@ -29,14 +28,15 @@ import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.support.PageableExecutionUtils
 
 /**
- * QueryDSL 쿼리 팩토리 및 페이지네이션 헬퍼를 제공하는 베이스 클래스.
+ * Base class providing a QueryDSL query factory and pagination helpers.
  *
- * DI, 쿼리 팩토리 래퍼, 페이지네이션 유틸리티만 포함합니다.
- * Extensions 인터페이스는 포함하지 않으므로 사용자가 원하는 것만 선택적으로 implement할 수 있습니다.
+ * Contains only DI wiring, query factory wrappers, and pagination utilities.
+ * Extension interfaces are intentionally excluded so you can selectively implement
+ * only the ones you need.
  *
- * 풀 패키지(모든 Extensions 포함)가 필요하면 [QuerydslRepository]를 사용하세요.
+ * If you want all extensions included out of the box, use [QuerydslRepository] instead.
  *
- * 서브클래스는 반드시 [domainClass]를 override해야 합니다.
+ * Subclasses must override [domainClass].
  *
  * ```kotlin
  * class MyRepository : QuerydslSupport<MyEntity>(), BooleanExpressionExtensions {
@@ -80,7 +80,7 @@ abstract class QuerydslSupport<T : Any> {
     }
 
     // ========================================
-    // 쿼리 팩토리 래퍼
+    // Query factory wrappers
     // ========================================
 
     protected fun delete(path: EntityPath<*>): JPADeleteClause =
@@ -117,25 +117,16 @@ abstract class QuerydslSupport<T : Any> {
         jpaQueryFactory.insert(path)
 
     // ========================================
-    // 조건 헬퍼
-    // ========================================
-
-    protected fun where(vararg conditions: BooleanExpression?): Array<BooleanExpression> =
-        conditions.filterNotNull().toTypedArray()
-
-    protected fun <V : Any> ifNotNull(value: V?, block: (V) -> BooleanExpression?): BooleanExpression? =
-        value?.let(block)
-
-    // ========================================
-    // 페이지네이션 헬퍼
+    // Pagination helpers
     // ========================================
 
     /**
-     * Slice 기반 페이지네이션을 수행합니다.
-     * pageSize + 1개를 fetch하여 다음 페이지 존재 여부를 정확히 판정합니다.
+     * Performs slice-based pagination by fetching pageSize + 1 rows to determine hasNext.
      *
-     * @param pageable 페이지 정보
-     * @return hasNext 값을 포함한 Slice 결과
+     * Use this instead of [paging] when you only need forward navigation without a total count.
+     *
+     * @param pageable the page request
+     * @return a [Slice] with accurate hasNext information
      */
     protected fun <R> JPAQuery<R>.slicing(pageable: Pageable): Slice<R> {
         val limit = pageable.pageSize
@@ -148,18 +139,18 @@ abstract class QuerydslSupport<T : Any> {
     }
 
     /**
-     * 자동 카운트 쿼리를 사용한 페이지네이션을 수행합니다.
+     * Performs pagination with an auto-generated count query.
      *
-     * **주의: fetch join이 포함된 쿼리에서는 사용할 수 없습니다!**
-     * fetch join이 있는 경우 반드시 countQuery overload를 사용하세요:
+     * **Warning: Do not use with fetch joins!**
+     * When fetch joins are present, use the overload that accepts a separate count query:
      * ```kotlin
      * query.paging(pageable) {
      *     jpaQueryFactory.select(entity.count()).from(entity).where(condition).fetchOne() ?: 0L
      * }
      * ```
      *
-     * @param pageable 페이지 정보
-     * @return 전체 개수와 현재 페이지 데이터를 포함한 Page 결과
+     * @param pageable the page request
+     * @return a [Page] containing the current page data and total count
      */
     protected fun <R> JPAQuery<R>.paging(pageable: Pageable): Page<R> {
         val countQuery: JPAQuery<R> = this.clone()
@@ -170,11 +161,14 @@ abstract class QuerydslSupport<T : Any> {
     }
 
     /**
-     * 별도 카운트 쿼리를 사용한 페이지네이션을 수행합니다.
+     * Performs pagination with a separate count query you provide.
      *
-     * @param pageable 페이지 정보
-     * @param countQuery 전체 개수를 반환하는 함수
-     * @return 전체 개수와 현재 페이지 데이터를 포함한 Page 결과
+     * Use this overload when the main query contains fetch joins or other constructs
+     * that prevent automatic count derivation.
+     *
+     * @param pageable the page request
+     * @param countQuery a lambda returning the total row count
+     * @return a [Page] containing the current page data and total count
      */
     protected fun <R> JPQLQuery<R>.paging(
         pageable: Pageable,

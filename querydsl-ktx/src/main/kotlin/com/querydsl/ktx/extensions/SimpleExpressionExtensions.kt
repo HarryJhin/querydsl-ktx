@@ -7,15 +7,17 @@ import com.querydsl.core.types.dsl.SimpleExpression
 interface SimpleExpressionExtensions {
 
     /**
-     * null-safe 동등 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe equality check that skips the condition when either side is null.
+     *
+     * Ideal for dynamic WHERE clauses where a filter parameter may be absent.
      *
      * ```sql
      * -- this = entity.status, right = 'ACTIVE'
      * status = 'ACTIVE'
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this = right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this = right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.eq(right: T?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -23,15 +25,17 @@ interface SimpleExpressionExtensions {
     }
 
     /**
-     * null-safe 동등 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe equality check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.status, right = entity.defaultStatus
      * status = default_status
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this = right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this = right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.eq(right: Expression<in T>?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -39,15 +43,15 @@ interface SimpleExpressionExtensions {
     }
 
     /**
-     * null-safe 부등 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe not-equal check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.status, right = 'DELETED'
      * status != 'DELETED'
      * ```
      *
-     * @param right 비교 대상 값, null이면 조건을 건너뛴다
-     * @return `this != right`, 어느 쪽이든 null이면 null
+     * @param right the value to compare against, or null to skip
+     * @return `this != right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.ne(right: T?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -55,15 +59,17 @@ interface SimpleExpressionExtensions {
     }
 
     /**
-     * null-safe 부등 비교 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe not-equal check against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.status, right = entity.defaultStatus
      * status != default_status
      * ```
      *
-     * @param right 비교 대상 표현식, null이면 조건을 건너뛴다
-     * @return `this != right`, 어느 쪽이든 null이면 null
+     * @param right the expression to compare against, or null to skip
+     * @return `this != right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.ne(right: Expression<in T>?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -71,15 +77,15 @@ interface SimpleExpressionExtensions {
     }
 
     /**
-     * null-safe IN. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe IN check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.status, right = ['ACTIVE', 'PENDING']
      * status IN ('ACTIVE', 'PENDING')
      * ```
      *
-     * @param right 포함 여부를 검사할 값 목록, null이면 조건을 건너뛴다
-     * @return `this IN right`, 어느 쪽이든 null이면 null
+     * @param right the collection of values to match against, or null to skip
+     * @return `this IN right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.`in`(right: Collection<T>?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -87,15 +93,15 @@ interface SimpleExpressionExtensions {
     }
 
     /**
-     * null-safe NOT IN. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NOT IN check that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.status, right = ['DELETED', 'BLOCKED']
      * status NOT IN ('DELETED', 'BLOCKED')
      * ```
      *
-     * @param right 제외할 값 목록, null이면 조건을 건너뛴다
-     * @return `this NOT IN right`, 어느 쪽이든 null이면 null
+     * @param right the collection of values to exclude, or null to skip
+     * @return `this NOT IN right`, or null if either side is null
      */
     infix fun <T> SimpleExpression<T>?.notIn(right: Collection<T>?): BooleanExpression? = when {
         this == null || right == null -> null

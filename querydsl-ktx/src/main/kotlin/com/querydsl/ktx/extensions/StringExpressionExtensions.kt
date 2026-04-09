@@ -7,15 +7,15 @@ import com.querydsl.core.types.dsl.StringExpression
 interface StringExpressionExtensions {
 
     /**
-     * null-safe LIKE 포함 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe substring match that skips the condition when either side is null.
      *
      * ```sql
-     * -- this = entity.name, right = '홍길동'
-     * name LIKE '%홍길동%'
+     * -- this = entity.name, right = 'John'
+     * name LIKE '%John%'
      * ```
      *
-     * @param right 검색할 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE '%right%'`, 어느 쪽이든 null이면 null
+     * @param right the substring to search for, or null to skip
+     * @return `this LIKE '%right%'`, or null if either side is null
      */
     infix fun StringExpression?.contains(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -23,14 +23,16 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe LIKE 포함 검색 (Expression). 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe substring match against another expression.
+     *
+     * Skips the condition when either side is null.
      *
      * ```sql
      * name LIKE CONCAT('%', keyword, '%')
      * ```
      *
-     * @param right 검색할 표현식, null이면 조건을 건너뛴다
-     * @return `this LIKE '%right%'`, 어느 쪽이든 null이면 null
+     * @param right the expression to search for, or null to skip
+     * @return `this LIKE '%right%'`, or null if either side is null
      */
     infix fun StringExpression?.contains(right: Expression<String>?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -38,14 +40,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 포함 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive substring match that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(name) LIKE LOWER('%keyword%')
      * ```
      *
-     * @param right 검색할 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE '%right%'` (대소문자 무시), 어느 쪽이든 null이면 null
+     * @param right the substring to search for, or null to skip
+     * @return `this LIKE '%right%'` (case-insensitive), or null if either side is null
      */
     infix fun StringExpression?.containsIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -53,15 +55,15 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 접두사 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe prefix match that skips the condition when either side is null.
      *
      * ```sql
-     * -- this = entity.name, right = '홍'
-     * name LIKE '홍%'
+     * -- this = entity.name, right = 'Jo'
+     * name LIKE 'Jo%'
      * ```
      *
-     * @param right 접두사 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE 'right%'`, 어느 쪽이든 null이면 null
+     * @param right the prefix string, or null to skip
+     * @return `this LIKE 'right%'`, or null if either side is null
      */
     infix fun StringExpression?.startsWith(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -69,14 +71,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 접두사 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive prefix match that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(name) LIKE LOWER('prefix%')
      * ```
      *
-     * @param right 접두사 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE 'right%'` (대소문자 무시), 어느 쪽이든 null이면 null
+     * @param right the prefix string, or null to skip
+     * @return `this LIKE 'right%'` (case-insensitive), or null if either side is null
      */
     infix fun StringExpression?.startsWithIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -84,15 +86,15 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 접미사 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe suffix match that skips the condition when either side is null.
      *
      * ```sql
      * -- this = entity.email, right = '@gmail.com'
      * email LIKE '%@gmail.com'
      * ```
      *
-     * @param right 접미사 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE '%right'`, 어느 쪽이든 null이면 null
+     * @param right the suffix string, or null to skip
+     * @return `this LIKE '%right'`, or null if either side is null
      */
     infix fun StringExpression?.endsWith(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -100,14 +102,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 접미사 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive suffix match that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(email) LIKE LOWER('%@gmail.com')
      * ```
      *
-     * @param right 접미사 문자열, null이면 조건을 건너뛴다
-     * @return `this LIKE '%right'` (대소문자 무시), 어느 쪽이든 null이면 null
+     * @param right the suffix string, or null to skip
+     * @return `this LIKE '%right'` (case-insensitive), or null if either side is null
      */
     infix fun StringExpression?.endsWithIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -115,14 +117,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 동등 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive equality check that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(name) = LOWER('admin')
      * ```
      *
-     * @param right 비교 대상 문자열, null이면 조건을 건너뛴다
-     * @return `LOWER(this) = LOWER(right)`, 어느 쪽이든 null이면 null
+     * @param right the string to compare against, or null to skip
+     * @return `LOWER(this) = LOWER(right)`, or null if either side is null
      */
     infix fun StringExpression?.equalsIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -130,14 +132,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 부등 비교. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive not-equal check that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(name) != LOWER('admin')
      * ```
      *
-     * @param right 비교 대상 문자열, null이면 조건을 건너뛴다
-     * @return `LOWER(this) != LOWER(right)`, 어느 쪽이든 null이면 null
+     * @param right the string to compare against, or null to skip
+     * @return `LOWER(this) != LOWER(right)`, or null if either side is null
      */
     infix fun StringExpression?.notEqualsIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -145,15 +147,15 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe LIKE 패턴 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe LIKE pattern match that skips the condition when either side is null.
      *
      * ```sql
-     * -- this = entity.name, right = '홍%동'
-     * name LIKE '홍%동'
+     * -- this = entity.name, right = 'J%n'
+     * name LIKE 'J%n'
      * ```
      *
-     * @param right LIKE 패턴, null이면 조건을 건너뛴다
-     * @return `this LIKE right`, 어느 쪽이든 null이면 null
+     * @param right the LIKE pattern, or null to skip
+     * @return `this LIKE right`, or null if either side is null
      */
     infix fun StringExpression?.like(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -161,14 +163,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 대소문자 무시 LIKE 패턴 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe case-insensitive LIKE pattern match that skips the condition when either side is null.
      *
      * ```sql
      * LOWER(name) LIKE LOWER('pattern%')
      * ```
      *
-     * @param right LIKE 패턴, null이면 조건을 건너뛴다
-     * @return `this LIKE right` (대소문자 무시), 어느 쪽이든 null이면 null
+     * @param right the LIKE pattern, or null to skip
+     * @return `this LIKE right` (case-insensitive), or null if either side is null
      */
     infix fun StringExpression?.likeIgnoreCase(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -176,14 +178,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe NOT LIKE 패턴 검색. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe NOT LIKE pattern match that skips the condition when either side is null.
      *
      * ```sql
      * name NOT LIKE 'test%'
      * ```
      *
-     * @param right LIKE 패턴, null이면 조건을 건너뛴다
-     * @return `this NOT LIKE right`, 어느 쪽이든 null이면 null
+     * @param right the LIKE pattern to negate, or null to skip
+     * @return `this NOT LIKE right`, or null if either side is null
      */
     infix fun StringExpression?.notLike(right: String?): BooleanExpression? = when {
         this == null || right == null -> null
@@ -191,14 +193,14 @@ interface StringExpressionExtensions {
     }
 
     /**
-     * null-safe 정규식 매칭. 어느 쪽이든 null이면 조건을 건너뛴다.
+     * Null-safe regex match that skips the condition when either side is null.
      *
      * ```sql
-     * name REGEXP '^[가-힣]+$'
+     * name REGEXP '^[A-Z]+$'
      * ```
      *
-     * @param regex 정규식 패턴, null이면 조건을 건너뛴다
-     * @return `this REGEXP regex`, 어느 쪽이든 null이면 null
+     * @param regex the regular expression pattern, or null to skip
+     * @return `this REGEXP regex`, or null if either side is null
      */
     infix fun StringExpression?.matches(regex: String?): BooleanExpression? = when {
         this == null || regex == null -> null
