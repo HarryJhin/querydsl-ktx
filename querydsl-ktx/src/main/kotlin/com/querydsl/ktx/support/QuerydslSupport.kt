@@ -18,6 +18,7 @@ import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.data.domain.SliceImpl
@@ -128,7 +129,7 @@ abstract class QuerydslSupport<T : Any> {
      * @param pageable the page request
      * @return a [Slice] with accurate hasNext information
      */
-    protected fun <R> JPAQuery<R>.slicing(pageable: Pageable): Slice<R> {
+    protected fun <R> JPQLQuery<R>.slicing(pageable: Pageable): Slice<R> {
         val limit = pageable.pageSize
         val content: List<R> = this
             .offset(pageable.offset)
@@ -180,8 +181,57 @@ abstract class QuerydslSupport<T : Any> {
         }
     }
 
+    /**
+     * Performs slice-based pagination using page number and page size.
+     *
+     * Convenience overload that accepts raw values instead of [Pageable].
+     *
+     * @param page zero-based page number
+     * @param size number of items per page
+     * @return a [Slice] with accurate hasNext information
+     */
+    protected fun <R> JPQLQuery<R>.slicing(page: Int, size: Int): Slice<R> =
+        slicing(PageRequest.of(page, size))
+
+    /**
+     * Performs pagination with an auto-generated count query using page number and page size.
+     *
+     * Convenience overload that accepts raw values instead of [Pageable].
+     *
+     * @param page zero-based page number
+     * @param size number of items per page
+     * @return a [Page] containing the current page data and total count
+     */
+    protected fun <R> JPAQuery<R>.paging(page: Int, size: Int): Page<R> =
+        paging(PageRequest.of(page, size))
+
+    /**
+     * Performs pagination with a separate count query using page number and page size.
+     *
+     * Convenience overload that accepts raw values instead of [Pageable].
+     *
+     * @param page zero-based page number
+     * @param size number of items per page
+     * @param countQuery a lambda returning the total row count
+     * @return a [Page] containing the current page data and total count
+     */
+    protected fun <R> JPQLQuery<R>.paging(page: Int, size: Int, countQuery: () -> Long?): Page<R> =
+        paging(PageRequest.of(page, size), countQuery)
+
     protected fun <R> JPQLQuery<R>.fetching(pageable: Pageable): List<R> =
         querydsl.applyPagination(pageable, this).fetch()
+
+    /**
+     * Fetches a page of results using offset and limit.
+     *
+     * Convenience overload that accepts raw values instead of [Pageable].
+     *
+     * @param offset number of rows to skip
+     * @param limit maximum number of rows to return
+     * @return list of results
+     */
+    protected fun <R> JPQLQuery<R>.fetching(offset: Long, limit: Int): List<R> =
+        this.offset(offset).limit(limit.toLong()).fetch()
 
     protected fun <R> JPQLQuery<R>.sort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R> {
         if (sort.isUnsorted) {
