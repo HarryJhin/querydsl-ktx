@@ -1,0 +1,399 @@
+# Extension Interfaces
+
+querydsl-ktx provides **7 extension interfaces**, each scoped to a specific QueryDSL expression type.
+All functions are null-safe: null arguments cause the condition to be skipped.
+
+---
+
+## Overview
+
+| Interface | Expression Type | Key Functions |
+|-----------|----------------|---------------|
+| [BooleanExpressionExtensions](#booleanexpressionextensions) | `BooleanExpression` | `and`, `or`, `andAnyOf`, `orAllOf`, `eq` |
+| [SimpleExpressionExtensions](#simpleexpressionextensions) | `SimpleExpression<T>` | `eq`, `ne`, `in`, `notIn` |
+| [ComparableExpressionExtensions](#comparableexpressionextensions) | `ComparableExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between` |
+| [NumberExpressionExtensions](#numberexpressionextensions) | `NumberExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between` |
+| [StringExpressionExtensions](#stringexpressionextensions) | `StringExpression` | `contains`, `startsWith`, `endsWith`, `like`, `matches` |
+| [TemporalExpressionExtensions](#temporalexpressionextensions) | `TemporalExpression<T>` | `after`, `before` |
+| [CollectionExpressionExtensions](#collectionexpressionextensions) | `CollectionExpressionBase<T, E>` | `contains` |
+
+---
+
+## BooleanExpressionExtensions
+
+Null-safe AND/OR combinators. The foundation for building dynamic WHERE clauses.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `and` | `BooleanExpression?.and(BooleanExpression?)` | `a AND b` |
+| `or` | `BooleanExpression?.or(BooleanExpression?)` | `a OR b` |
+| `andAnyOf` | `BooleanExpression?.andAnyOf(List<BooleanExpression?>)` | `a AND (b OR c OR ...)` |
+| `orAllOf` | `BooleanExpression?.orAllOf(List<BooleanExpression?>)` | `a OR (b AND c AND ...)` |
+| `eq` | `BooleanExpression?.eq(Boolean?)` | `active = true` |
+| `nullif` | `BooleanExpression?.nullif(Boolean?)` | `NULLIF(active, true)` |
+| `coalesce` | `BooleanExpression?.coalesce(Boolean?)` | `COALESCE(active, false)` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    // AND -- null side is ignored
+    val predicate = (entity.active eq true) and (entity.name eq name)
+
+    // OR group
+    val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
+
+    // AND with OR subgroup
+    val complex = (entity.active eq true) andAnyOf listOf(
+        entity.role eq role,
+        entity.department eq department,
+    )
+    ```
+
+=== "SQL"
+
+    ```sql
+    -- AND (name = 'John')
+    active = true AND name = 'John'
+
+    -- AND (name = null) -> only left side
+    active = true
+
+    -- OR group
+    role = 'ADMIN' OR role = 'MANAGER'
+
+    -- AND with OR subgroup
+    active = true AND (role = ? OR department = ?)
+    ```
+
+---
+
+## SimpleExpressionExtensions
+
+Equality and membership operators for any expression type.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `eq` | `SimpleExpression<T>?.eq(T?)` | `status = ?` |
+| `eq` | `SimpleExpression<T>?.eq(Expression<in T>?)` | `status = default_status` |
+| `ne` | `SimpleExpression<T>?.ne(T?)` | `status != ?` |
+| `ne` | `SimpleExpression<T>?.ne(Expression<in T>?)` | `status != default_status` |
+| `in` | `SimpleExpression<T>?.in(Collection<T>?)` | `status IN (?, ?)` |
+| `notIn` | `SimpleExpression<T>?.notIn(Collection<T>?)` | `status NOT IN (?, ?)` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    // Equality
+    entity.status eq "ACTIVE"              // status = 'ACTIVE'
+    entity.status eq null                  // null (skipped)
+
+    // Not equal
+    entity.status ne "DELETED"             // status != 'DELETED'
+
+    // IN / NOT IN
+    entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
+    entity.status notIn listOf("C")       // status NOT IN ('C')
+    entity.status `in` null               // null (skipped)
+    ```
+
+=== "SQL"
+
+    ```sql
+    status = 'ACTIVE'
+    status != 'DELETED'
+    status IN ('A', 'B')
+    status NOT IN ('C')
+    ```
+
+---
+
+## ComparableExpressionExtensions
+
+Comparison and range operators for `Comparable` types (dates, strings, enums, etc.).
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `gt` | `ComparableExpression<T>?.gt(T?)` | `col > ?` |
+| `goe` | `ComparableExpression<T>?.goe(T?)` | `col >= ?` |
+| `lt` | `ComparableExpression<T>?.lt(T?)` | `col < ?` |
+| `loe` | `ComparableExpression<T>?.loe(T?)` | `col <= ?` |
+| `between` | `ComparableExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
+| `between` | `ComparableExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
+| `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
+| `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
+
+All comparison functions also have `Expression<T>` overloads for comparing against other columns.
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    // Simple comparison
+    entity.date gt startDate       // date > ?
+    entity.date goe startDate      // date >= ?
+    entity.date lt endDate         // date < ?
+    entity.date loe endDate        // date <= ?
+
+    // BETWEEN with Pair -- partial range support
+    entity.date between (from to to)       // BETWEEN ? AND ?
+    entity.date between (from to null)     // date >= ?
+    entity.date between (null to to)       // date <= ?
+    entity.date between (null to null)     // null (skipped)
+
+    // BETWEEN with ClosedRange
+    entity.age between (20..60)            // BETWEEN 20 AND 60
+    ```
+
+=== "SQL"
+
+    ```sql
+    -- Full range
+    created_at BETWEEN '2024-01-01' AND '2024-12-31'
+
+    -- One-sided (from only)
+    created_at >= '2024-01-01'
+
+    -- One-sided (to only)
+    created_at <= '2024-12-31'
+
+    -- ClosedRange
+    age BETWEEN 20 AND 60
+    ```
+
+!!! tip "Pair-based between for optional date ranges"
+    The `Pair` overload is the most powerful feature for date range filters.
+    A single expression handles all four combinations (both, from-only, to-only, neither)
+    that would otherwise require a 4-branch `if/else`.
+
+---
+
+## NumberExpressionExtensions
+
+Same API as `ComparableExpressionExtensions`, but for `NumberExpression`.
+
+### Why a separate interface?
+
+In QueryDSL's type hierarchy, `NumberExpression` does **not** extend `ComparableExpression`.
+This is a QueryDSL design decision -- `NumberExpression` inherits from `ComparableExpressionBase`
+while `ComparableExpression` is a separate branch. So querydsl-ktx provides a parallel set of
+operators specifically typed for `NumberExpression`.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `gt` | `NumberExpression<T>?.gt(T?)` | `col > ?` |
+| `goe` | `NumberExpression<T>?.goe(T?)` | `col >= ?` |
+| `lt` | `NumberExpression<T>?.lt(T?)` | `col < ?` |
+| `loe` | `NumberExpression<T>?.loe(T?)` | `col <= ?` |
+| `between` | `NumberExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
+| `between` | `NumberExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
+| `notBetween` | `NumberExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
+| `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    entity.price gt 10000
+    entity.price between (minPrice to maxPrice)
+    entity.score between (0..100)
+    entity.quantity loe maxQuantity
+    ```
+
+=== "SQL"
+
+    ```sql
+    price > 10000
+    price BETWEEN ? AND ?
+    score BETWEEN 0 AND 100
+    quantity <= ?
+    ```
+
+---
+
+## StringExpressionExtensions
+
+Pattern matching and string comparison operators.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `contains` | `StringExpression?.contains(String?)` | `LIKE '%val%'` |
+| `containsIgnoreCase` | `StringExpression?.containsIgnoreCase(String?)` | `LOWER(col) LIKE LOWER('%val%')` |
+| `startsWith` | `StringExpression?.startsWith(String?)` | `LIKE 'val%'` |
+| `startsWithIgnoreCase` | `StringExpression?.startsWithIgnoreCase(String?)` | `LOWER(col) LIKE LOWER('val%')` |
+| `endsWith` | `StringExpression?.endsWith(String?)` | `LIKE '%val'` |
+| `endsWithIgnoreCase` | `StringExpression?.endsWithIgnoreCase(String?)` | `LOWER(col) LIKE LOWER('%val')` |
+| `equalsIgnoreCase` | `StringExpression?.equalsIgnoreCase(String?)` | `LOWER(col) = LOWER(?)` |
+| `notEqualsIgnoreCase` | `StringExpression?.notEqualsIgnoreCase(String?)` | `LOWER(col) != LOWER(?)` |
+| `like` | `StringExpression?.like(String?)` | `LIKE ?` |
+| `likeIgnoreCase` | `StringExpression?.likeIgnoreCase(String?)` | `LOWER(col) LIKE LOWER(?)` |
+| `notLike` | `StringExpression?.notLike(String?)` | `NOT LIKE ?` |
+| `matches` | `StringExpression?.matches(String?)` | `REGEXP ?` |
+
+`contains` and `startsWith` also have `Expression<String>` overloads.
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    // Substring search
+    entity.name contains keyword              // name LIKE '%keyword%'
+    entity.name containsIgnoreCase keyword     // case-insensitive
+
+    // Prefix / suffix
+    entity.name startsWith prefix             // name LIKE 'prefix%'
+    entity.name endsWith suffix               // name LIKE '%suffix'
+
+    // Pattern and regex
+    entity.name like "J%n"                    // name LIKE 'J%n'
+    entity.email matches "^[a-z]+@.*"         // name REGEXP '^[a-z]+@.*'
+
+    // Case-insensitive equality
+    entity.email equalsIgnoreCase email       // LOWER(email) = LOWER(?)
+    ```
+
+=== "SQL"
+
+    ```sql
+    name LIKE '%keyword%'
+    LOWER(name) LIKE LOWER('%keyword%')
+    name LIKE 'prefix%'
+    name LIKE '%suffix'
+    name LIKE 'J%n'
+    email REGEXP '^[a-z]+@.*'
+    LOWER(email) = LOWER(?)
+    ```
+
+---
+
+## TemporalExpressionExtensions
+
+Temporal comparison operators for date/time expressions.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `after` | `TemporalExpression<T>?.after(T?)` | `col > ?` |
+| `after` | `TemporalExpression<T>?.after(Expression<T>?)` | `col > other_col` |
+| `before` | `TemporalExpression<T>?.before(T?)` | `col < ?` |
+| `before` | `TemporalExpression<T>?.before(Expression<T>?)` | `col < other_col` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    entity.createdAt after startDate     // created_at > ?
+    entity.createdAt before endDate      // created_at < ?
+
+    // Column comparison
+    entity.endDate after entity.startDate  // end_date > start_date
+
+    // Null-safe
+    entity.createdAt after null          // null (skipped)
+    ```
+
+=== "SQL"
+
+    ```sql
+    created_at > '2024-01-01'
+    created_at < '2024-12-31'
+    end_date > start_date
+    ```
+
+!!! tip "after/before vs gt/goe/lt/loe"
+    Use `after`/`before` for `TemporalExpression` (dates, timestamps) and
+    `gt`/`goe`/`lt`/`loe` for `ComparableExpression` or `NumberExpression`.
+    They generate the same SQL but are defined on different QueryDSL types.
+
+---
+
+## CollectionExpressionExtensions
+
+Membership check for mapped collection fields (e.g., `@ElementCollection`, `@ManyToMany`).
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `contains` | `CollectionExpressionBase<T, E>?.contains(E?)` | `? IN (col)` |
+| `contains` | `CollectionExpressionBase<T, E>?.contains(Expression<E>?)` | `other_col IN (col)` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
+    entity.tags contains tag            // ? IN (tags), null-safe
+    ```
+
+=== "SQL"
+
+    ```sql
+    'ADMIN' IN (roles)
+    ```
+
+---
+
+## Selective Implementation
+
+You don't have to use all 7 interfaces. Choose what you need:
+
+### Option 1: QuerydslRepository (all included)
+
+```kotlin
+@Repository
+class MyRepository : QuerydslRepository<MyEntity>() {
+    // All 7 interfaces are available
+}
+```
+
+### Option 2: QuerydslSupport + selected interfaces
+
+```kotlin
+@Repository
+class MyRepository : QuerydslSupport<MyEntity>(),
+    SimpleExpressionExtensions,
+    StringExpressionExtensions {
+
+    override val domainClass = MyEntity::class.java
+
+    // Only eq, ne, in, notIn, contains, startsWith, etc.
+    // No number/comparable/temporal/collection extensions
+}
+```
+
+### Option 3: Implement on any class
+
+```kotlin
+class PredicateBuilder : BooleanExpressionExtensions, SimpleExpressionExtensions {
+    // Use extensions anywhere, not just in repositories
+}
+```
+
+!!! note "QuerydslRepository vs QuerydslSupport"
+    | | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
+    |---|---|---|
+    | Extension interfaces | All 7 included | None (add what you need) |
+    | `domainClass` | Auto-resolved via generics | Must override manually |
+    | Use when | You want everything | You want minimal surface area |

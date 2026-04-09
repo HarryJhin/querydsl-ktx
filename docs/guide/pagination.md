@@ -1,0 +1,243 @@
+# Pagination
+
+`QuerydslSupport` (and by extension `QuerydslRepository`) provides pagination helpers
+as extension functions on QueryDSL query objects.
+
+---
+
+## slice vs page vs fetch
+
+| Method | Returns | Count Query | Use When |
+|--------|---------|-------------|----------|
+| `slice(pageable)` | `Slice<R>` | No (fetches N+1 rows) | Infinite scroll, forward-only navigation |
+| `page(pageable)` | `Page<R>` | Yes (auto-generated) | Traditional pagination with total count |
+| `fetch(pageable)` | `List<R>` | No | You just need a windowed list |
+
+### slice -- No count query
+
+Fetches `pageSize + 1` rows to determine `hasNext` accurately, then trims the result.
+
+=== "Kotlin"
+
+    ```kotlin
+    fun searchMembers(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .slice(pageable)
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT m.*
+    FROM member m
+    WHERE m.name LIKE '%keyword%'
+    LIMIT 21  -- pageSize(20) + 1
+    OFFSET 0
+    ```
+
+!!! tip "Why pageSize + 1?"
+    If 21 rows come back, we know there's a next page. We return only the first 20.
+    If 20 or fewer come back, there's no next page. This is more accurate than
+    checking `content.size == pageSize`, which gives false positives on the last full page.
+
+### page -- With count query
+
+Generates a count query automatically from the main query.
+
+=== "Kotlin"
+
+    ```kotlin
+    fun searchMembers(name: String?, pageable: Pageable): Page<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .page(pageable)
+    ```
+
+=== "SQL"
+
+    ```sql
+    -- Content query
+    SELECT m.*
+    FROM member m
+    WHERE m.name LIKE '%keyword%'
+    LIMIT 20 OFFSET 0
+
+    -- Count query (auto-generated)
+    SELECT COUNT(*)
+    FROM member m
+    WHERE m.name LIKE '%keyword%'
+    ```
+
+!!! warning "Do not use with fetch joins"
+    The auto-generated count query clones the main query and replaces the select
+    with `COUNT(*)`. When fetch joins are present, this produces incorrect counts.
+    Use the overload with a separate count query instead:
+
+    ```kotlin
+    selectFrom(member)
+        .join(member.team, team).fetchJoin()
+        .where(member.name contains name)
+        .page(pageable) {
+            select(member.count())
+                .from(member)
+                .where(member.name contains name)
+                .fetchOne() ?: 0L
+        }
+    ```
+
+### fetch -- Plain list
+
+Applies pagination (offset/limit + sorting) and returns a raw list.
+
+```kotlin
+fun recentMembers(pageable: Pageable): List<Member> =
+    selectFrom(member)
+        .where(member.active eq true)
+        .fetch(pageable)
+```
+
+---
+
+## Value-Based Overloads
+
+All pagination methods have overloads that accept raw `page`/`size` or `offset`/`limit` values
+instead of a `Pageable` object:
+
+```kotlin
+// Pageable-based
+query.slice(pageable)
+query.page(pageable)
+
+// Value-based -- zero-indexed page number
+query.slice(page = 0, size = 20)
+query.page(page = 0, size = 20)
+
+// Offset/limit -- for fetch
+query.fetch(offset = 0, limit = 20)
+```
+
+!!! tip "When to use value-based overloads"
+    - Internal repository methods that don't need Spring's `Pageable` abstraction
+    - Tests where constructing a `PageRequest` adds noise
+    - Non-web contexts (batch processing, CLI tools)
+
+---
+
+## Separate Count Query
+
+When the main query has fetch joins or complex constructs, provide your own count query:
+
+=== "Lambda"
+
+    ```kotlin
+    fun searchWithJoin(name: String?, pageable: Pageable): Page<Member> =
+        selectFrom(member)
+            .join(member.team, team).fetchJoin()
+            .where(member.name contains name)
+            .page(pageable) {
+                select(member.count())
+                    .from(member)
+                    .where(member.name contains name)
+                    .fetchOne() ?: 0L
+            }
+    ```
+
+=== "Value-based with lambda"
+
+    ```kotlin
+    fun searchWithJoin(name: String?): Page<Member> =
+        selectFrom(member)
+            .join(member.team, team).fetchJoin()
+            .where(member.name contains name)
+            .page(page = 0, size = 20) {
+                select(member.count())
+                    .from(member)
+                    .where(member.name contains name)
+                    .fetchOne() ?: 0L
+            }
+    ```
+
+The count query lambda is **lazy** -- it only executes when `Page.getTotalElements()` is called,
+thanks to `PageableExecutionUtils.getPage()`.
+
+---
+
+## applySort with Fallback
+
+`applySort` applies Spring Data's `Sort` to a query. When the sort is empty, a fallback order is used:
+
+```kotlin
+fun searchMembers(
+    name: String?,
+    pageable: Pageable,
+): List<Member> =
+    selectFrom(member)
+        .where(member.name contains name)
+        .applySort(pageable.sort) {
+            member.createdAt.desc()  // fallback when no sort specified
+        }
+        .fetch()
+```
+
+| `pageable.sort` | Result |
+|-----------------|--------|
+| `Sort.by("name")` | `ORDER BY m.name ASC` |
+| `Sort.unsorted()` | `ORDER BY m.created_at DESC` (fallback) |
+
+!!! note "Sort property names"
+    `applySort` uses Spring Data's `Querydsl.applySorting()` internally,
+    which maps `Sort` property names to the entity's `PathBuilder`.
+    Property names must match the entity field names (e.g., `createdAt`, not `created_at`).
+
+---
+
+## List to Page
+
+Convert an in-memory list to a `Page` when you need to paginate after post-processing:
+
+```kotlin
+fun complexSearch(pageable: Pageable): Page<MemberDto> {
+    val rawResults = selectFrom(member)
+        .where(member.active eq true)
+        .fetch(pageable)
+
+    val dtos = rawResults.map { it.toDto() }
+
+    return dtos.page(pageable) {
+        select(member.count())
+            .from(member)
+            .where(member.active eq true)
+            .fetchOne() ?: 0L
+    }
+}
+```
+
+---
+
+## Before & After
+
+=== "Before"
+
+    ```kotlin
+    fun search(name: String?, pageable: Pageable): Slice<Member> {
+        val content = queryFactory.selectFrom(member)
+            .where(if (name != null) member.name.contains(name) else null)
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch()
+        val hasNext = content.size == pageable.pageSize // (1)!
+        return SliceImpl(content, pageable, hasNext)
+    }
+    ```
+
+    1. This gives a false positive on the last full page.
+
+=== "After"
+
+    ```kotlin
+    fun search(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .slice(pageable)
+    ```

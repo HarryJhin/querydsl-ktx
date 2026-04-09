@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dokka:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,13 +27,26 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Generate Dokka HTML
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
+
+      - name: Generate Dokka API docs
         run: ./gradlew dokkaHtmlMultiModule
+
+      - name: Copy Dokka into MkDocs
+        run: cp -r build/dokka/htmlMultiModule docs/api
+
+      - name: Build MkDocs
+        run: mkdocs build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/dokka/htmlMultiModule
+          path: site
 
       - name: Cleanup Gradle Cache
         run: |
@@ -41,7 +54,7 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/gc.properties
 
   deploy:
-    needs: dokka
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
