@@ -13,6 +13,10 @@ dependencies {
     compileOnly(libs.jakarta.annotation.api)
 
     testImplementation(libs.querydsl.core)
+    testImplementation(libs.querydsl.jpa) {
+        artifact { classifier = "jakarta" }
+    }
+    testImplementation(libs.spring.data.commons)
     testImplementation(kotlin("test"))
 }
 

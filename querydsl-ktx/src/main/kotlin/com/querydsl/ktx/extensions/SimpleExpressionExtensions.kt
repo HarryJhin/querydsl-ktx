@@ -124,4 +124,45 @@ interface SimpleExpressionExtensions {
         this == null || right == null -> null
         else -> this.notIn(right)
     }
+
+    /**
+     * Null-safe IN check that automatically splits large collections into OR-ed chunks.
+     *
+     * Many databases (notably Oracle) limit the number of items in a single IN clause.
+     * This operator transparently chunks the collection and combines the resulting
+     * IN expressions with OR.
+     *
+     * - If either side is null, the condition is skipped (returns null).
+     * - If the collection fits within one chunk, a plain IN is used.
+     * - Otherwise, the collection is split into chunks of 1000 and OR-combined.
+     *
+     * Empty collections are passed through to the underlying IN as-is,
+     * since the caller may have intentionally provided an empty list.
+     *
+     * ```sql
+     * -- 2500 ids, chunkSize = 1000
+     * (id IN (1..1000)) OR (id IN (1001..2000)) OR (id IN (2001..2500))
+     * ```
+     *
+     * @param right the collection of values to match against, or null to skip
+     * @return chunked IN expression, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?): BooleanExpression? =
+        inChunked(right, 1000)
+
+    /**
+     * Null-safe IN check that splits large collections into OR-ed chunks of the given size.
+     *
+     * @param right the collection of values to match against, or null to skip
+     * @param chunkSize maximum number of items per IN clause (default 1000)
+     * @return chunked IN expression, or null if either side is null
+     * @see inChunked
+     */
+    fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression? = when {
+        this == null || right == null -> null
+        right.size <= chunkSize -> this.`in`(right)
+        else -> right.chunked(chunkSize)
+            .map { chunk -> this.`in`(chunk) }
+            .reduce { acc, expr -> acc.or(expr) }
+    }
 }

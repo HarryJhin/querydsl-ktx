@@ -180,4 +180,73 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
         val result = status notIn emptyList<String>()
         assertNotNull(result)
     }
+
+    // ── inChunked (infix) ──
+
+    @Test
+    fun `inChunked - both non-null with small list returns IN expression`() {
+        val result = status inChunked listOf("A", "B", "C")
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `inChunked - this null returns null`() {
+        val result = nullExpr inChunked listOf("A", "B")
+        assertNull(result)
+    }
+
+    @Test
+    fun `inChunked - right null returns null`() {
+        val result = status inChunked (null as Collection<String>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `inChunked - both null returns null`() {
+        val result = nullExpr inChunked (null as Collection<String>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `inChunked - empty collection still generates expression`() {
+        val result = status inChunked emptyList<String>()
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `inChunked - large list is split into OR-ed chunks`() {
+        val largeList = (1..1001).map { it.toString() }
+        val result = status inChunked largeList
+        assertNotNull(result)
+        // 1001 items with default chunk size 1000 -> 2 chunks joined by OR
+        assert(result.toString().contains("||")) { "Expected OR expression for chunked IN, got: $result" }
+    }
+
+    @Test
+    fun `inChunked - exactly chunk size uses single IN`() {
+        val exactList = (1..1000).map { it.toString() }
+        val result = status inChunked exactList
+        assertNotNull(result)
+        // Should be a single IN, no OR
+        assert(!result.toString().contains("||")) { "Expected single IN without OR, got: $result" }
+    }
+
+    // ── inChunked (custom chunk size) ──
+
+    @Test
+    fun `inChunked with custom chunk size - splits correctly`() {
+        val list = (1..10).map { it.toString() }
+        val result = status.inChunked(list, chunkSize = 3)
+        assertNotNull(result)
+        // 10 items / 3 = 4 chunks -> 3 OR operators
+        assert(result.toString().contains("||")) { "Expected OR expression for chunked IN, got: $result" }
+    }
+
+    @Test
+    fun `inChunked with custom chunk size - small list uses single IN`() {
+        val list = listOf("A", "B")
+        val result = status.inChunked(list, chunkSize = 5)
+        assertNotNull(result)
+        assert(!result.toString().contains("||")) { "Expected single IN without OR, got: $result" }
+    }
 }

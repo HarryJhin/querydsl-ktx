@@ -6,6 +6,7 @@ import com.querydsl.ktx.extensions.ComparableExpressionExtensions
 import com.querydsl.ktx.extensions.NumberExpressionExtensions
 import com.querydsl.ktx.extensions.SimpleExpressionExtensions
 import com.querydsl.ktx.extensions.StringExpressionExtensions
+import com.querydsl.ktx.extensions.SubQueryExtensions
 import com.querydsl.ktx.extensions.TemporalExpressionExtensions
 import org.springframework.core.GenericTypeResolver
 import org.springframework.data.repository.NoRepositoryBean
@@ -37,6 +38,7 @@ abstract class QuerydslRepository<T : Any> :
     NumberExpressionExtensions,
     SimpleExpressionExtensions,
     StringExpressionExtensions,
+    SubQueryExtensions,
     TemporalExpressionExtensions {
 
     @Suppress("UNCHECKED_CAST")

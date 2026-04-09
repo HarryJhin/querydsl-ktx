@@ -241,6 +241,43 @@ abstract class QuerydslSupport<T : Any> {
         return querydsl.applySorting(sort, this)
     }
 
+    /**
+     * Applies sorting using a [SortSpec] that maps property names to QueryDSL expressions.
+     *
+     * Unlike the [Querydsl.applySorting]-based overload, this resolves sort properties
+     * through an explicit mapping, giving you full control over which properties are
+     * sortable and how they map to expressions (including cross-entity paths).
+     *
+     * ```kotlin
+     * private val memberSort = sortSpec {
+     *     "name"      by qMember.name
+     *     "createdAt" by qMember.createdAt
+     * }
+     *
+     * fun findAll(pageable: Pageable): Page<Member> =
+     *     selectFrom(qMember)
+     *         .applySort(pageable.sort, memberSort) { qMember.createdAt.desc() }
+     *         .page(pageable)
+     * ```
+     *
+     * @param sort the Spring Data [Sort] from the client
+     * @param spec the [SortSpec] mapping property names to expressions
+     * @param fallback optional default order when [sort] is unsorted or resolves to nothing
+     * @return the query with ordering applied
+     */
+    protected fun <R> JPQLQuery<R>.applySort(
+        sort: Sort,
+        spec: SortSpec,
+        fallback: (() -> OrderSpecifier<*>?)? = null,
+    ): JPQLQuery<R> {
+        val orders = spec.resolve(sort)
+        if (orders.isNotEmpty()) {
+            return this.orderBy(*orders.toTypedArray())
+        }
+        val fallbackOrder = fallback?.invoke() ?: return this
+        return this.orderBy(fallbackOrder)
+    }
+
     protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R> =
         querydsl.applySorting(sort, this).fetch()
 
