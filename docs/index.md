@@ -9,30 +9,17 @@ Write declarative, type-safe dynamic queries that read like SQL.
 
 ## Why querydsl-ktx?
 
-<div class="grid cards" markdown>
-
--   :material-shield-check:{ .lg .middle } **Null-Safe by Default**
-
-    ---
-
+!!! abstract "Null-Safe by Default"
     Every extension function accepts nullable receivers and nullable arguments.
     `null` means "skip this condition" -- no `if` checks, no `BooleanBuilder`.
 
--   :material-code-tags:{ .lg .middle } **Infix & Declarative**
-
-    ---
-
+!!! abstract "Infix & Declarative"
     Kotlin infix syntax makes queries read like natural language.
     `entity.name eq name` instead of `entity.name.eq(name)`.
 
--   :material-lock-check:{ .lg .middle } **Type-Safe & Scoped**
-
-    ---
-
+!!! abstract "Type-Safe & Scoped"
     Extensions are scoped through interface implementation -- no global pollution.
     Implement only the interfaces you need.
-
-</div>
 
 ---
 
