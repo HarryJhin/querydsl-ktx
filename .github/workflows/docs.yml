@@ -3,6 +3,12 @@ name: Docs
 on:
   push:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'querydsl-ktx/src/main/kotlin/**'
+    tags-ignore:
+      - 'v*'
   release:
     types: [published]
 
