@@ -15,12 +15,12 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 
 ### Tech Stack
 
-- Kotlin 1.7+ (compiled with 1.7.21)
+- Kotlin 1.7+ (compiled with 1.9.25)
 - Spring Boot 3.0+ (compileOnly — does not force version)
 - QueryDSL 5.1.0+ (compileOnly)
-- Gradle 7.6.4 with Kotlin DSL
+- Gradle 8.5 with Kotlin DSL
 - JUnit 5 + kotlin-test for testing
-- Dokka 1.7.20 for API documentation
+- Dokka 1.9.20 for API documentation
 
 ## Architecture
 
@@ -38,6 +38,19 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
     ├── QuerydslSupport.kt    — abstract, requires domainClass override
     └── QuerydslRepository.kt — extends Support, implements all 7 interfaces
 ```
+
+### Documentation Site
+
+- `docs/` — MkDocs Material source files (`*.md` English, `*.ko.md` Korean planned)
+- `mkdocs.yml` — site configuration
+- `.github/workflows/ci.yml` — Build + test on Java 17/21 matrix
+- `.github/workflows/docs.yml` — Dokka API docs + MkDocs → GitHub Pages
+
+### Publishing
+
+- Maven Central via `com.vanniktech.maven.publish` plugin (Central Portal)
+- Signing: `useInMemoryPgpKeys` from environment variables
+- All 3 modules published: querydsl-ktx, querydsl-ktx-spring-boot, querydsl-ktx-spring-boot-starter
 
 ## Null-Safety Contract
 
@@ -57,6 +70,10 @@ This contract is the core design principle. Any new extension must follow it.
 ./gradlew build                        # Full build + test
 ./gradlew :querydsl-ktx:test           # Run tests only
 ./gradlew :querydsl-ktx:dokkaHtml      # Generate API docs
+./gradlew publishToMavenLocal             # Publish to local Maven repo (testing)
+./gradlew publishAndReleaseToMavenCentral # Publish to Maven Central (requires GPG + Sonatype token)
+mkdocs serve                              # Local docs preview (requires pip install mkdocs-material)
+mkdocs build                              # Build docs site
 ```
 
 ## Code Style
