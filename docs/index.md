@@ -2,8 +2,40 @@
 
 **Null-safe infix Kotlin extensions for QueryDSL dynamic queries.**
 
-Stop writing `if (x != null) builder.and(...)` boilerplate.
-Write declarative, type-safe dynamic queries that read like SQL.
+Eliminate `BooleanBuilder` boilerplate. Write dynamic queries that read like SQL.
+
+---
+
+## The Problem
+
+Every QueryDSL dynamic query starts the same way:
+
+```kotlin
+val builder = BooleanBuilder()
+if (name != null) builder.and(member.name.contains(name))
+if (status != null) builder.and(member.status.eq(status))
+if (minAge != null && maxAge != null) builder.and(member.age.between(minAge, maxAge))
+else if (minAge != null) builder.and(member.age.goe(minAge))
+else if (maxAge != null) builder.and(member.age.loe(maxAge))
+// ...keeps growing with every new filter
+```
+
+Every optional filter adds 1-3 lines. Range filters need 3 branches.
+The pattern is always the same -- but you write it every time.
+
+querydsl-ktx turns this into:
+
+```kotlin
+selectFrom(member).where(
+    member.name contains name,
+    member.status eq status,
+    member.age between (minAge to maxAge),
+).fetch()
+```
+
+Null parameters are automatically skipped. No `if` checks, no `BooleanBuilder`.
+
+[See full comparison →](why.md)
 
 ---
 
