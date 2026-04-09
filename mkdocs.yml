@@ -68,4 +68,4 @@ nav:
     - Extensions: guide/extensions.md
     - Pagination: guide/pagination.md
     - Bulk DML: guide/bulk-dml.md
-  - API Reference: api/index.html
+  - API Reference: https://harryjhin.github.io/querydsl-ktx/api/
