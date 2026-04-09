@@ -164,7 +164,7 @@ protected fun <R> JPQLQuery<R>.fetch(offset: Long, limit: Int): List<R>
 
 // Sorting
 protected fun <R> JPQLQuery<R>.applySort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>
-protected fun <R> JPQLQuery<R>.fetchSorted(sort: Sort): List<R>
+protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R>
 
 // List to Page conversion
 protected fun <R> List<R>.page(pageable: Pageable, countQuery: () -> Long): Page<R>

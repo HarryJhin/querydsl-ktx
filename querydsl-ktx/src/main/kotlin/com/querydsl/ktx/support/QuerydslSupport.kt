@@ -241,7 +241,7 @@ abstract class QuerydslSupport<T : Any> {
         return querydsl.applySorting(sort, this)
     }
 
-    protected fun <R> JPQLQuery<R>.fetchSorted(sort: Sort): List<R> =
+    protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R> =
         querydsl.applySorting(sort, this).fetch()
 
     protected fun <R> List<R>.page(

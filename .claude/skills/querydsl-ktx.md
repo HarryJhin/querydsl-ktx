@@ -81,7 +81,7 @@ query.slice(pageable)                   // Slice (pageSize+1)
 query.page(page = 0, size = 20)         // value-based
 query.fetch(offset = 0, limit = 20)     // raw List
 query.applySort(sort) { fallback() }    // sort with fallback
-query.fetchSorted(sort)                 // sort + fetch
+query.fetch(sort)                 // sort + fetch
 ```
 
 ## Bulk DML
