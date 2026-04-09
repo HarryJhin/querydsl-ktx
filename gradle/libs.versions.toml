@@ -1,10 +1,11 @@
 [versions]
-kotlin = "1.7.21"
+kotlin = "1.9.25"
 querydsl = "5.1.0"
 spring-boot = "3.0.0"
 spring-data = "3.0.0"
 jakarta-persistence = "3.1.0"
 jakarta-annotation = "2.1.1"
+maven-publish = "0.29.0"
 
 [libraries]
 querydsl-jpa = { module = "com.querydsl:querydsl-jpa", version.ref = "querydsl" }
@@ -17,4 +18,5 @@ jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api",
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
