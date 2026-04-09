@@ -17,3 +17,4 @@ jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api",
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
