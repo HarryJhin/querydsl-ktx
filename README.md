@@ -155,29 +155,77 @@ entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
 
 Full base class implementing all extension interfaces with pagination, sorting, and DML helpers.
 
+### Dynamic Query — Before & After
+
 ```kotlin
+// Before — manual null checks, verbose BooleanBuilder
 @Repository
-class MemberQuerydslRepository : QuerydslRepository<Member>() {
+class MemberRepository(private val queryFactory: JPAQueryFactory) {
+
+    fun search(name: String?, status: String?, pageable: Pageable): Page<Member> {
+        val builder = BooleanBuilder()
+        if (name != null) builder.and(member.name.contains(name))
+        if (status != null) builder.and(member.status.eq(status))
+        return queryFactory.selectFrom(member)
+            .where(builder)
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetchResults()
+            .let { PageImpl(it.results, pageable, it.total) }
+    }
+}
+```
+
+```kotlin
+// After — null-safe infix, declarative
+@Repository
+class MemberRepository : QuerydslRepository<Member>() {
 
     private val member = QMember.member
 
-    fun search(condition: MemberCondition, pageable: Pageable): Page<MemberProjection> =
-        select(memberProjection())
-            .from(member)
+    fun search(name: String?, status: String?, pageable: Pageable): Page<Member> =
+        selectFrom(member)
             .where(
-                member.name contains condition.name,
-                member.status eq condition.status,
-                member.age between (condition.minAge to condition.maxAge),
+                member.name contains name,
+                member.status eq status,
             )
-            .paging(pageable)
-
-    fun deactivateAll(ids: List<Long>): Long = modifying {
-        update(member)
-            .set(member.active, false)
-            .where(member.id `in` ids)
-            .execute()
-    }
+            .page(pageable)
 }
+```
+
+### Pagination — Before & After
+
+```kotlin
+// Before — manual Slice construction
+val content = query.offset(pageable.offset).limit(pageable.pageSize.toLong()).fetch()
+val hasNext = content.size == pageable.pageSize  // false positive on last page
+SliceImpl(content, pageable, hasNext)
+
+// After — accurate hasNext via pageSize + 1
+query.slice(pageable)
+
+// Or with raw values
+query.slice(page = 0, size = 20)
+query.page(page = 0, size = 20)
+query.fetch(offset = 0, limit = 20)
+```
+
+### Bulk DML — Before & After
+
+```kotlin
+// Before — easy to forget flush/clear
+queryFactory.update(member).set(member.active, false).where(...).execute()
+entityManager.flush()   // forgot this? stale persistence context
+entityManager.clear()   // forgot this? stale reads
+
+// After — flush + clear guaranteed
+modifying {
+    update(member).set(member.active, false).where(...).execute()
+}
+
+// Control individually (same flags as @Modifying)
+modifying(flushAutomatically = false) { ... }
+modifying(clearAutomatically = false) { ... }
 ```
 
 ### QuerydslSupport
@@ -186,23 +234,11 @@ Use when you only need query/pagination helpers without the infix extensions:
 
 ```kotlin
 @Repository
-class MyRepository : QuerydslSupport<MyEntity>(MyEntity::class.java) {
-    // select, paging, slicing, modifying available
+class MyRepository : QuerydslSupport<MyEntity>() {
+    override val domainClass = MyEntity::class.java
+    // select, page, slice, modifying available
     // infix extensions not included
 }
-```
-
-### modifying
-
-Manages the persistence context around bulk DML operations. Supports the same flags as `@Modifying`.
-
-```kotlin
-// Default: flush before + clear after
-modifying { update(entity).set(...).execute() }
-
-// Control individually
-modifying(flushAutomatically = false) { ... }
-modifying(clearAutomatically = false) { ... }
 ```
 
 ## Null-Safety Design

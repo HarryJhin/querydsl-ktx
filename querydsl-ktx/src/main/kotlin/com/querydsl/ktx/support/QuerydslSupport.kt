@@ -124,12 +124,12 @@ abstract class QuerydslSupport<T : Any> {
     /**
      * Performs slice-based pagination by fetching pageSize + 1 rows to determine hasNext.
      *
-     * Use this instead of [paging] when you only need forward navigation without a total count.
+     * Use this instead of [page] when you only need forward navigation without a total count.
      *
      * @param pageable the page request
      * @return a [Slice] with accurate hasNext information
      */
-    protected fun <R> JPQLQuery<R>.slicing(pageable: Pageable): Slice<R> {
+    protected fun <R> JPQLQuery<R>.slice(pageable: Pageable): Slice<R> {
         val limit = pageable.pageSize
         val content: List<R> = this
             .offset(pageable.offset)
@@ -145,7 +145,7 @@ abstract class QuerydslSupport<T : Any> {
      * **Warning: Do not use with fetch joins!**
      * When fetch joins are present, use the overload that accepts a separate count query:
      * ```kotlin
-     * query.paging(pageable) {
+     * query.page(pageable) {
      *     jpaQueryFactory.select(entity.count()).from(entity).where(condition).fetchOne() ?: 0L
      * }
      * ```
@@ -153,9 +153,9 @@ abstract class QuerydslSupport<T : Any> {
      * @param pageable the page request
      * @return a [Page] containing the current page data and total count
      */
-    protected fun <R> JPAQuery<R>.paging(pageable: Pageable): Page<R> {
+    protected fun <R> JPAQuery<R>.page(pageable: Pageable): Page<R> {
         val countQuery: JPAQuery<R> = this.clone()
-        val content: List<R> = this.fetching(pageable)
+        val content: List<R> = this.fetch(pageable)
         return PageableExecutionUtils.getPage(content, pageable) {
             countQuery.select(Wildcard.count).fetchOne() ?: 0L
         }
@@ -171,11 +171,11 @@ abstract class QuerydslSupport<T : Any> {
      * @param countQuery a lambda returning the total row count
      * @return a [Page] containing the current page data and total count
      */
-    protected fun <R> JPQLQuery<R>.paging(
+    protected fun <R> JPQLQuery<R>.page(
         pageable: Pageable,
         countQuery: () -> Long?,
     ): Page<R> {
-        val content: List<R> = this.fetching(pageable)
+        val content: List<R> = this.fetch(pageable)
         return PageableExecutionUtils.getPage(content, pageable) {
             countQuery() ?: 0L
         }
@@ -190,8 +190,8 @@ abstract class QuerydslSupport<T : Any> {
      * @param size number of items per page
      * @return a [Slice] with accurate hasNext information
      */
-    protected fun <R> JPQLQuery<R>.slicing(page: Int, size: Int): Slice<R> =
-        slicing(PageRequest.of(page, size))
+    protected fun <R> JPQLQuery<R>.slice(page: Int, size: Int): Slice<R> =
+        slice(PageRequest.of(page, size))
 
     /**
      * Performs pagination with an auto-generated count query using page number and page size.
@@ -202,8 +202,8 @@ abstract class QuerydslSupport<T : Any> {
      * @param size number of items per page
      * @return a [Page] containing the current page data and total count
      */
-    protected fun <R> JPAQuery<R>.paging(page: Int, size: Int): Page<R> =
-        paging(PageRequest.of(page, size))
+    protected fun <R> JPAQuery<R>.page(page: Int, size: Int): Page<R> =
+        page(PageRequest.of(page, size))
 
     /**
      * Performs pagination with a separate count query using page number and page size.
@@ -215,10 +215,10 @@ abstract class QuerydslSupport<T : Any> {
      * @param countQuery a lambda returning the total row count
      * @return a [Page] containing the current page data and total count
      */
-    protected fun <R> JPQLQuery<R>.paging(page: Int, size: Int, countQuery: () -> Long?): Page<R> =
-        paging(PageRequest.of(page, size), countQuery)
+    protected fun <R> JPQLQuery<R>.page(page: Int, size: Int, countQuery: () -> Long?): Page<R> =
+        page(PageRequest.of(page, size), countQuery)
 
-    protected fun <R> JPQLQuery<R>.fetching(pageable: Pageable): List<R> =
+    protected fun <R> JPQLQuery<R>.fetch(pageable: Pageable): List<R> =
         querydsl.applyPagination(pageable, this).fetch()
 
     /**
@@ -230,10 +230,10 @@ abstract class QuerydslSupport<T : Any> {
      * @param limit maximum number of rows to return
      * @return list of results
      */
-    protected fun <R> JPQLQuery<R>.fetching(offset: Long, limit: Int): List<R> =
+    protected fun <R> JPQLQuery<R>.fetch(offset: Long, limit: Int): List<R> =
         this.offset(offset).limit(limit.toLong()).fetch()
 
-    protected fun <R> JPQLQuery<R>.sort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R> {
+    protected fun <R> JPQLQuery<R>.applySort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R> {
         if (sort.isUnsorted) {
             val defaultOrder = fallbackOrder() ?: return this
             return this.orderBy(defaultOrder)
@@ -241,10 +241,10 @@ abstract class QuerydslSupport<T : Any> {
         return querydsl.applySorting(sort, this)
     }
 
-    protected fun <R> JPQLQuery<R>.fetching(sort: Sort): List<R> =
+    protected fun <R> JPQLQuery<R>.fetchSorted(sort: Sort): List<R> =
         querydsl.applySorting(sort, this).fetch()
 
-    protected fun <R> List<R>.paging(
+    protected fun <R> List<R>.page(
         pageable: Pageable,
         countQuery: () -> Long,
     ): Page<R> = PageImpl(this, pageable, countQuery())
