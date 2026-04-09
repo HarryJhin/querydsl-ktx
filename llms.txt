@@ -2,6 +2,34 @@
 
 > Null-safe infix Kotlin extensions for QueryDSL dynamic queries. Eliminates manual `BooleanBuilder` null checks by providing seven extension interfaces that turn `if (x != null) builder.and(...)` patterns into declarative infix expressions like `entity.name eq name`. Null arguments are automatically skipped. Works with Spring Boot 3.0+, QueryDSL 5.1.0+, Kotlin 1.7+, Java 17+.
 
+Documentation: https://harryjhin.github.io/querydsl-ktx/
+
+## The Problem
+
+QueryDSL dynamic queries require repetitive null checks for every optional filter:
+
+```kotlin
+val builder = BooleanBuilder()
+if (name != null) builder.and(member.name.contains(name))
+if (status != null) builder.and(member.status.eq(status))
+if (minAge != null && maxAge != null) builder.and(member.age.between(minAge, maxAge))
+else if (minAge != null) builder.and(member.age.goe(minAge))
+else if (maxAge != null) builder.and(member.age.loe(maxAge))
+```
+
+Each optional filter adds 1-3 lines. Range filters need 3 branches. querydsl-ktx eliminates this entirely.
+
+## Alternatives Comparison
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| `BooleanBuilder` | Built-in, no dependency | Verbose, error-prone with ranges |
+| `BooleanExpression` chaining | Slightly cleaner | Still manual null checks everywhere |
+| Spring Data `Specification` | Type-safe | Separate from QueryDSL, no infix syntax |
+| Top-level Kotlin extensions | Concise | Pollutes global scope; name clashes with stdlib |
+| Hand-rolled helper functions | Familiar | Duplicated per entity; partial coverage; no standard |
+| **querydsl-ktx** | Null-safe, concise, scoped, tested | Additional dependency |
+
 ## Installation
 
 ```kotlin
