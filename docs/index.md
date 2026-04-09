@@ -25,7 +25,7 @@ Write declarative, type-safe dynamic queries that read like SQL.
 
 ## Before & After
 
-=== "Before -- Vanilla QueryDSL"
+=== "Before -- Plain QueryDSL"
 
     ```kotlin
     @Repository
