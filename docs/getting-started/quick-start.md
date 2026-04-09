@@ -9,13 +9,13 @@ Write your first null-safe dynamic query in 5 minutes.
 === "Gradle (Kotlin DSL)"
 
     ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.0.1")
+    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
     ```
 
 === "Gradle (Groovy DSL)"
 
     ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.0.1'
+    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0'
     ```
 
 See [Installation](installation.md) for Maven and module selection details.

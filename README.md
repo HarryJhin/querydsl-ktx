@@ -46,7 +46,7 @@ Null parameters are automatically skipped. `between` with a `Pair` handles one-s
 
 ```kotlin
 // 1. Add the dependency
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.0.1")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
 ```
 
 ```kotlin
