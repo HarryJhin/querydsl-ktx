@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    api(project(":querydsl-ktx"))
-    api(project(":querydsl-ktx-spring-boot-autoconfigure"))
+    api(projects.querydslKtx)
+    api(projects.querydslKtxSpringBoot)
     api(libs.querydsl.jpa) {
         artifact { classifier = "jakarta" }
     }
