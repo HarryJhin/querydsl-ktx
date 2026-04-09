@@ -241,3 +241,60 @@ fun complexSearch(pageable: Pageable): Page<MemberDto> {
             .where(member.name contains name)
             .slice(pageable)
     ```
+
+---
+
+## SortSpec — 타입 세이프 동적 정렬
+
+Spring Data `Sort`는 문자열 프로퍼티명을 사용하며, `PathBuilder`가 암묵적으로 해석합니다.
+이 방식의 한계:
+
+- **보안**: 클라이언트가 임의 컬럼을 요청할 수 있음 (예: `?sort=password,asc`)
+- **조인 경로**: `PathBuilder`는 크로스 엔티티 경로를 해석할 수 없음
+- **암묵적**: 어떤 필드가 정렬 가능한지 코드에서 안 보임
+
+`SortSpec`은 명시적 화이트리스트 매핑으로 세 가지 문제를 모두 해결합니다.
+
+### SortSpec 정의
+
+```kotlin
+private val memberSort = sortSpec {
+    "name"       by qMember.name
+    "createdAt"  by qMember.createdAt
+    "department" by qDepartment.name   // 조인 컬럼 — PathBuilder로 해석 불가
+}
+```
+
+### 페이지네이션과 함께 사용
+
+```kotlin
+fun search(name: String?, pageable: Pageable): Page<Member> =
+    selectFrom(qMember)
+        .join(qMember.department, qDepartment)
+        .where(qMember.name contains name)
+        .page(pageable, memberSort)
+```
+
+`page`와 `slice` 메서드는 선택적으로 `SortSpec`을 받습니다:
+
+| 메서드 | 시그니처 |
+|--------|----------|
+| `slice` | `JPQLQuery<R>.slice(pageable, spec, fallback?)` |
+| `page` | `JPAQuery<R>.page(pageable, spec, fallback?)` |
+| `page` | `JPQLQuery<R>.page(pageable, spec, fallback?, countQuery)` |
+
+### Fallback 정렬
+
+클라이언트가 정렬을 보내지 않거나 모든 프로퍼티가 매핑에 없을 때 fallback이 사용됩니다:
+
+```kotlin
+selectFrom(qMember)
+    .page(pageable, memberSort) { qMember.createdAt.desc() }
+```
+
+### 동작 원리
+
+1. `pageable.sort`가 `SortSpec`을 통해 해석 (화이트리스트 매핑)
+2. 매핑된 프로퍼티는 `OrderSpecifier`로 변환되어 `orderBy` 적용
+3. 매핑 안 된 프로퍼티는 무시
+4. 페이지네이션(offset/limit)은 Pageable의 sort **없이** 적용 (이중 정렬 방지)

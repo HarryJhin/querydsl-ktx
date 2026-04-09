@@ -4,18 +4,18 @@ querydsl-ktx — Null-safe infix Kotlin extensions for QueryDSL dynamic queries.
 
 ## Project Overview
 
-This library provides seven extension interfaces that eliminate manual `BooleanBuilder` null checks
+This library provides eight extension interfaces that eliminate manual `BooleanBuilder` null checks
 in QueryDSL dynamic queries. Implementing an interface makes its infix functions available in scope.
 
 ### Modules
 
-- `querydsl-ktx` — Core: 7 extension interfaces + QuerydslSupport/QuerydslRepository base classes
+- `querydsl-ktx` — Core: 8 extension interfaces + QuerydslSupport/QuerydslRepository base classes
 - `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration
 - `querydsl-ktx-spring-boot-starter` — Starter: aggregates the above modules
 
 ### Tech Stack
 
-- Kotlin 1.7+ (compiled with 1.9.25)
+- Kotlin 1.7+ (compiled with 1.9.25; apiVersion/languageVersion 1.7)
 - Spring Boot 3.0+ (compileOnly — does not force version)
 - QueryDSL 5.1.0+ (compileOnly)
 - Gradle 8.5 with Kotlin DSL
@@ -26,22 +26,24 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 
 ```
 querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
-├── extensions/          ← 7 interfaces (no state, no dependencies)
+├── extensions/          ← 8 interfaces (no state, no dependencies)
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
 │   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn
 │   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between
 │   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy)
 │   ├── StringExpressionExtensions.kt     — contains, startsWith, like, matches
 │   ├── TemporalExpressionExtensions.kt   — after, before
-│   └── CollectionExpressionExtensions.kt — contains
+│   ├── CollectionExpressionExtensions.kt — contains
+│   └── SubQueryExtensions.kt            — exists, notExists
 └── support/             ← Base classes (DI, pagination, DML)
     ├── QuerydslSupport.kt    — abstract, requires domainClass override
-    └── QuerydslRepository.kt — extends Support, implements all 7 interfaces
+    ├── QuerydslRepository.kt — extends Support, implements all 8 interfaces
+    └── SortSpec.kt           — maps Sort property names to QueryDSL expressions
 ```
 
 ### Documentation Site
 
-- `docs/` — MkDocs Material source files (`*.md` English, `*.ko.md` Korean planned)
+- `docs/` — MkDocs Material source files (`*.md` English, `*.ko.md` Korean)
 - `mkdocs.yml` — site configuration
 - `.github/workflows/ci.yml` — Build + test on Java 17/21 matrix
 - `.github/workflows/docs.yml` — Dokka API docs + MkDocs → GitHub Pages

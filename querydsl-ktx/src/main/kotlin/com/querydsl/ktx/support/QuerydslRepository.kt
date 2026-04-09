@@ -14,7 +14,7 @@ import org.springframework.data.repository.NoRepositoryBean
 /**
  * Batteries-included base class with all QueryDSL extension interfaces.
  *
- * Extends [QuerydslSupport] and implements all seven extension interfaces.
+ * Extends [QuerydslSupport] and implements all eight extension interfaces.
  * The type parameter `T` is automatically resolved via [GenericTypeResolver],
  * so you do not need to specify [domainClass] manually.
  *

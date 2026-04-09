@@ -1,6 +1,6 @@
 # querydsl-ktx
 
-> Null-safe infix Kotlin extensions for QueryDSL dynamic queries. Eliminates manual `BooleanBuilder` null checks by providing seven extension interfaces that turn `if (x != null) builder.and(...)` patterns into declarative infix expressions like `entity.name eq name`. Null arguments are automatically skipped. Works with Spring Boot 3.0+, QueryDSL 5.1.0+, Kotlin 1.7+, Java 17+.
+> Null-safe infix Kotlin extensions for QueryDSL dynamic queries. Eliminates manual `BooleanBuilder` null checks by providing eight extension interfaces that turn `if (x != null) builder.and(...)` patterns into declarative infix expressions like `entity.name eq name`. Null arguments are automatically skipped. Works with Spring Boot 3.0+, QueryDSL 5.1.0+, Kotlin 1.7+, Java 17+.
 
 Documentation: https://harryjhin.github.io/querydsl-ktx/
 
@@ -47,7 +47,7 @@ Extensions are delivered as **interfaces**. Implement the interface on your repo
 ```kotlin
 @Repository
 class MemberRepository : QuerydslRepository<Member>() {
-    // All 7 extension interfaces are active via QuerydslRepository
+    // All 8 extension interfaces are active via QuerydslRepository
 }
 
 // Or selectively:
@@ -83,6 +83,8 @@ infix fun <T> SimpleExpression<T>?.ne(right: T?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.ne(right: Expression<in T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.`in`(right: Collection<T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.notIn(right: Collection<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?): BooleanExpression?
+fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression?
 ```
 
 Null behavior: either side null returns null (condition skipped).
@@ -153,6 +155,15 @@ infix fun <T : Collection<E>, E> CollectionExpressionBase<T, E>?.contains(child:
 
 Null behavior: either side null returns null (condition skipped).
 
+### SubQueryExtensions
+
+```kotlin
+fun <T> EntityPath<T>.exists(vararg predicates: Predicate?): BooleanExpression
+fun <T> EntityPath<T>.notExists(vararg predicates: Predicate?): BooleanExpression
+```
+
+Builds EXISTS / NOT EXISTS sub-queries. Null predicates are filtered out.
+
 ## QuerydslSupport Base Class
 
 Provides query factory wrappers and pagination helpers without extension interfaces.
@@ -194,9 +205,27 @@ protected fun <R> JPQLQuery<R>.fetch(offset: Long, limit: Int): List<R>
 protected fun <R> JPQLQuery<R>.applySort(sort: Sort, fallbackOrder: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>
 protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R>
 
+// SortSpec-based sorting + pagination
+protected fun <R> JPQLQuery<R>.slice(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Slice<R>
+protected fun <R> JPAQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Page<R>
+protected fun <R> JPQLQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }, countQuery: () -> Long?): Page<R>
+protected fun <R> JPQLQuery<R>.applySort(sort: Sort, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>
+
 // List to Page conversion
 protected fun <R> List<R>.page(pageable: Pageable, countQuery: () -> Long): Page<R>
 ```
+
+### SortSpec
+
+```kotlin
+class SortSpec {
+    infix fun String.by(expression: Expression<out Comparable<*>>)
+    fun resolve(sort: Sort): List<OrderSpecifier<*>>
+}
+inline fun sortSpec(block: SortSpec.() -> Unit): SortSpec
+```
+
+Maps Spring Data Sort property names to QueryDSL expressions for type-safe dynamic ordering. Unknown properties are silently ignored (whitelist-based security).
 
 ### Bulk DML Helper
 
@@ -212,7 +241,7 @@ Wraps DML operations with `entityManager.flush()` before and `entityManager.clea
 
 ## QuerydslRepository
 
-Extends `QuerydslSupport` and implements all seven extension interfaces. Auto-resolves `domainClass` via `GenericTypeResolver` so no manual override is needed.
+Extends `QuerydslSupport` and implements all eight extension interfaces. Auto-resolves `domainClass` via `GenericTypeResolver` so no manual override is needed.
 
 ```kotlin
 @Repository

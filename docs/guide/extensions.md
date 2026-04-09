@@ -1,6 +1,6 @@
 # Extension Interfaces
 
-querydsl-ktx provides **7 extension interfaces**, each scoped to a specific QueryDSL expression type.
+querydsl-ktx provides **8 extension interfaces**, each scoped to a specific QueryDSL expression type.
 All functions are null-safe: null arguments cause the condition to be skipped.
 
 ---
@@ -16,6 +16,7 @@ All functions are null-safe: null arguments cause the condition to be skipped.
 | [StringExpressionExtensions](#stringexpressionextensions) | `StringExpression` | `contains`, `startsWith`, `endsWith`, `like`, `matches` |
 | [TemporalExpressionExtensions](#temporalexpressionextensions) | `TemporalExpression<T>` | `after`, `before` |
 | [CollectionExpressionExtensions](#collectionexpressionextensions) | `CollectionExpressionBase<T, E>` | `contains` |
+| [SubQueryExtensions](#subqueryextensions) | `EntityPath<T>` | `exists`, `notExists` |
 
 ---
 
@@ -85,6 +86,7 @@ Equality and membership operators for any expression type.
 | `ne` | `SimpleExpression<T>?.ne(Expression<in T>?)` | `status != default_status` |
 | `in` | `SimpleExpression<T>?.in(Collection<T>?)` | `status IN (?, ?)` |
 | `notIn` | `SimpleExpression<T>?.notIn(Collection<T>?)` | `status NOT IN (?, ?)` |
+| `inChunked` | `SimpleExpression<T>?.inChunked(Collection<T>?)` | `col IN (?) OR col IN (?)` |
 
 ### Examples
 
@@ -102,6 +104,10 @@ Equality and membership operators for any expression type.
     entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
     entity.status notIn listOf("C")       // status NOT IN ('C')
     entity.status `in` null               // null (skipped)
+
+    // Large IN clause auto-split (default 1000 per chunk)
+    entity.id inChunked largeIdList   // id IN (1..1000) OR id IN (1001..2000)
+    entity.id.inChunked(ids, 500)     // custom chunk size
     ```
 
 === "SQL"
@@ -355,16 +361,57 @@ Membership check for mapped collection fields (e.g., `@ElementCollection`, `@Man
 
 ---
 
+## SubQueryExtensions
+
+Shorthand EXISTS / NOT EXISTS sub-query builders.
+
+### Functions
+
+| Function | Signature | SQL |
+|----------|-----------|-----|
+| `exists` | `EntityPath<T>.exists(vararg Predicate?)` | `EXISTS (SELECT 1 FROM ...)` |
+| `notExists` | `EntityPath<T>.notExists(vararg Predicate?)` | `NOT EXISTS (SELECT 1 FROM ...)` |
+
+### Examples
+
+=== "Kotlin"
+
+    ```kotlin
+    // Before — verbose sub-query
+    JPAExpressions.selectOne()
+        .from(orderItem)
+        .where(orderItem.orderId.eq(order.id))
+        .exists()
+
+    // After — concise
+    orderItem.exists(orderItem.orderId eq order.id)
+
+    // NOT EXISTS
+    orderItem.notExists(orderItem.orderId eq order.id)
+    ```
+
+=== "SQL"
+
+    ```sql
+    EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+    NOT EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+    ```
+
+!!! note "Null predicates"
+    Null predicates in the vararg are silently filtered out.
+
+---
+
 ## Selective Implementation
 
-You don't have to use all 7 interfaces. Choose what you need:
+You don't have to use all 8 interfaces. Choose what you need:
 
 ### Option 1: QuerydslRepository (all included)
 
 ```kotlin
 @Repository
 class MyRepository : QuerydslRepository<MyEntity>() {
-    // All 7 interfaces are available
+    // All 8 interfaces are available
 }
 ```
 
@@ -394,6 +441,6 @@ class PredicateBuilder : BooleanExpressionExtensions, SimpleExpressionExtensions
 !!! note "QuerydslRepository vs QuerydslSupport"
     | | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
     |---|---|---|
-    | Extension interfaces | All 7 included | None (add what you need) |
+    | Extension interfaces | All 8 included | None (add what you need) |
     | `domainClass` | Auto-resolved via generics | Must override manually |
     | Use when | You want everything | You want minimal surface area |

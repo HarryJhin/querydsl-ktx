@@ -241,3 +241,60 @@ fun complexSearch(pageable: Pageable): Page<MemberDto> {
             .where(member.name contains name)
             .slice(pageable)
     ```
+
+---
+
+## SortSpec — Type-Safe Dynamic Ordering
+
+Spring Data `Sort` uses string property names, which `PathBuilder` resolves implicitly.
+This has limitations:
+
+- **Security**: clients can request arbitrary columns (e.g., `?sort=password,asc`)
+- **Join paths**: `PathBuilder` cannot resolve cross-entity paths
+- **Implicit**: no clear definition of what's sortable
+
+`SortSpec` solves all three by providing an explicit whitelist mapping.
+
+### Defining a SortSpec
+
+```kotlin
+private val memberSort = sortSpec {
+    "name"       by qMember.name
+    "createdAt"  by qMember.createdAt
+    "department" by qDepartment.name   // join column — PathBuilder can't resolve this
+}
+```
+
+### Using with Pagination
+
+```kotlin
+fun search(name: String?, pageable: Pageable): Page<Member> =
+    selectFrom(qMember)
+        .join(qMember.department, qDepartment)
+        .where(qMember.name contains name)
+        .page(pageable, memberSort)
+```
+
+The `page` and `slice` methods accept an optional `SortSpec`:
+
+| Method | Signature |
+|--------|-----------|
+| `slice` | `JPQLQuery<R>.slice(pageable, spec, fallback?)` |
+| `page` | `JPAQuery<R>.page(pageable, spec, fallback?)` |
+| `page` | `JPQLQuery<R>.page(pageable, spec, fallback?, countQuery)` |
+
+### Fallback Sort
+
+When the client sends no sort or all properties are unmapped, a fallback is used:
+
+```kotlin
+selectFrom(qMember)
+    .page(pageable, memberSort) { qMember.createdAt.desc() }
+```
+
+### How It Works
+
+1. `pageable.sort` is resolved through `SortSpec` (whitelist mapping)
+2. Matched properties become `OrderSpecifier`s applied via `orderBy`
+3. Unmatched properties are silently ignored
+4. Pagination (offset/limit) is applied **without** the Pageable's sort (preventing double-sort)
