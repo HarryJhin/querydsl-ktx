@@ -11,4 +11,11 @@ dependencies {
     compileOnly(libs.spring.data.jpa)
     compileOnly(libs.jakarta.persistence.api)
     compileOnly(libs.jakarta.annotation.api)
+
+    testImplementation(libs.querydsl.core)
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
