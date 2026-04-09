@@ -39,10 +39,41 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      default_language: en
+      languages:
+        - locale: en
+          default: true
+          name: English
+        - locale: ko
+          name: 한국어
+          nav_translations:
+            Home: 홈
+            Why: 왜 querydsl-ktx?
+            Getting Started: 시작하기
+            Installation: 설치
+            Quick Start: 빠른 시작
+            User Guide: 사용 가이드
+            Dynamic Queries: 동적 쿼리
+            Extensions: 확장 인터페이스
+            Pagination: 페이지네이션
+            Bulk DML: Bulk DML
+            API Reference: API 레퍼런스
+
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/HarryJhin/querydsl-ktx
+  alternate:
+    - name: English
+      link: /querydsl-ktx/
+      lang: en
+    - name: 한국어
+      link: /querydsl-ktx/ko/
+      lang: ko
 
 markdown_extensions:
   - admonition
