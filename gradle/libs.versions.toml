@@ -5,12 +5,19 @@ spring-boot = "3.0.0"
 spring-data = "3.0.0"
 jakarta-persistence = "3.1.0"
 jakarta-annotation = "2.1.1"
+assertj = "3.24.2"
+mockito = "5.11.0"
 maven-publish = "0.29.0"
 
 [libraries]
 querydsl-jpa = { module = "com.querydsl:querydsl-jpa", version.ref = "querydsl" }
 querydsl-core = { module = "com.querydsl:querydsl-core", version.ref = "querydsl" }
 spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
+spring-boot-autoconfigure-processor = { module = "org.springframework.boot:spring-boot-autoconfigure-processor", version.ref = "spring-boot" }
+spring-boot-test-autoconfigure = { module = "org.springframework.boot:spring-boot-test-autoconfigure", version.ref = "spring-boot" }
+spring-boot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "spring-boot" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 spring-data-commons = { module = "org.springframework.data:spring-data-commons", version.ref = "spring-data" }
 spring-data-jpa = { module = "org.springframework.data:spring-data-jpa", version.ref = "spring-data" }
 jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence" }

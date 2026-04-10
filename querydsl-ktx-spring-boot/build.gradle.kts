@@ -10,12 +10,12 @@ dependencies {
         artifact { classifier = "jakarta" }
     }
     compileOnly(libs.jakarta.persistence.api)
-    kapt("org.springframework.boot:spring-boot-autoconfigure-processor:${libs.versions.spring.boot.get()}")
+    kapt(libs.spring.boot.autoconfigure.processor)
 
-    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure:${libs.versions.spring.boot.get()}")
-    testImplementation("org.springframework.boot:spring-boot-test:${libs.versions.spring.boot.get()}")
-    testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation(libs.spring.boot.test.autoconfigure)
+    testImplementation(libs.spring.boot.test)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.mockito.core)
     testImplementation(libs.querydsl.jpa) {
         artifact { classifier = "jakarta" }
     }
