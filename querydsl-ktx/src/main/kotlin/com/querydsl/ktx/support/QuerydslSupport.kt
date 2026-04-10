@@ -161,7 +161,7 @@ abstract class QuerydslSupport<T : Any> {
         spec: SortSpec,
         fallback: (() -> OrderSpecifier<*>?)? = null,
     ): Slice<R> =
-        this.applySort(pageable.sort, spec, fallback).slice(PageRequest.of(pageable.pageNumber, pageable.pageSize))
+        this.applySort(pageable.sort, spec, fallback).slice(pageable.withoutSort)
 
     /**
      * Performs pagination with an auto-generated count query.
@@ -205,7 +205,7 @@ abstract class QuerydslSupport<T : Any> {
         fallback: (() -> OrderSpecifier<*>?)? = null,
     ): Page<R> {
         val countQuery: JPAQuery<R> = this.clone()
-        val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+        val unsorted = pageable.withoutSort
         val content: List<R> = this.applySort(pageable.sort, spec, fallback).fetch(unsorted)
         return PageableExecutionUtils.getPage(content, pageable) {
             countQuery.select(Wildcard.count).fetchOne() ?: 0L
@@ -255,7 +255,7 @@ abstract class QuerydslSupport<T : Any> {
         fallback: (() -> OrderSpecifier<*>?)? = null,
         countQuery: () -> Long?,
     ): Page<R> {
-        val unsorted = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+        val unsorted = pageable.withoutSort
         val content: List<R> = this.applySort(pageable.sort, spec, fallback).fetch(unsorted)
         return PageableExecutionUtils.getPage(content, pageable) {
             countQuery() ?: 0L
@@ -367,6 +367,9 @@ abstract class QuerydslSupport<T : Any> {
         pageable: Pageable,
         countQuery: () -> Long,
     ): Page<R> = PageImpl(this, pageable, countQuery())
+
+    protected val Pageable.withoutSort: Pageable
+        get() = PageRequest.of(pageNumber, pageSize)
 
     // ========================================
     // modifying
