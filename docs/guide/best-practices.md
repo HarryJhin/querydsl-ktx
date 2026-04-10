@@ -212,9 +212,16 @@ class MemberService(
 ```
 
 !!! warning "@Transactional is required — but on the service, not the repository"
-    Without an active transaction, `flush()` will fail. `@Transactional` is typically
-    declared on the service layer, and the repository method participates in that
-    transaction. Do not put `@Transactional` on repository methods.
+    Without an active transaction, `flush()` will fail. Declare `@Transactional` on the
+    service layer, and the repository method participates in that transaction.
+
+    > *"We generally recommend declaring transaction boundaries when starting a unit of work
+    > to ensure proper consistency and desired transaction participation."*
+    >
+    > — [Spring Data JPA Reference: Transactions](https://docs.spring.io/spring-data/jpa/reference/jpa/transactions.html)
+
+    Note: `QuerydslRepository` does not extend Spring Data's `SimpleJpaRepository`,
+    so its methods do not inherit any default `@Transactional` configuration.
 
 !!! note "Multiple statements share one flush/clear cycle"
     When you put multiple DML statements in a single `modifying { }` block, flush

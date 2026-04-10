@@ -212,9 +212,16 @@ class MemberService(
 ```
 
 !!! warning "@Transactional은 서비스 계층에서 — 리포지토리가 아님"
-    `@Transactional` 없이 사용하면 `flush()` 호출이 실패합니다. 트랜잭션은 일반적으로
-    서비스 계층에서 선언하고, 리포지토리 메서드는 그 트랜잭션에 참여합니다.
-    리포지토리에 `@Transactional`을 직접 붙이지 마세요.
+    `@Transactional` 없이 사용하면 `flush()` 호출이 실패합니다. 트랜잭션은 서비스
+    계층에서 선언하고, 리포지토리 메서드는 그 트랜잭션에 참여합니다.
+
+    > *"We generally recommend declaring transaction boundaries when starting a unit of work
+    > to ensure proper consistency and desired transaction participation."*
+    >
+    > — [Spring Data JPA Reference: Transactions](https://docs.spring.io/spring-data/jpa/reference/jpa/transactions.html)
+
+    참고: `QuerydslRepository`는 Spring Data의 `SimpleJpaRepository`를 상속하지 않으므로,
+    메서드에 기본 `@Transactional`이 적용되지 않습니다.
 
 !!! note "여러 문이 하나의 flush/clear 사이클을 공유"
     하나의 `modifying { }` 블록에 여러 DML 문을 넣으면, flush는 첫 번째 문 전에 한 번,
