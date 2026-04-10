@@ -3,17 +3,6 @@ plugins {
     kotlin("kapt")
 }
 
-val springBootVersion = findProperty("springBootVersion") as String?
-if (springBootVersion != null) {
-    configurations.configureEach {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "org.springframework.boot") {
-                useVersion(springBootVersion)
-            }
-        }
-    }
-}
-
 dependencies {
     implementation(projects.querydslKtx)
     compileOnly(libs.spring.boot.autoconfigure)

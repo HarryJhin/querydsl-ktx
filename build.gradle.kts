@@ -17,6 +17,17 @@ subprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "com.vanniktech.maven.publish")
 
+    val springBootVersion = findProperty("springBootVersion") as String?
+    if (springBootVersion != null) {
+        configurations.configureEach {
+            resolutionStrategy.eachDependency {
+                if (requested.group == "org.springframework.boot") {
+                    useVersion(springBootVersion)
+                }
+            }
+        }
+    }
+
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")

@@ -112,16 +112,9 @@ class DynamicQueryTest {
 
     @Test
     fun `contains - substring match`() {
-        val result = memberRepository.findByCondition(name = null, status = null)
-        // Use the specific contains method via findByCondition indirectly
-        // Test via the contains extension used in findByCondition's "name contains name" pattern
-        // But findByCondition uses "contains" for name - wait, looking at MemberRepository,
-        // findByCondition uses: member.name contains name
-        // This means eq for name won't work - it's contains! Let me verify.
-        // Actually no - member.name contains name is from StringExpressionExtensions.
-        // Let me test it directly with a substring.
-        val result2 = memberRepository.findByCondition(name = "li")
-        assertEquals(2, result2.size) // Alice, Charlie
+        // findByCondition uses "member.name contains name" (substring match)
+        val result = memberRepository.findByCondition(name = "li")
+        assertEquals(2, result.size) // Alice, Charlie
     }
 
     // -- containsIgnoreCase --

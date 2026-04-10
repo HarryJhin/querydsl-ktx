@@ -2,6 +2,7 @@
 kotlin = "1.9.25"
 querydsl = "5.1.0"
 spring-boot = "3.0.0"
+spring-framework = "6.0.2"  # must match spring-boot version (Boot 3.0.x → Framework 6.0.x)
 spring-data = "3.0.0"
 jakarta-persistence = "3.1.0"
 jakarta-annotation = "2.1.1"
@@ -18,7 +19,7 @@ spring-boot-autoconfigure-processor = { module = "org.springframework.boot:sprin
 spring-boot-test-autoconfigure = { module = "org.springframework.boot:spring-boot-test-autoconfigure", version.ref = "spring-boot" }
 spring-boot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "spring-boot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
-spring-core-test = { module = "org.springframework:spring-core-test", version = "6.0.2" }  # matches spring-boot 3.0.0
+spring-core-test = { module = "org.springframework:spring-core-test", version.ref = "spring-framework" }  # matches spring-boot 3.0.0
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }

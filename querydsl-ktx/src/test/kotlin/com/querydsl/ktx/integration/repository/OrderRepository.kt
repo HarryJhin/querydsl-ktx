@@ -27,8 +27,8 @@ class OrderRepository : QuerydslRepository<Order>() {
             `when`(order.amount.goe(100000)) then "HIGH"
             `when`(order.amount.goe(50000)) then "MEDIUM"
             otherwise("LOW")
-        }
-        return select(order.productName, priorityLabel!!)
+        } ?: return emptyList()
+        return select(order.productName, priorityLabel)
             .from(order)
             .fetch()
     }

@@ -124,8 +124,6 @@ class PaginationTest {
         assertEquals("Zara", page.content[2].name)
     }
 
-    // -- page with custom count query --
-
     // -- Sort order verification (non-SortSpec path) --
 
     @Test
