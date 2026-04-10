@@ -322,6 +322,9 @@ protected fun <R> JPQLQuery<R>.applySort(sort: Sort, spec: SortSpec, fallback: (
 
 // List to Page conversion
 protected fun <R> List<R>.page(pageable: Pageable, countQuery: () -> Long): Page<R>
+
+// Sort stripping — used internally by SortSpec-based pagination
+protected val Pageable.withoutSort: Pageable
 ```
 
 ### SortSpec
@@ -419,6 +422,8 @@ modifying {
 |---|---|---|---|---|
 | `and` / `or` | returns arg | returns this | null | Both sides survive |
 | `between(Pair)` | null | one-sided comparison | null | One-sided survival |
+| reverse `between(Pair)` | null | one-sided comparison | null | One-sided survival |
+| `case {}` | n/a | null predicate skips branch | all null → null | Skip null branches |
 | All others (`eq`, `gt`, `contains`, ...) | null | null | null | Skip if any null |
 
 ## Common Mistakes

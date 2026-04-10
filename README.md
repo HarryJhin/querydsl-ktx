@@ -78,13 +78,22 @@ class MemberRepository : QuerydslRepository<Member>() {
 
 Extensions are scoped through **interface implementation** — no global namespace pollution. [Learn more →](https://harryjhin.github.io/querydsl-ktx/why/)
 
+## Features
+
+- **8 extension interfaces** — null-safe infix operators for Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery expressions
+- **Reverse between** — `value between (expr1 to expr2)` with one-sided survival
+- **Expressions reified wrappers** — `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`
+- **Case/When DSL** — `case<Int> { when(pred) then value; otherwise(default) }` with null-safe branches
+- **Pagination helpers** — `slice()`, `page()`, `fetch()` + SortSpec dynamic ordering
+- **Bulk DML** — `modifying { }` with auto flush/clear
+
 ## Documentation
 
 | | |
 |---|---|
 | [Installation](https://harryjhin.github.io/querydsl-ktx/getting-started/installation/) | Gradle, Maven setup and module selection |
 | [Quick Start](https://harryjhin.github.io/querydsl-ktx/getting-started/quick-start/) | Write your first dynamic query in 5 minutes |
-| [User Guide](https://harryjhin.github.io/querydsl-ktx/guide/dynamic-queries/) | Dynamic queries, extensions, pagination, bulk DML |
+| [User Guide](https://harryjhin.github.io/querydsl-ktx/guide/dynamic-queries/) | Dynamic queries, extensions, expressions, Case/When DSL, pagination, bulk DML |
 | [API Reference](https://harryjhin.github.io/querydsl-ktx/api/) | Dokka-generated API documentation |
 
 ## Requirements

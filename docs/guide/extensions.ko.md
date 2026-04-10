@@ -136,6 +136,7 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 | `between` | `ComparableExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `ComparableExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
 | `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `between` (역방향) | `T?.between(Pair<ComparableExpression<T>?, ComparableExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 
@@ -160,6 +161,10 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 
     // ClosedRange를 사용한 BETWEEN
     entity.age between (20..60)            // BETWEEN 20 AND 60
+
+    // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+    now between (sale.startAt to sale.endAt)
+    // → start_at <= now AND end_at >= now
     ```
 
 === "SQL"
@@ -207,6 +212,7 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 | `between` | `NumberExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `NumberExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
 | `notBetween` | `NumberExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `between` (역방향) | `T?.between(Pair<NumberExpression<T>?, NumberExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 
@@ -219,6 +225,10 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
     entity.price between (minPrice to maxPrice)
     entity.score between (0..100)
     entity.quantity loe maxQuantity
+
+    // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+    now between (sale.startAt to sale.endAt)
+    // → start_at <= now AND end_at >= now
     ```
 
 === "SQL"

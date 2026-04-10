@@ -13,6 +13,8 @@
 - [Dynamic Queries](https://harryjhin.github.io/querydsl-ktx/guide/dynamic-queries/): Core concept — null means skip condition
 - [Extension Interfaces](https://harryjhin.github.io/querydsl-ktx/guide/extensions/): All 8 interfaces with signatures, SQL examples, null behavior
 - [Pagination & SortSpec](https://harryjhin.github.io/querydsl-ktx/guide/pagination/): slice, page, fetch helpers + SortSpec dynamic ordering
+- [Expressions](https://harryjhin.github.io/querydsl-ktx/guide/expressions/): Reified template wrappers and value wrapping utilities
+- [Case/When DSL](https://harryjhin.github.io/querydsl-ktx/guide/case-dsl/): Kotlin-idiomatic CASE expression builder with null-safe branches
 - [Bulk DML](https://harryjhin.github.io/querydsl-ktx/guide/bulk-dml/): modifying helper with auto flush/clear
 - [Full API reference (llms-full.txt)](https://raw.githubusercontent.com/HarryJhin/querydsl-ktx/main/llms-full.txt): Complete API signatures and usage examples
 

@@ -136,6 +136,7 @@ Comparison and range operators for `Comparable` types (dates, strings, enums, et
 | `between` | `ComparableExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `ComparableExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
 | `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `between` (reverse) | `T?.between(Pair<ComparableExpression<T>?, ComparableExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 
@@ -160,6 +161,10 @@ All comparison functions also have `Expression<T>` overloads for comparing again
 
     // BETWEEN with ClosedRange
     entity.age between (20..60)            // BETWEEN 20 AND 60
+
+    // Reverse BETWEEN -- value on left, expression bounds on right
+    now between (sale.startAt to sale.endAt)
+    // → start_at <= now AND end_at >= now
     ```
 
 === "SQL"
@@ -207,6 +212,7 @@ operators specifically typed for `NumberExpression`.
 | `between` | `NumberExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `NumberExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
 | `notBetween` | `NumberExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `between` (reverse) | `T?.between(Pair<NumberExpression<T>?, NumberExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 
@@ -219,6 +225,10 @@ operators specifically typed for `NumberExpression`.
     entity.price between (minPrice to maxPrice)
     entity.score between (0..100)
     entity.quantity loe maxQuantity
+
+    // Reverse BETWEEN -- value on left, expression bounds on right
+    now between (sale.startAt to sale.endAt)
+    // → start_at <= now AND end_at >= now
     ```
 
 === "SQL"

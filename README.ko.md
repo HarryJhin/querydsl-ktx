@@ -78,13 +78,22 @@ class MemberRepository : QuerydslRepository<Member>() {
 
 확장 함수는 **인터페이스 구현**을 통해 스코프가 제한됩니다 — 글로벌 네임스페이스 오염 없음. [자세히 보기 →](https://harryjhin.github.io/querydsl-ktx/ko/why/)
 
+## 기능
+
+- **8개 확장 인터페이스** — Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery 표현식용 null-safe infix 연산자
+- **역방향 between** — `value between (expr1 to expr2)` 단측 생존 지원
+- **Expressions reified 래퍼** — `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`
+- **Case/When DSL** — `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기
+- **페이지네이션 헬퍼** — `slice()`, `page()`, `fetch()` + SortSpec 동적 정렬
+- **Bulk DML** — `modifying { }` 자동 flush/clear
+
 ## 문서
 
 | | |
 |---|---|
 | [설치](https://harryjhin.github.io/querydsl-ktx/ko/getting-started/installation/) | Gradle, Maven 설정 및 모듈 선택 |
 | [빠른 시작](https://harryjhin.github.io/querydsl-ktx/ko/getting-started/quick-start/) | 5분 안에 첫 동적 쿼리 작성 |
-| [사용 가이드](https://harryjhin.github.io/querydsl-ktx/ko/guide/dynamic-queries/) | 동적 쿼리, 확장 인터페이스, 페이지네이션, Bulk DML |
+| [사용 가이드](https://harryjhin.github.io/querydsl-ktx/ko/guide/dynamic-queries/) | 동적 쿼리, 확장 인터페이스, Expressions, Case/When DSL, 페이지네이션, Bulk DML |
 | [API 레퍼런스](https://harryjhin.github.io/querydsl-ktx/api/) | Dokka 생성 API 문서 |
 
 ## 요구사항
