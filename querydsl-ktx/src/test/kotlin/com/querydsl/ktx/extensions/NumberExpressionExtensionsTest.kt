@@ -383,4 +383,36 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         val result = nullExpr coalesce (null as Int?)
         assertNull(result)
     }
+
+    // ── reverse between (value between two expressions) ──
+
+    @Test
+    fun `reverse between - value non-null, both bounds non-null returns AND expression`() {
+        val result = 30000 between (price to minPrice)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - value null returns null`() {
+        val result = (null as Int?) between (price to minPrice)
+        assertNull(result)
+    }
+
+    @Test
+    fun `reverse between - lower null returns GOE only`() {
+        val result = 30000 between (null as NumberExpression<Int>? to minPrice)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - upper null returns LOE only`() {
+        val result = 30000 between (price to null as NumberExpression<Int>?)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - both bounds null returns null`() {
+        val result = 30000 between (null as NumberExpression<Int>? to null as NumberExpression<Int>?)
+        assertNull(result)
+    }
 }

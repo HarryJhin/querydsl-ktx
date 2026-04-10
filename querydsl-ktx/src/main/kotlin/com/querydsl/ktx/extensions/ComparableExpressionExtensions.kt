@@ -293,4 +293,31 @@ interface ComparableExpressionExtensions {
         this == null || arg == null -> null
         else -> this.coalesce(arg)
     }
+
+    /**
+     * Null-safe reverse BETWEEN: checks if a value falls between two expression bounds.
+     *
+     * Adapts to whichever bounds are present: both yields `lower <= value AND upper >= value`,
+     * only lower yields `lower <= value`, only upper yields `upper >= value`, neither skips.
+     *
+     * ```sql
+     * -- this = '2024-06-15', lower = entity.startDate, upper = entity.endDate
+     * start_date <= '2024-06-15' AND end_date >= '2024-06-15'
+     * ```
+     *
+     * @param range a `lower to upper` pair of expressions where either bound can be null
+     * @return `lower <= this AND upper >= this`, or null if this is null or both bounds are null
+     */
+    infix fun <T : Comparable<T>> T?.between(
+        range: Pair<ComparableExpression<T>?, ComparableExpression<T>?>,
+    ): BooleanExpression? {
+        val (lower, upper) = range
+        return when {
+            this == null -> null
+            lower != null && upper != null -> lower.loe(this).and(upper.goe(this))
+            lower != null -> lower.loe(this)
+            upper != null -> upper.goe(this)
+            else -> null
+        }
+    }
 }

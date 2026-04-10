@@ -308,4 +308,31 @@ interface NumberExpressionExtensions {
         this == null || arg == null -> null
         else -> this.coalesce(arg)
     }
+
+    /**
+     * Null-safe reverse BETWEEN: checks if a numeric value falls between two expression bounds.
+     *
+     * Adapts to whichever bounds are present: both yields `lower <= value AND upper >= value`,
+     * only lower yields `lower <= value`, only upper yields `upper >= value`, neither skips.
+     *
+     * ```sql
+     * -- this = 30000, lower = entity.minPrice, upper = entity.maxPrice
+     * min_price <= 30000 AND max_price >= 30000
+     * ```
+     *
+     * @param range a `lower to upper` pair of expressions where either bound can be null
+     * @return `lower <= this AND upper >= this`, or null if this is null or both bounds are null
+     */
+    infix fun <T> T?.between(
+        range: Pair<NumberExpression<T>?, NumberExpression<T>?>,
+    ): BooleanExpression? where T : Number, T : Comparable<*> {
+        val (lower, upper) = range
+        return when {
+            this == null -> null
+            lower != null && upper != null -> lower.loe(this).and(upper.goe(this))
+            lower != null -> lower.loe(this)
+            upper != null -> upper.goe(this)
+            else -> null
+        }
+    }
 }

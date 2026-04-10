@@ -384,4 +384,36 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
         val result = nullExpr coalesce (null as String?)
         assertNull(result)
     }
+
+    // ── reverse between (value between two expressions) ──
+
+    @Test
+    fun `reverse between - value non-null, both bounds non-null returns AND expression`() {
+        val result = "M" between (code to otherCode)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - value null returns null`() {
+        val result = (null as String?) between (code to otherCode)
+        assertNull(result)
+    }
+
+    @Test
+    fun `reverse between - lower null returns GOE only`() {
+        val result = "M" between (null as ComparableExpression<String>? to otherCode)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - upper null returns LOE only`() {
+        val result = "M" between (code to null as ComparableExpression<String>?)
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `reverse between - both bounds null returns null`() {
+        val result = "M" between (null as ComparableExpression<String>? to null as ComparableExpression<String>?)
+        assertNull(result)
+    }
 }
