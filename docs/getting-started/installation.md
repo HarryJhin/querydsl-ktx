@@ -14,13 +14,13 @@
 === "Gradle (Kotlin DSL)"
 
     ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
+    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0")
     ```
 
 === "Gradle (Groovy DSL)"
 
     ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0'
+    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0'
     ```
 
 === "Maven"
@@ -29,7 +29,7 @@
     <dependency>
         <groupId>io.github.harryjhin</groupId>
         <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </dependency>
     ```
 
@@ -51,14 +51,14 @@ The library ships three modules. Choose based on your needs:
 
 ```kotlin
 // Pulls in both querydsl-ktx and querydsl-ktx-spring-boot
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0")
 ```
 
 ### Core only
 
 ```kotlin
 // Extension interfaces only -- no AutoConfiguration
-implementation("io.github.harryjhin:querydsl-ktx:0.1.0")
+implementation("io.github.harryjhin:querydsl-ktx:0.2.0")
 ```
 
 !!! note "When to use core only"

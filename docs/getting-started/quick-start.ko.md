@@ -9,13 +9,13 @@
 === "Gradle (Kotlin DSL)"
 
     ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0")
+    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0")
     ```
 
 === "Gradle (Groovy DSL)"
 
     ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.1.0'
+    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0'
     ```
 
 Maven 및 모듈 선택에 대한 자세한 내용은 [설치](installation.md)를 참고하세요.
