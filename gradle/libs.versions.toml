@@ -31,5 +31,5 @@ jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api",
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
