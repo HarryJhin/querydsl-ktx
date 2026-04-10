@@ -1,5 +1,6 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
@@ -347,6 +348,110 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     @Test
     fun `matches - both null returns null`() {
         val result = nullExpr matches (null as String?)
+        assertNull(result)
+    }
+
+    // ── nullif(Expression) ──
+
+    @Test
+    fun `nullif expression - both non-null returns NULLIF`() {
+        val result = name nullif keyword
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `nullif expression - this null returns null`() {
+        val result = nullExpr nullif keyword
+        assertNull(result)
+    }
+
+    @Test
+    fun `nullif expression - other null returns null`() {
+        val result = name nullif (null as Expression<String>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `nullif expression - both null returns null`() {
+        val result = nullExpr nullif (null as Expression<String>?)
+        assertNull(result)
+    }
+
+    // ── nullif(String?) ──
+
+    @Test
+    fun `nullif value - both non-null returns NULLIF`() {
+        val result = name nullif "default"
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `nullif value - this null returns null`() {
+        val result = nullExpr nullif "default"
+        assertNull(result)
+    }
+
+    @Test
+    fun `nullif value - other null returns null`() {
+        val result = name nullif (null as String?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `nullif value - both null returns null`() {
+        val result = nullExpr nullif (null as String?)
+        assertNull(result)
+    }
+
+    // ── coalesce(Expression) ──
+
+    @Test
+    fun `coalesce expression - both non-null returns COALESCE`() {
+        val result = name coalesce keyword
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `coalesce expression - this null returns null`() {
+        val result = nullExpr coalesce keyword
+        assertNull(result)
+    }
+
+    @Test
+    fun `coalesce expression - expr null returns null`() {
+        val result = name coalesce (null as Expression<String>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `coalesce expression - both null returns null`() {
+        val result = nullExpr coalesce (null as Expression<String>?)
+        assertNull(result)
+    }
+
+    // ── coalesce(String?) ──
+
+    @Test
+    fun `coalesce value - both non-null returns COALESCE`() {
+        val result = name coalesce "unknown"
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `coalesce value - this null returns null`() {
+        val result = nullExpr coalesce "unknown"
+        assertNull(result)
+    }
+
+    @Test
+    fun `coalesce value - arg null returns null`() {
+        val result = name coalesce (null as String?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `coalesce value - both null returns null`() {
+        val result = nullExpr coalesce (null as String?)
         assertNull(result)
     }
 }

@@ -223,4 +223,72 @@ interface StringExpressionExtensions {
         this == null || regex == null -> null
         else -> this.matches(regex)
     }
+
+    /**
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
+     *
+     * ```sql
+     * NULLIF(name, other_name)
+     * ```
+     *
+     * @param other the expression to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
+     */
+    infix fun StringExpression?.nullif(other: Expression<String>?): StringExpression? = when {
+        this == null || other == null -> null
+        else -> this.nullif(other)
+    }
+
+    /**
+     * Null-safe NULLIF that returns SQL NULL when this equals [other].
+     *
+     * Skips the expression entirely when either side is Kotlin null.
+     *
+     * ```sql
+     * NULLIF(name, 'default')
+     * ```
+     *
+     * @param other the value to compare against, or null to skip
+     * @return `NULLIF(this, other)`, or null if either side is null
+     */
+    infix fun StringExpression?.nullif(other: String?): StringExpression? = when {
+        this == null || other == null -> null
+        else -> this.nullif(other)
+    }
+
+    /**
+     * Null-safe COALESCE that falls back to [expr] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
+     *
+     * ```sql
+     * COALESCE(name, other_name)
+     * ```
+     *
+     * @param expr the fallback expression, or null to skip
+     * @return `COALESCE(this, expr)`, or null if either side is null
+     */
+    infix fun StringExpression?.coalesce(expr: Expression<String>?): StringExpression? = when {
+        this == null || expr == null -> null
+        else -> this.coalesce(expr)
+    }
+
+    /**
+     * Null-safe COALESCE that falls back to [arg] when this is SQL NULL.
+     *
+     * Skips the expression entirely when either side is Kotlin null.
+     *
+     * ```sql
+     * COALESCE(name, 'unknown')
+     * ```
+     *
+     * @param arg the fallback value, or null to skip
+     * @return `COALESCE(this, arg)`, or null if either side is null
+     */
+    infix fun StringExpression?.coalesce(arg: String?): StringExpression? = when {
+        this == null || arg == null -> null
+        else -> this.coalesce(arg)
+    }
 }
