@@ -107,13 +107,22 @@ infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: Expression<
 infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: T?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(expr: Expression<T>?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(arg: T?): ComparableExpression<T>?
+infix fun <T : Comparable<T>> T?.between(range: Pair<ComparableExpression<T>?, ComparableExpression<T>?>): BooleanExpression?
 ```
 
 Null behavior for `between(Pair)`: both bounds present = BETWEEN, only from = `>=`, only to = `<=`, both null = null. This is the **one-sided survival** pattern.
 
+Reverse `between`: value on the left, expression pair on the right — `now between (sale.startAt to sale.endAt)`. Same one-sided survival: only lower → `lower <= value`, only upper → `upper >= value`.
+
 ### NumberExpressionExtensions
 
-Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`.
+Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, and reverse `between`.
+
+```kotlin
+// Reverse between (value on the left, expression bounds on the right)
+infix fun <T> T?.between(range: Pair<NumberExpression<T>?, NumberExpression<T>?>): BooleanExpression?
+    where T : Number, T : Comparable<*>
+```
 
 ### StringExpressionExtensions
 
@@ -163,6 +172,106 @@ fun <T> EntityPath<T>.notExists(vararg predicates: Predicate?): BooleanExpressio
 ```
 
 Builds EXISTS / NOT EXISTS sub-queries. Null predicates are filtered out.
+
+## Expressions (Top-Level Utility Functions)
+
+Reified wrappers around `com.querydsl.core.types.dsl.Expressions` that eliminate `::class.java` boilerplate.
+
+### Template Functions (reified)
+
+```kotlin
+inline fun <reified T> numberTemplate(template: String, vararg args: Any?): NumberExpression<T>
+    where T : Number, T : Comparable<*>
+inline fun <reified T : Comparable<*>> comparableTemplate(template: String, vararg args: Any?): ComparableExpression<T>
+inline fun <reified T> simpleTemplate(template: String, vararg args: Any?): SimpleExpression<T>
+inline fun <reified T> template(template: String, vararg args: Any?): Expression<T>
+inline fun <reified T : Comparable<*>> dateTemplate(template: String, vararg args: Any?): DateExpression<T>
+inline fun <reified T : Comparable<*>> dateTimeTemplate(template: String, vararg args: Any?): DateTimeExpression<T>
+inline fun <reified T : Comparable<*>> timeTemplate(template: String, vararg args: Any?): TimeExpression<T>
+inline fun <reified T : Enum<T>> enumTemplate(template: String, vararg args: Any?): EnumExpression<T>
+```
+
+### Template Functions (non-reified, fixed type)
+
+```kotlin
+fun stringTemplate(template: String, vararg args: Any?): StringExpression
+fun booleanTemplate(template: String, vararg args: Any?): BooleanExpression
+```
+
+### Value Wrapping
+
+```kotlin
+fun <T> asNumber(value: T): NumberExpression<T> where T : Number, T : Comparable<*>
+fun asString(value: String): StringExpression
+fun asBoolean(value: Boolean): BooleanExpression
+fun <T : Comparable<*>> asComparable(value: T): ComparableExpression<T>
+fun <T : Comparable<*>> asDate(value: T): DateExpression<T>
+fun <T : Comparable<*>> asDateTime(value: T): DateTimeExpression<T>
+fun <T : Comparable<*>> asTime(value: T): TimeExpression<T>
+fun <T : Enum<T>> asEnum(value: T): EnumExpression<T>
+```
+
+### Constant
+
+```kotlin
+inline fun <reified T> constant(value: T): Expression<T>
+```
+
+## Case/When DSL
+
+Kotlin-idiomatic CASE expression builder. Null-safe: null predicates skip branches; all null → null result.
+
+### Searched CASE (CASE WHEN pred THEN ... END)
+
+```kotlin
+fun <T> case(block: SearchedCaseDsl<T>.() -> Unit): Expression<T>?
+```
+
+```kotlin
+val expr = case<Int> {
+    `when`(entity.status.eq("VIP")) then 1
+    `when`(entity.status.eq("NORMAL")) then 2
+    otherwise(3)
+}
+```
+
+### Simple CASE (CASE expr WHEN value THEN ... END)
+
+```kotlin
+fun <D, T> case(expression: SimpleExpression<D>, block: SimpleCaseDsl<D, T>.() -> Unit): Expression<T>?
+```
+
+```kotlin
+val expr = case<String, Int>(entity.status) {
+    `when`("VIP") then 1
+    `when`("NORMAL") then 2
+    otherwise(3)
+}
+```
+
+### DSL Classes
+
+```kotlin
+class SearchedCaseDsl<T> {
+    fun `when`(pred: BooleanExpression?): WhenClause
+    fun otherwise(value: T)
+    fun otherwise(expr: Expression<T>)
+    inner class WhenClause(pred: BooleanExpression?) {
+        infix fun then(value: T)
+        infix fun then(expr: Expression<T>)
+    }
+}
+
+class SimpleCaseDsl<D, T>(expression: SimpleExpression<D>) {
+    fun `when`(value: D): SimpleWhenClause
+    fun otherwise(value: T)
+    fun otherwise(expr: Expression<T>)
+    inner class SimpleWhenClause(value: D) {
+        infix fun then(result: T)
+        infix fun then(expr: Expression<T>)
+    }
+}
+```
 
 ## QuerydslSupport Base Class
 

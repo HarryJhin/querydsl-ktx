@@ -9,7 +9,7 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 
 ### Modules
 
-- `querydsl-ktx` — Core: 8 extension interfaces + QuerydslSupport/QuerydslRepository base classes
+- `querydsl-ktx` — Core: 8 extension interfaces + top-level utilities (Expressions, CaseDsl) + QuerydslSupport/QuerydslRepository base classes
 - `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration
 - `querydsl-ktx-spring-boot-starter` — Starter: aggregates the above modules
 
@@ -26,10 +26,12 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 
 ```
 querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
+├── Expressions.kt       ← Reified template wrappers + value wrapping + constant
+├── CaseDsl.kt           ← CASE/WHEN Kotlin DSL (searched & simple)
 ├── extensions/          ← 8 interfaces (no state, no dependencies)
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
 │   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn
-│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between
+│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between
 │   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy)
 │   ├── StringExpressionExtensions.kt     — contains, startsWith, like, matches
 │   ├── TemporalExpressionExtensions.kt   — after, before
@@ -62,6 +64,8 @@ All extension functions follow this contract:
 |--------------|-----------|----------|-----------|
 | `and` / `or` | returns arg | returns this | null |
 | `between(Pair)` | null | one-sided comparison (goe/loe) | null |
+| reverse `between(Pair)` | null | one-sided comparison (loe/goe) | null |
+| `case {}` | n/a | null predicate skips branch | all null → null |
 | All others | null | null | null |
 
 This contract is the core design principle. Any new extension must follow it.
@@ -87,7 +91,8 @@ mkdocs build                              # Build docs site
 
 ## Testing
 
-- Tests in `querydsl-ktx/src/test/kotlin/com/querydsl/ktx/extensions/`
+- Extension tests in `querydsl-ktx/src/test/kotlin/com/querydsl/ktx/extensions/`
+- Top-level utility tests in `querydsl-ktx/src/test/kotlin/com/querydsl/ktx/` (`ExpressionsTest`, `CaseDslTest`)
 - Each extension interface has its own test class
 - Test class implements the extension interface to access infix functions
 - Every function tests: this-null, arg-null, both-null, both-non-null
