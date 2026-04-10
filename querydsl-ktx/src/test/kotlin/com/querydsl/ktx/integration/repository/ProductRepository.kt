@@ -14,4 +14,9 @@ class ProductRepository : QuerydslRepository<Product>() {
         selectFrom(product)
             .where(now between (product.saleStartAt to product.saleEndAt))
             .fetch()
+
+    fun findActiveSalesWithRangeTo(now: LocalDateTime? = null): List<Product> =
+        selectFrom(product)
+            .where(now between (product.saleStartAt..product.saleEndAt))
+            .fetch()
 }

@@ -93,4 +93,15 @@ class ReverseBetweenTest {
         val result = productRepository.findActiveSales(null)
         assertEquals(4, result.size)
     }
+
+    // ── rangeTo syntax ──
+
+    @Test
+    fun `rangeTo syntax produces same result as Pair`() {
+        val now = LocalDateTime.of(2025, 2, 15, 12, 0)
+        val pairResult = productRepository.findActiveSales(now)
+        val rangeToResult = productRepository.findActiveSalesWithRangeTo(now)
+        assertEquals(pairResult.size, rangeToResult.size)
+        assertEquals(pairResult.map { it.name }, rangeToResult.map { it.name })
+    }
 }
