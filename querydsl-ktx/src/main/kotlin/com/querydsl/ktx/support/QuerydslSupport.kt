@@ -132,6 +132,7 @@ abstract class QuerydslSupport<T : Any> {
     protected fun <R> JPQLQuery<R>.slice(pageable: Pageable): Slice<R> {
         val limit = pageable.pageSize
         val content: List<R> = this
+            .applySort(pageable.sort)
             .offset(pageable.offset)
             .limit(limit.toLong() + 1)
             .fetch()
