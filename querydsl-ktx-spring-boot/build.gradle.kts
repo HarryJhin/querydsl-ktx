@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    kotlin("kapt")
 }
 
 dependencies {
@@ -9,4 +10,5 @@ dependencies {
         artifact { classifier = "jakarta" }
     }
     compileOnly(libs.jakarta.persistence.api)
+    kapt("org.springframework.boot:spring-boot-autoconfigure-processor:${libs.versions.spring.boot.get()}")
 }
