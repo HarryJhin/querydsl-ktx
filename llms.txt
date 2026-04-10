@@ -16,6 +16,7 @@
 - [Expressions](https://harryjhin.github.io/querydsl-ktx/guide/expressions/): Reified template wrappers and value wrapping utilities
 - [Case/When DSL](https://harryjhin.github.io/querydsl-ktx/guide/case-dsl/): Kotlin-idiomatic CASE expression builder with null-safe branches
 - [Bulk DML](https://harryjhin.github.io/querydsl-ktx/guide/bulk-dml/): modifying helper with auto flush/clear
+- [Best Practices](https://harryjhin.github.io/querydsl-ktx/guide/best-practices/): Condition object pattern, SortSpec reuse, fetch join count queries, modifying + @Transactional, reverse between
 - [Full API reference (llms-full.txt)](https://raw.githubusercontent.com/HarryJhin/querydsl-ktx/main/llms-full.txt): Complete API signatures and usage examples
 
 ## Optional

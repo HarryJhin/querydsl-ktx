@@ -64,6 +64,7 @@ plugins:
             Case/When DSL: Case/When DSL
             Pagination: 페이지네이션
             Bulk DML: Bulk DML
+            Best Practices: 베스트 프랙티스
             API Reference: API 레퍼런스
 
 extra:
@@ -106,4 +107,5 @@ nav:
     - Case/When DSL: guide/case-dsl.md
     - Pagination: guide/pagination.md
     - Bulk DML: guide/bulk-dml.md
+    - Best Practices: guide/best-practices.md
   - API Reference: https://harryjhin.github.io/querydsl-ktx/api/
