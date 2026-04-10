@@ -1,7 +1,24 @@
 # Expressions
 
-querydsl-ktx provides top-level utility functions that wrap `com.querydsl.core.types.dsl.Expressions`.
-Reified type parameters eliminate `::class.java` boilerplate.
+QueryDSL's built-in operators cover most cases, but sometimes you need to reach for
+database-specific functions -- `GROUP_CONCAT`, `CAST`, window functions, or custom stored
+procedures. That's when you use template expressions.
+
+In vanilla QueryDSL, every template call requires passing `YourType::class.java` explicitly.
+querydsl-ktx uses Kotlin's reified type parameters to eliminate that boilerplate.
+
+---
+
+## When You Need Templates
+
+!!! tip "When QueryDSL's built-in operators aren't enough"
+    You'll reach for template expressions when you need:
+
+    - **Database-specific functions** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
+    - **Type casting** -- `CAST(column AS DECIMAL)` for aggregation precision
+    - **Window functions** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
+    - **Custom SQL functions** -- registered via `@FunctionContributor` or Hibernate dialects
+    - **Date/time functions** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
 
 ---
 
@@ -27,6 +44,7 @@ Create typed QueryDSL template expressions without passing `Class<T>`.
     ```kotlin
     Expressions.numberTemplate(Float::class.java, "RAND()")
     Expressions.dateTimeTemplate(LocalDateTime::class.java, "NOW()")
+    Expressions.numberTemplate(Long::class.java, "CAST({0} AS BIGINT)", order.price)
     ```
 
 === "After (querydsl-ktx)"
@@ -34,7 +52,125 @@ Create typed QueryDSL template expressions without passing `Class<T>`.
     ```kotlin
     numberTemplate<Float>("RAND()")
     dateTimeTemplate<LocalDateTime>("NOW()")
+    numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
     ```
+
+---
+
+## Real-World Scenarios
+
+### GROUP_CONCAT for Comma-Separated Lists
+
+Collecting tags or categories into a single string -- common in admin dashboards:
+
+=== "Kotlin"
+
+    ```kotlin
+    val tagList = stringTemplate(
+        "GROUP_CONCAT({0} SEPARATOR ', ')",
+        productTag.name,
+    )
+
+    select(product.name, tagList)
+        .from(product)
+        .join(productTag).on(productTag.productId.eq(product.id))
+        .groupBy(product.id)
+        .fetch()
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT p.name, GROUP_CONCAT(pt.name SEPARATOR ', ')
+    FROM product p
+    JOIN product_tag pt ON pt.product_id = p.id
+    GROUP BY p.id
+    ```
+
+### CAST for Aggregation Precision
+
+When `SUM` or `AVG` on an integer column loses decimal precision:
+
+=== "Kotlin"
+
+    ```kotlin
+    val avgPrice = numberTemplate<Double>(
+        "CAST(AVG({0}) AS DOUBLE)",
+        orderItem.price,
+    )
+
+    select(product.category, avgPrice)
+        .from(orderItem)
+        .join(product).on(orderItem.productId.eq(product.id))
+        .groupBy(product.category)
+        .fetch()
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT p.category, CAST(AVG(oi.price) AS DOUBLE)
+    FROM order_item oi
+    JOIN product p ON oi.product_id = p.id
+    GROUP BY p.category
+    ```
+
+### Date Formatting
+
+Formatting dates for reports or grouping by month:
+
+=== "Kotlin"
+
+    ```kotlin
+    val yearMonth = stringTemplate(
+        "DATE_FORMAT({0}, '%Y-%m')",
+        order.createdAt,
+    )
+
+    select(yearMonth, order.count())
+        .from(order)
+        .groupBy(yearMonth)
+        .orderBy(yearMonth.asc())
+        .fetch()
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT DATE_FORMAT(o.created_at, '%Y-%m'), COUNT(o.id)
+    FROM orders o
+    GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+    ORDER BY DATE_FORMAT(o.created_at, '%Y-%m') ASC
+    ```
+
+### Custom Hibernate Functions
+
+If you've registered a custom function via Hibernate's `FunctionContributor`:
+
+```kotlin
+// Registered function: full_text_match(column, query) -> boolean
+val matches = booleanTemplate(
+    "FUNCTION('full_text_match', {0}, {1})",
+    product.description,
+    asString(searchQuery),
+)
+
+selectFrom(product)
+    .where(matches)
+    .fetch()
+```
+
+### Random Ordering
+
+A simple but common need -- randomizing results:
+
+```kotlin
+selectFrom(product)
+    .where(product.active eq true)
+    .orderBy(numberTemplate<Double>("RAND()").asc())
+    .limit(5)
+    .fetch()
+```
 
 ---
 
@@ -50,15 +186,16 @@ String and Boolean templates have fixed return types, so no type parameter is ne
 ### Example
 
 ```kotlin
-val fullName = stringTemplate("CONCAT({0}, ' ', {1})", entity.firstName, entity.lastName)
-val isActive = booleanTemplate("FUNCTION('is_active', {0})", entity.id)
+val fullName = stringTemplate("CONCAT({0}, ' ', {1})", member.firstName, member.lastName)
+val isActive = booleanTemplate("FUNCTION('is_active', {0})", member.id)
 ```
 
 ---
 
 ## Value Wrapping
 
-Wrap Kotlin values into QueryDSL expressions for use in queries.
+Wrap Kotlin values into QueryDSL expressions for use in queries. Useful when you need
+a literal value to participate in a QueryDSL expression chain:
 
 | Function | Return Type |
 |----------|-------------|
@@ -71,24 +208,32 @@ Wrap Kotlin values into QueryDSL expressions for use in queries.
 | `asTime(value)` | `TimeExpression<T>` |
 | `asEnum(value)` | `EnumExpression<T>` |
 
-### Example
+### When You Need Value Wrapping
 
 ```kotlin
+// Comparing a Kotlin value against a column expression
 val threshold = asNumber(100)
+selectFrom(product)
+    .where(product.stock.lt(threshold))
+    .fetch()
+
+// Using a Kotlin value as a template argument
 val now = asDateTime(LocalDateTime.now())
+selectFrom(coupon)
+    .where(coupon.expiresAt.after(now))
+    .fetch()
 ```
 
 ---
 
 ## Constant
 
-Creates a constant expression with reified type inference.
+Creates a constant expression with reified type inference. Constants are inlined
+into the JPQL query (not bound as parameters).
 
 ```kotlin
 inline fun <reified T> constant(value: T): Expression<T>
 ```
-
-### Before / After
 
 === "Before (vanilla QueryDSL)"
 
@@ -102,6 +247,12 @@ inline fun <reified T> constant(value: T): Expression<T>
     constant(42)
     ```
 
+!!! warning "Constants vs Parameters"
+    Constants are embedded directly in the query string, not as bind parameters.
+    Use them for truly fixed values (like `SELECT 1` in EXISTS subqueries),
+    not for user input. For user-provided values, use the `as*` wrapping functions
+    or pass values directly to extension operators like `eq`.
+
 ---
 
 ## Summary
@@ -110,6 +261,7 @@ These utilities are **top-level functions** in the `com.querydsl.ktx` package. T
 
 ```kotlin
 import com.querydsl.ktx.numberTemplate
+import com.querydsl.ktx.stringTemplate
 import com.querydsl.ktx.dateTimeTemplate
 import com.querydsl.ktx.constant
 import com.querydsl.ktx.asNumber

@@ -119,6 +119,11 @@ Equality and membership operators for any expression type.
     status NOT IN ('C')
     ```
 
+!!! tip "inChunked for Oracle"
+    Oracle has a hard limit of 1000 items in a single IN clause.
+    `inChunked` automatically splits large collections into multiple IN clauses
+    joined with OR. The default chunk size is 1000, but you can customize it.
+
 ---
 
 ## ComparableExpressionExtensions
@@ -164,7 +169,7 @@ All comparison functions also have `Expression<T>` overloads for comparing again
 
     // Reverse BETWEEN -- value on left, expression bounds on right
     now between (sale.startAt to sale.endAt)
-    // → start_at <= now AND end_at >= now
+    // -> start_at <= now AND end_at >= now
     ```
 
 === "SQL"
@@ -187,6 +192,47 @@ All comparison functions also have `Expression<T>` overloads for comparing again
     The `Pair` overload is the most powerful feature for date range filters.
     A single expression handles all four combinations (both, from-only, to-only, neither)
     that would otherwise require a 4-branch `if/else`.
+
+### Reverse Between -- Real-World Use Cases
+
+The reverse `between` puts a **value on the left** and **column bounds on the right**.
+This pattern is surprisingly common:
+
+**Checking if a date falls within an active period:**
+
+```kotlin
+// Is the coupon valid right now?
+val now = LocalDateTime.now()
+selectFrom(coupon)
+    .where(now between (coupon.validFrom to coupon.validUntil))
+    .fetch()
+// SQL: valid_from <= '2025-04-10T12:00' AND valid_until >= '2025-04-10T12:00'
+```
+
+**Checking if a price falls within a discount range:**
+
+```kotlin
+// Which discount tier applies to this order amount?
+val orderAmount = 50000
+selectFrom(discountTier)
+    .where(orderAmount between (discountTier.minAmount to discountTier.maxAmount))
+    .fetch()
+// SQL: min_amount <= 50000 AND max_amount >= 50000
+```
+
+**Checking if a point is within geo bounds:**
+
+```kotlin
+// Simplified bounding box check
+selectFrom(store)
+    .where(
+        userLat between (store.southLat to store.northLat),
+        userLng between (store.westLng to store.eastLng),
+    )
+    .fetch()
+```
+
+The reverse between is also null-safe: if the value is null, the entire expression returns null (skipped).
 
 ---
 
@@ -227,8 +273,8 @@ operators specifically typed for `NumberExpression`.
     entity.quantity loe maxQuantity
 
     // Reverse BETWEEN -- value on left, expression bounds on right
-    now between (sale.startAt to sale.endAt)
-    // → start_at <= now AND end_at >= now
+    orderAmount between (tier.minAmount to tier.maxAmount)
+    // -> min_amount <= orderAmount AND max_amount >= orderAmount
     ```
 
 === "SQL"
@@ -387,13 +433,13 @@ Shorthand EXISTS / NOT EXISTS sub-query builders.
 === "Kotlin"
 
     ```kotlin
-    // Before — verbose sub-query
+    // Before -- verbose sub-query
     JPAExpressions.selectOne()
         .from(orderItem)
         .where(orderItem.orderId.eq(order.id))
         .exists()
 
-    // After — concise
+    // After -- concise
     orderItem.exists(orderItem.orderId eq order.id)
 
     // NOT EXISTS

@@ -1,79 +1,185 @@
 # Case/When DSL
 
-querydsl-ktx provides a Kotlin-idiomatic builder for SQL CASE expressions.
+SQL CASE expressions show up more often than you'd think -- status-based pricing tiers,
+conditional display names, mapping enums to human-readable labels. In vanilla QueryDSL,
+building these means wrestling with `CaseBuilder`, backtick-escaped `when`, and verbose
+`.then()` chains.
+
+querydsl-ktx replaces all of that with a Kotlin DSL that reads like the SQL it generates.
 Null-safe: null predicates skip branches. If all branches are skipped, the result is `null`.
+
+---
+
+## When to Use CASE in SQL
+
+!!! tip "CASE vs application layer"
+    Use SQL CASE when you need the result **in the query itself** -- for ordering,
+    grouping, aggregation, or projections sent directly to the client.
+    If you're just mapping values for display after fetching, do it in Kotlin.
+
+    **Good fit for SQL CASE:**
+
+    - Sorting by business priority (VIP first, then NORMAL, then DORMANT)
+    - Conditional aggregation (`SUM(CASE WHEN ... THEN price ELSE 0 END)`)
+    - Projecting computed columns (discount tier, display label)
+
+    **Better in Kotlin:**
+
+    - Simple enum-to-string mapping after fetch
+    - Complex business logic that depends on multiple entities
 
 ---
 
 ## Searched CASE
 
-The most common form. Each branch has an independent predicate.
-
-### Signature
+The most common form. Each branch has an independent predicate -- like a chain of `if/else if`.
 
 ```kotlin
 fun <T> case(block: SearchedCaseDsl<T>.() -> Unit): Expression<T>?
 ```
 
-### Example
+### Real-World Example: Status-Based Discount Rate
+
+You have an order system where discount rates depend on the member's tier:
 
 === "Kotlin"
 
     ```kotlin
-    val expr = case<Int> {
-        `when`(entity.status.eq("VIP")) then 1
-        `when`(entity.status.eq("NORMAL")) then 2
-        otherwise(3)
+    val discountRate = case<Int> {
+        `when`(member.grade.eq("VIP")) then 20
+        `when`(member.grade.eq("GOLD")) then 10
+        `when`(member.grade.eq("SILVER")) then 5
+        otherwise(0)
     }
+
+    val results = select(member.name, member.grade, discountRate)
+        .from(member)
+        .fetch()
     ```
 
 === "SQL"
 
     ```sql
-    CASE
-        WHEN status = 'VIP' THEN 1
-        WHEN status = 'NORMAL' THEN 2
-        ELSE 3
-    END
+    SELECT m.name, m.grade,
+        CASE
+            WHEN m.grade = 'VIP' THEN 20
+            WHEN m.grade = 'GOLD' THEN 10
+            WHEN m.grade = 'SILVER' THEN 5
+            ELSE 0
+        END
+    FROM member m
+    ```
+
+### Custom Sort Order
+
+Sort by business priority instead of alphabetical order:
+
+=== "Kotlin"
+
+    ```kotlin
+    val priority = case<Int> {
+        `when`(order.status.eq("PENDING")) then 1
+        `when`(order.status.eq("PROCESSING")) then 2
+        `when`(order.status.eq("SHIPPED")) then 3
+        otherwise(99)
+    }
+
+    selectFrom(order)
+        .orderBy(priority!!.asc())
+        .fetch()
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT o.*
+    FROM orders o
+    ORDER BY
+        CASE
+            WHEN o.status = 'PENDING' THEN 1
+            WHEN o.status = 'PROCESSING' THEN 2
+            WHEN o.status = 'SHIPPED' THEN 3
+            ELSE 99
+        END ASC
+    ```
+
+### Conditional Display Name
+
+Project a computed label for the frontend:
+
+=== "Kotlin"
+
+    ```kotlin
+    val displayStatus = case<String> {
+        `when`(product.stock.gt(10)) then "In Stock"
+        `when`(product.stock.gt(0)) then "Low Stock"
+        otherwise("Out of Stock")
+    }
+
+    select(product.name, product.price, displayStatus)
+        .from(product)
+        .fetch()
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT p.name, p.price,
+        CASE
+            WHEN p.stock > 10 THEN 'In Stock'
+            WHEN p.stock > 0 THEN 'Low Stock'
+            ELSE 'Out of Stock'
+        END
+    FROM product p
     ```
 
 ---
 
 ## Simple CASE
 
-Matches a single expression against constant values. Internally converts to a searched CASE using `expression.eq(value)`.
+Matches a single expression against constant values. Cleaner when you're comparing
+one column against multiple literals -- like a SQL `switch` statement.
 
-### Signature
+Internally converts to a searched CASE using `expression.eq(value)`.
 
 ```kotlin
 fun <D, T> case(expression: SimpleExpression<D>, block: SimpleCaseDsl<D, T>.() -> Unit): Expression<T>?
 ```
 
-### Example
+### Example: Enum to Label Mapping
 
 === "Kotlin"
 
     ```kotlin
-    val expr = case<String, Int>(entity.status) {
-        `when`("VIP") then 1
-        `when`("NORMAL") then 2
-        otherwise(0)
+    val label = case<String, String>(order.status) {
+        `when`("PENDING") then "Awaiting Payment"
+        `when`("PAID") then "Payment Complete"
+        `when`("SHIPPED") then "In Transit"
+        otherwise("Unknown")
     }
     ```
 
 === "SQL"
 
     ```sql
-    CASE status
-        WHEN 'VIP' THEN 1
-        WHEN 'NORMAL' THEN 2
-        ELSE 0
+    CASE o.status
+        WHEN 'PENDING' THEN 'Awaiting Payment'
+        WHEN 'PAID' THEN 'Payment Complete'
+        WHEN 'SHIPPED' THEN 'In Transit'
+        ELSE 'Unknown'
     END
     ```
+
+!!! tip "Searched vs Simple"
+    Use **Simple CASE** when comparing one column against literal values.
+    Use **Searched CASE** when branches have different predicates or compare multiple columns.
 
 ---
 
 ## Null-Safety
+
+This is where querydsl-ktx's CASE DSL really shines compared to vanilla QueryDSL.
+When building CASE expressions with dynamic conditions, null predicates are silently skipped:
 
 | Scenario | Behavior |
 |----------|----------|
@@ -81,17 +187,22 @@ fun <D, T> case(expression: SimpleExpression<D>, block: SimpleCaseDsl<D, T>.() -
 | All predicates null | `case {}` returns `null` |
 | Non-null predicate | Branch is added normally |
 
-```kotlin
-val keyword: String? = null
+### Dynamic CASE with Optional Conditions
 
-// The when branch is skipped because the predicate is null
-val expr = case<Int> {
-    `when`(entity.name.eq(keyword)) then 1   // keyword is null → skipped
-    `when`(entity.active.eq(true)) then 2    // added normally
+```kotlin
+val keyword: String? = request.keyword  // might be null
+
+val matchScore = case<Int> {
+    `when`(product.name.eq(keyword)) then 100    // skipped if keyword is null
+    `when`(product.name contains keyword) then 50 // skipped if keyword is null
+    `when`(product.active.eq(true)) then 10       // always added
     otherwise(0)
 }
-// Result: CASE WHEN active = true THEN 2 ELSE 0 END
+// If keyword is null: CASE WHEN active = true THEN 10 ELSE 0 END
+// If keyword is "phone": full 3-branch CASE
 ```
+
+In vanilla QueryDSL, you'd need to wrap each branch in an `if` check. The DSL handles it automatically.
 
 ---
 
@@ -100,23 +211,44 @@ val expr = case<Int> {
 === "Before (vanilla QueryDSL)"
 
     ```kotlin
+    // Backtick hell + verbose chaining
     CaseBuilder()
-        .`when`(entity.status.eq("VIP")).then(1)
-        .`when`(entity.status.eq("NORMAL")).then(2)
-        .otherwise(3)
+        .`when`(member.grade.eq("VIP")).then(20)
+        .`when`(member.grade.eq("GOLD")).then(10)
+        .`when`(member.grade.eq("SILVER")).then(5)
+        .otherwise(0)
+
+    // And if you need null-safety? Good luck:
+    val builder = CaseBuilder()
+    if (keyword != null) {
+        builder.`when`(product.name.eq(keyword)).then(100)
+    }
+    // CaseBuilder doesn't support conditional branch addition...
     ```
 
 === "After (querydsl-ktx)"
 
     ```kotlin
     case<Int> {
-        `when`(entity.status.eq("VIP")) then 1
-        `when`(entity.status.eq("NORMAL")) then 2
-        otherwise(3)
+        `when`(member.grade.eq("VIP")) then 20
+        `when`(member.grade.eq("GOLD")) then 10
+        `when`(member.grade.eq("SILVER")) then 5
+        otherwise(0)
+    }
+
+    // Null-safe branches -- just works
+    case<Int> {
+        `when`(product.name.eq(keyword)) then 100  // null keyword → skipped
+        `when`(product.active.eq(true)) then 10
+        otherwise(0)
     }
     ```
 
-The DSL version adds null-safety (null predicates are silently skipped) and a more natural Kotlin syntax with `infix fun then`.
+The DSL version gives you:
+
+- **Infix `then`** -- reads like SQL, no `.then()` chain
+- **Null-safe branches** -- null predicates are silently skipped
+- **Type inference** -- `case<Int>` sets the return type once
 
 ---
 

@@ -1,5 +1,48 @@
 # Dynamic Queries
 
+## The Evolution of QueryDSL Dynamic Queries
+
+If you've worked with QueryDSL in Kotlin, you've probably gone through this progression:
+
+**Stage 1: BooleanBuilder** -- the first thing most people learn.
+
+```kotlin
+val builder = BooleanBuilder()
+if (name != null) builder.and(member.name.contains(name))
+if (status != null) builder.and(member.status.eq(status))
+```
+
+**Stage 2: Per-field helper functions** -- returning `BooleanExpression?` for each condition.
+This is the pattern popularized by many blog posts and tutorials:
+
+```kotlin
+fun statusEq(status: String?): BooleanExpression? =
+    status?.let { member.status.eq(it) }
+
+fun nameLike(name: String?): BooleanExpression? =
+    name?.let { member.name.contains(it) }
+
+// Usage
+selectFrom(member)
+    .where(statusEq(status), nameLike(name))
+    .fetch()
+```
+
+**Stage 3: querydsl-ktx** -- the same null-safe behavior, but without writing a helper function per field.
+
+```kotlin
+selectFrom(member)
+    .where(
+        member.status eq status,
+        member.name contains name,
+    )
+    .fetch()
+```
+
+All three approaches produce the same SQL. The difference is boilerplate.
+
+---
+
 ## Core Concept: null = skip
 
 Every extension function in querydsl-ktx follows one rule:
@@ -48,6 +91,66 @@ selectFrom(entity)
     QueryDSL's `.where()` already ignores null predicates in its vararg overload.
     Combined with querydsl-ktx's null-returning extensions, null parameters are
     transparently filtered at every level.
+
+---
+
+## Comparing with Hand-Written Helpers
+
+You've probably written (or seen) per-field helper functions like these:
+
+=== "Per-field helpers (hand-written)"
+
+    ```kotlin
+    private fun statusEq(status: String?): BooleanExpression? =
+        status?.let { member.status.eq(it) }
+
+    private fun nameLike(name: String?): BooleanExpression? =
+        name?.let { member.name.contains(it) }
+
+    private fun ageBetween(min: Int?, max: Int?): BooleanExpression? {
+        if (min != null && max != null) return member.age.between(min, max)
+        if (min != null) return member.age.goe(min)
+        if (max != null) return member.age.loe(max)
+        return null
+    }
+
+    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+        selectFrom(member)
+            .where(statusEq(status), nameLike(name), ageBetween(minAge, maxAge))
+            .fetch()
+    ```
+
+=== "querydsl-ktx (no helpers needed)"
+
+    ```kotlin
+    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+        selectFrom(member)
+            .where(
+                member.status eq status,
+                member.name contains name,
+                member.age between (minAge to maxAge),
+            )
+            .fetch()
+    ```
+
+The querydsl-ktx version does exactly the same thing -- `member.status eq null` returns `null`,
+which `.where()` ignores. The `between` with a `Pair` handles all four combinations
+(both, min-only, max-only, neither) in a single expression.
+
+!!! tip "When to still extract helpers"
+    querydsl-ktx doesn't mean you should never extract methods. Complex conditions
+    that combine multiple fields or contain business logic are still better as named methods:
+
+    ```kotlin
+    // This is still cleaner as a named method
+    private fun isEligibleForPromotion(): BooleanExpression? =
+        (member.grade eq "VIP") or (
+            (member.totalPurchase goe 100000) and (member.active eq true)
+        )
+    ```
+
+    The rule of thumb: if a condition maps 1:1 to a field, use the inline extension.
+    If it encodes business logic, extract it.
 
 ---
 
@@ -222,6 +325,46 @@ fun search(criteria: SearchCriteria): List<Entity> {
 !!! tip "When to use `if` vs null-safety"
     - **Simple null check** -- Let the extension handle it. `entity.status eq criteria.status` is enough.
     - **Complex logic** (e.g., keyword search across multiple fields) -- Use an explicit `if` block to build the sub-expression, then combine with `and`.
+
+---
+
+## Real-World Example: Admin Search Page
+
+A typical admin search with multiple optional filters:
+
+```kotlin
+@Repository
+class OrderRepository : QuerydslRepository<Order>() {
+
+    private val order = QOrder.order
+    private val member = QMember.member
+
+    fun adminSearch(
+        orderNumber: String?,
+        memberName: String?,
+        status: OrderStatus?,
+        minAmount: Int?,
+        maxAmount: Int?,
+        from: LocalDateTime?,
+        to: LocalDateTime?,
+        pageable: Pageable,
+    ): Page<Order> =
+        selectFrom(order)
+            .join(order.member, member)
+            .where(
+                order.orderNumber contains orderNumber,
+                member.name contains memberName,
+                order.status eq status,
+                order.totalAmount between (minAmount to maxAmount),
+                order.createdAt between (from to to),
+            )
+            .page(pageable)
+}
+```
+
+Every parameter is nullable. If the admin fills in only "member name" and "status",
+only those two conditions appear in the SQL. No BooleanBuilder, no helper functions,
+no branching logic.
 
 ---
 

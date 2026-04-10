@@ -1,5 +1,48 @@
 # 동적 쿼리
 
+## QueryDSL 동적 쿼리의 발전 과정
+
+Kotlin에서 QueryDSL을 써봤다면, 아마 이런 순서로 발전해 왔을 겁니다:
+
+**1단계: BooleanBuilder** -- 대부분 처음 배우는 패턴입니다.
+
+```kotlin
+val builder = BooleanBuilder()
+if (name != null) builder.and(member.name.contains(name))
+if (status != null) builder.and(member.status.eq(status))
+```
+
+**2단계: 필드별 헬퍼 함수** -- `BooleanExpression?`을 반환하는 메서드를 조건마다 작성합니다.
+인프런 김영한 강의에서 소개하는 패턴이 이것입니다:
+
+```kotlin
+fun statusEq(status: String?): BooleanExpression? =
+    status?.let { member.status.eq(it) }
+
+fun nameLike(name: String?): BooleanExpression? =
+    name?.let { member.name.contains(it) }
+
+// 사용
+selectFrom(member)
+    .where(statusEq(status), nameLike(name))
+    .fetch()
+```
+
+**3단계: querydsl-ktx** -- 동일한 null-safe 동작이지만, 필드마다 헬퍼 함수를 작성할 필요가 없습니다.
+
+```kotlin
+selectFrom(member)
+    .where(
+        member.status eq status,
+        member.name contains name,
+    )
+    .fetch()
+```
+
+세 가지 접근 방식 모두 같은 SQL을 생성합니다. 차이는 보일러플레이트의 양입니다.
+
+---
+
 ## 핵심 개념: null = 건너뛰기
 
 querydsl-ktx의 모든 확장 함수는 하나의 규칙을 따릅니다:
@@ -48,6 +91,66 @@ selectFrom(entity)
     QueryDSL의 `.where()`는 vararg 오버로드에서 이미 null 프레디킷을 무시합니다.
     querydsl-ktx의 null 반환 확장 함수와 결합하면, null 파라미터가
     모든 레벨에서 투명하게 필터링됩니다.
+
+---
+
+## 필드별 헬퍼 함수와 비교
+
+인프런 강의 스타일의 필드별 헬퍼 함수를 작성해 본 적이 있을 겁니다:
+
+=== "필드별 헬퍼 (직접 작성)"
+
+    ```kotlin
+    private fun statusEq(status: String?): BooleanExpression? =
+        status?.let { member.status.eq(it) }
+
+    private fun nameLike(name: String?): BooleanExpression? =
+        name?.let { member.name.contains(it) }
+
+    private fun ageBetween(min: Int?, max: Int?): BooleanExpression? {
+        if (min != null && max != null) return member.age.between(min, max)
+        if (min != null) return member.age.goe(min)
+        if (max != null) return member.age.loe(max)
+        return null
+    }
+
+    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+        selectFrom(member)
+            .where(statusEq(status), nameLike(name), ageBetween(minAge, maxAge))
+            .fetch()
+    ```
+
+=== "querydsl-ktx (헬퍼 불필요)"
+
+    ```kotlin
+    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+        selectFrom(member)
+            .where(
+                member.status eq status,
+                member.name contains name,
+                member.age between (minAge to maxAge),
+            )
+            .fetch()
+    ```
+
+querydsl-ktx 버전은 정확히 같은 일을 합니다 -- `member.status eq null`은 `null`을 반환하고,
+`.where()`가 이를 무시합니다. `Pair`를 사용한 `between`은 네 가지 조합
+(양쪽 값, min만, max만, 둘 다 없음)을 하나의 표현식으로 처리합니다.
+
+!!! tip "그래도 헬퍼를 추출해야 할 때"
+    querydsl-ktx가 있다고 메서드 추출이 필요 없다는 뜻은 아닙니다. 여러 필드를 조합하거나
+    비즈니스 로직이 포함된 복잡한 조건은 여전히 이름이 있는 메서드가 낫습니다:
+
+    ```kotlin
+    // 이건 여전히 메서드로 추출하는 게 깔끔합니다
+    private fun isEligibleForPromotion(): BooleanExpression? =
+        (member.grade eq "VIP") or (
+            (member.totalPurchase goe 100000) and (member.active eq true)
+        )
+    ```
+
+    기준: 조건이 필드 1:1 매핑이면 인라인 확장 함수를 쓰세요.
+    비즈니스 로직을 인코딩하면 메서드로 추출하세요.
 
 ---
 
@@ -222,6 +325,46 @@ fun search(criteria: SearchCriteria): List<Entity> {
 !!! tip "`if` vs null-safety 사용 시점"
     - **단순 null 검사** -- 확장 함수에 맡기세요. `entity.status eq criteria.status`로 충분합니다.
     - **복잡한 로직** (예: 여러 필드에 걸친 키워드 검색) -- 명시적 `if` 블록으로 서브 표현식을 구성한 후 `and`로 결합하세요.
+
+---
+
+## 실전 예제: 어드민 검색 페이지
+
+여러 선택적 필터가 있는 전형적인 어드민 검색:
+
+```kotlin
+@Repository
+class OrderRepository : QuerydslRepository<Order>() {
+
+    private val order = QOrder.order
+    private val member = QMember.member
+
+    fun adminSearch(
+        orderNumber: String?,
+        memberName: String?,
+        status: OrderStatus?,
+        minAmount: Int?,
+        maxAmount: Int?,
+        from: LocalDateTime?,
+        to: LocalDateTime?,
+        pageable: Pageable,
+    ): Page<Order> =
+        selectFrom(order)
+            .join(order.member, member)
+            .where(
+                order.orderNumber contains orderNumber,
+                member.name contains memberName,
+                order.status eq status,
+                order.totalAmount between (minAmount to maxAmount),
+                order.createdAt between (from to to),
+            )
+            .page(pageable)
+}
+```
+
+모든 파라미터가 nullable입니다. 어드민이 "회원명"과 "상태"만 입력하면
+SQL에는 그 두 조건만 나타납니다. BooleanBuilder도, 헬퍼 함수도,
+분기 로직도 없습니다.
 
 ---
 

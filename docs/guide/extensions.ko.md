@@ -119,6 +119,11 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
     status NOT IN ('C')
     ```
 
+!!! tip "Oracle의 IN 절 제한 대응"
+    Oracle은 단일 IN 절에 1000개 항목 제한이 있습니다.
+    `inChunked`는 대량 컬렉션을 자동으로 여러 IN 절로 분할하고 OR로 연결합니다.
+    기본 청크 사이즈는 1000이며, 커스텀 사이즈 지정이 가능합니다.
+
 ---
 
 ## ComparableExpressionExtensions
@@ -164,7 +169,7 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 
     // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
     now between (sale.startAt to sale.endAt)
-    // → start_at <= now AND end_at >= now
+    // -> start_at <= now AND end_at >= now
     ```
 
 === "SQL"
@@ -187,6 +192,60 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
     `Pair` 오버로드는 날짜 범위 필터에서 가장 강력한 기능입니다.
     하나의 표현식으로 네 가지 조합(양쪽 값, from만, to만, 둘 다 없음)을 모두 처리합니다.
     그렇지 않으면 4분기 `if/else`가 필요합니다.
+
+### 역방향 Between -- 실전 활용 사례
+
+역방향 `between`은 **값이 왼쪽**, **컬럼 경계가 오른쪽**에 옵니다.
+실무에서 의외로 자주 필요한 패턴입니다:
+
+**할인 기간 검증 -- 쿠폰이 지금 유효한지 확인:**
+
+```kotlin
+val now = LocalDateTime.now()
+selectFrom(coupon)
+    .where(now between (coupon.validFrom to coupon.validUntil))
+    .fetch()
+// SQL: valid_from <= '2025-04-10T12:00' AND valid_until >= '2025-04-10T12:00'
+```
+
+**주문 금액이 할인 구간에 해당하는지 확인:**
+
+```kotlin
+val orderAmount = 50000
+selectFrom(discountTier)
+    .where(orderAmount between (discountTier.minAmount to discountTier.maxAmount))
+    .fetch()
+// SQL: min_amount <= 50000 AND max_amount >= 50000
+```
+
+**이벤트 기간 내 주문 조회:**
+
+```kotlin
+// 주문일이 이벤트 기간 안에 있는지
+selectFrom(order)
+    .where(order.orderedAt between (event.startAt to event.endAt))
+    .fetch()
+```
+
+역방향 between도 null-safe입니다: 값이 null이면 전체 표현식이 null을 반환합니다(건너뜀).
+
+!!! tip "인프런에서 배운 BooleanExpression 패턴과의 비교"
+    김영한 강의에서 배운 BooleanExpression 반환 메서드 패턴을 기억하시나요?
+
+    ```kotlin
+    // 강의 스타일 -- 필드마다 메서드 하나씩
+    fun isWithinPeriod(now: LocalDateTime?): BooleanExpression? {
+        if (now == null) return null
+        return event.startAt.loe(now).and(event.endAt.goe(now))
+    }
+    ```
+
+    querydsl-ktx에서는 이 패턴이 별도 메서드 없이 인라인으로 표현됩니다:
+
+    ```kotlin
+    // querydsl-ktx -- 메서드 추출 불필요
+    now between (event.startAt to event.endAt)
+    ```
 
 ---
 
@@ -227,8 +286,8 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
     entity.quantity loe maxQuantity
 
     // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
-    now between (sale.startAt to sale.endAt)
-    // → start_at <= now AND end_at >= now
+    orderAmount between (tier.minAmount to tier.maxAmount)
+    // -> min_amount <= orderAmount AND max_amount >= orderAmount
     ```
 
 === "SQL"
@@ -387,13 +446,13 @@ EXISTS / NOT EXISTS 서브쿼리 단축 빌더.
 === "Kotlin"
 
     ```kotlin
-    // Before — 장황한 서브쿼리
+    // Before -- 장황한 서브쿼리
     JPAExpressions.selectOne()
         .from(orderItem)
         .where(orderItem.orderId.eq(order.id))
         .exists()
 
-    // After — 간결
+    // After -- 간결
     orderItem.exists(orderItem.orderId eq order.id)
 
     // NOT EXISTS

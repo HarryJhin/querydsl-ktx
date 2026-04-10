@@ -12,6 +12,8 @@
 
 ## The Problem
 
+If you've used QueryDSL in Kotlin, you've written this pattern hundreds of times:
+
 ```kotlin
 val builder = BooleanBuilder()
 if (name != null) builder.and(member.name.contains(name))
@@ -40,7 +42,7 @@ selectFrom(member)
 ```
 
 Null parameters are automatically skipped. `between` with a `Pair` handles one-sided ranges.
-30 lines → 10 lines.
+30 lines to 10 lines.
 
 ## Quick Start
 
@@ -71,21 +73,23 @@ class MemberRepository : QuerydslRepository<Member>() {
 | Approach | Drawback |
 |----------|----------|
 | `BooleanBuilder` | Verbose, error-prone with ranges |
+| Per-field helpers (`statusEq()`) | Duplicated per entity, partial coverage |
 | `Specification` | Separate from QueryDSL, no infix syntax |
 | Top-level extensions | Global scope pollution, name clashes |
-| Hand-rolled helpers | Duplicated per entity, partial coverage |
 | **querydsl-ktx** | Standard, tested, complete |
 
-Extensions are scoped through **interface implementation** — no global namespace pollution. [Learn more →](https://harryjhin.github.io/querydsl-ktx/why/)
+Extensions are scoped through **interface implementation** -- no global namespace pollution. [Learn more](https://harryjhin.github.io/querydsl-ktx/why/)
 
 ## Features
 
-- **8 extension interfaces** — null-safe infix operators for Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery expressions
-- **Reverse between** — `value between (expr1 to expr2)` with one-sided survival
-- **Expressions reified wrappers** — `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`
-- **Case/When DSL** — `case<Int> { when(pred) then value; otherwise(default) }` with null-safe branches
-- **Pagination helpers** — `slice()`, `page()`, `fetch()` + SortSpec dynamic ordering
-- **Bulk DML** — `modifying { }` with auto flush/clear
+- **Null-safe dynamic queries** -- `entity.status eq null` returns `null` (skipped), no `if` check needed. Replaces both BooleanBuilder and per-field helper functions.
+- **One-sided range survival** -- `entity.date between (from to null)` becomes `date >= from`. A single expression handles 4 combinations that used to need 3-branch `if/else`.
+- **Pagination without fetchResults()** -- `fetchResults()` is deprecated since QueryDSL 5.0. `page()` auto-generates count queries for simple cases and accepts a lambda for complex ones. `slice()` avoids count queries entirely.
+- **Type-safe dynamic sorting** -- `SortSpec` provides a whitelist mapping for `Sort` property names. No more `?sort=password,asc` security holes or broken join-column sorting.
+- **8 extension interfaces** -- null-safe infix operators for Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery expressions.
+- **Reified expression templates** -- `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`.
+- **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` with null-safe branches.
+- **Bulk DML** -- `modifying { }` with auto flush/clear.
 
 ## Documentation
 

@@ -12,6 +12,8 @@ QueryDSL 동적 쿼리의 **BooleanBuilder 보일러플레이트를 90% 제거**
 
 ## 문제
 
+Kotlin에서 QueryDSL을 써봤다면 이 패턴을 수백 번 작성했을 겁니다:
+
 ```kotlin
 val builder = BooleanBuilder()
 if (name != null) builder.and(member.name.contains(name))
@@ -40,7 +42,7 @@ selectFrom(member)
 ```
 
 null 파라미터는 자동으로 건너뜁니다. `Pair`를 사용한 `between`이 한쪽만 있는 범위를 자동 처리합니다.
-30줄 → 10줄.
+30줄에서 10줄로.
 
 ## 빠른 시작
 
@@ -71,21 +73,23 @@ class MemberRepository : QuerydslRepository<Member>() {
 | 접근 방식 | 단점 |
 |----------|------|
 | `BooleanBuilder` | 장황하고 범위 필터에서 실수하기 쉬움 |
+| 필드별 헬퍼 함수 (`statusEq()`) | 엔티티마다 중복, 부분적 커버리지 |
 | `Specification` | QueryDSL과 별개, infix 문법 없음 |
 | Top-level 확장 함수 | 글로벌 스코프 오염, 이름 충돌 |
-| 직접 만든 헬퍼 함수 | 엔티티마다 중복, 부분적 커버리지 |
 | **querydsl-ktx** | 표준화, 테스트 완료, 완전한 커버리지 |
 
-확장 함수는 **인터페이스 구현**을 통해 스코프가 제한됩니다 — 글로벌 네임스페이스 오염 없음. [자세히 보기 →](https://harryjhin.github.io/querydsl-ktx/ko/why/)
+확장 함수는 **인터페이스 구현**을 통해 스코프가 제한됩니다 -- 글로벌 네임스페이스 오염 없음. [자세히 보기](https://harryjhin.github.io/querydsl-ktx/ko/why/)
 
 ## 기능
 
-- **8개 확장 인터페이스** — Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery 표현식용 null-safe infix 연산자
-- **역방향 between** — `value between (expr1 to expr2)` 단측 생존 지원
-- **Expressions reified 래퍼** — `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`
-- **Case/When DSL** — `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기
-- **페이지네이션 헬퍼** — `slice()`, `page()`, `fetch()` + SortSpec 동적 정렬
-- **Bulk DML** — `modifying { }` 자동 flush/clear
+- **Null-safe 동적 쿼리** -- `entity.status eq null`은 `null`을 반환합니다(건너뜀). `if` 체크가 필요 없습니다. BooleanBuilder와 필드별 헬퍼 함수를 모두 대체합니다.
+- **단측 범위 생존** -- `entity.date between (from to null)`은 `date >= from`이 됩니다. 기존에 3분기 `if/else`가 필요했던 4가지 조합을 하나의 표현식으로 처리합니다.
+- **fetchResults() 없는 페이지네이션** -- `fetchResults()`는 QueryDSL 5.0부터 deprecated입니다. `page()`는 단순한 경우 카운트 쿼리를 자동 생성하고, 복잡한 경우 람다를 받습니다. `slice()`는 카운트 쿼리를 완전히 회피합니다.
+- **타입 세이프 동적 정렬** -- `SortSpec`은 `Sort` 프로퍼티명에 대한 화이트리스트 매핑을 제공합니다. `?sort=password,asc` 보안 구멍이나 조인 컬럼 정렬 오류가 없습니다.
+- **8개 확장 인터페이스** -- Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery 표현식용 null-safe infix 연산자.
+- **Reified 표현식 템플릿** -- `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`.
+- **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기.
+- **Bulk DML** -- `modifying { }` 자동 flush/clear.
 
 ## 문서
 
