@@ -90,6 +90,7 @@ Extensions are scoped through **interface implementation** -- no global namespac
 - **Reified expression templates** -- `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`.
 - **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` with null-safe branches.
 - **Bulk DML** -- `modifying { }` with auto flush/clear.
+- **GraalVM native image** -- `RuntimeHints` auto-registered via `@ImportRuntimeHints` for out-of-the-box native image support.
 
 ## Documentation
 

@@ -10,7 +10,7 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 ### Modules
 
 - `querydsl-ktx` — Core: 8 extension interfaces + top-level utilities (Expressions, CaseDsl) + QuerydslSupport/QuerydslRepository base classes
-- `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration
+- `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration + GraalVM RuntimeHints for native image support
 - `querydsl-ktx-spring-boot-starter` — Starter: aggregates the above modules
 
 ### Tech Stack
@@ -31,9 +31,9 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 ├── extensions/          ← 8 interfaces (no state, no dependencies)
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
 │   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn
-│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between
-│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy)
-│   ├── StringExpressionExtensions.kt     — contains, startsWith, like, matches
+│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo
+│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo
+│   ├── StringExpressionExtensions.kt     — contains, startsWith, like, matches, nullif, coalesce
 │   ├── TemporalExpressionExtensions.kt   — after, before
 │   ├── CollectionExpressionExtensions.kt — contains
 │   └── SubQueryExtensions.kt            — exists, notExists

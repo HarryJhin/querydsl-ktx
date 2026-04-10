@@ -90,6 +90,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 - **Reified 표현식 템플릿** -- `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`.
 - **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기.
 - **Bulk DML** -- `modifying { }` 자동 flush/clear.
+- **GraalVM 네이티브 이미지** -- `@ImportRuntimeHints`를 통해 `RuntimeHints`가 자동 등록되어 네이티브 이미지를 바로 지원합니다.
 
 ## 문서
 

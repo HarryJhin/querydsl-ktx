@@ -108,6 +108,7 @@ infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: T?): Compar
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(expr: Expression<T>?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(arg: T?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> T?.between(range: Pair<ComparableExpression<T>?, ComparableExpression<T>?>): BooleanExpression?
+operator fun <T : Comparable<T>> ComparableExpression<T>.rangeTo(other: ComparableExpression<T>): Pair<ComparableExpression<T>, ComparableExpression<T>>
 ```
 
 Null behavior for `between(Pair)`: both bounds present = BETWEEN, only from = `>=`, only to = `<=`, both null = null. This is the **one-sided survival** pattern.
@@ -116,11 +117,13 @@ Reverse `between`: value on the left, expression pair on the right — `now betw
 
 ### NumberExpressionExtensions
 
-Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, and reverse `between`.
+Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, reverse `between`, and `rangeTo`.
 
 ```kotlin
 // Reverse between (value on the left, expression bounds on the right)
 infix fun <T> T?.between(range: Pair<NumberExpression<T>?, NumberExpression<T>?>): BooleanExpression?
+    where T : Number, T : Comparable<*>
+operator fun <T> NumberExpression<T>.rangeTo(other: NumberExpression<T>): Pair<NumberExpression<T>, NumberExpression<T>>
     where T : Number, T : Comparable<*>
 ```
 
@@ -140,6 +143,10 @@ infix fun StringExpression?.like(right: String?): BooleanExpression?
 infix fun StringExpression?.likeIgnoreCase(right: String?): BooleanExpression?
 infix fun StringExpression?.notLike(right: String?): BooleanExpression?
 infix fun StringExpression?.matches(regex: String?): BooleanExpression?
+infix fun StringExpression?.nullif(other: Expression<String>?): StringExpression?
+infix fun StringExpression?.nullif(other: String?): StringExpression?
+infix fun StringExpression?.coalesce(expr: Expression<String>?): StringExpression?
+infix fun StringExpression?.coalesce(arg: String?): StringExpression?
 ```
 
 Null behavior: either side null returns null (condition skipped).
@@ -439,6 +446,7 @@ The starter auto-registers a `JPAQueryFactory` bean:
 - `@ConditionalOnClass(JPAQueryFactory)` -- only when QueryDSL is on classpath
 - `@ConditionalOnMissingBean` -- respects your custom bean
 - Runs after `HibernateJpaAutoConfiguration`
+- `@ImportRuntimeHints(QuerydslKtxRuntimeHints::class)` -- registers reflection hints for GraalVM native image support
 
 ## Modules
 

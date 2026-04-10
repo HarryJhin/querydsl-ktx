@@ -9,11 +9,11 @@ All functions are null-safe: null arguments cause the condition to be skipped.
 
 | Interface | Expression Type | Key Functions |
 |-----------|----------------|---------------|
-| [BooleanExpressionExtensions](#booleanexpressionextensions) | `BooleanExpression` | `and`, `or`, `andAnyOf`, `orAllOf`, `eq` |
+| [BooleanExpressionExtensions](#booleanexpressionextensions) | `BooleanExpression` | `and`, `or`, `andAnyOf`, `orAllOf`, `eq`, `nullif`, `coalesce` |
 | [SimpleExpressionExtensions](#simpleexpressionextensions) | `SimpleExpression<T>` | `eq`, `ne`, `in`, `notIn` |
-| [ComparableExpressionExtensions](#comparableexpressionextensions) | `ComparableExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between` |
-| [NumberExpressionExtensions](#numberexpressionextensions) | `NumberExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between` |
-| [StringExpressionExtensions](#stringexpressionextensions) | `StringExpression` | `contains`, `startsWith`, `endsWith`, `like`, `matches` |
+| [ComparableExpressionExtensions](#comparableexpressionextensions) | `ComparableExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between`, `nullif`, `coalesce`, `rangeTo` |
+| [NumberExpressionExtensions](#numberexpressionextensions) | `NumberExpression<T>` | `gt`, `goe`, `lt`, `loe`, `between`, `nullif`, `coalesce`, `rangeTo` |
+| [StringExpressionExtensions](#stringexpressionextensions) | `StringExpression` | `contains`, `startsWith`, `endsWith`, `like`, `matches`, `nullif`, `coalesce` |
 | [TemporalExpressionExtensions](#temporalexpressionextensions) | `TemporalExpression<T>` | `after`, `before` |
 | [CollectionExpressionExtensions](#collectionexpressionextensions) | `CollectionExpressionBase<T, E>` | `contains` |
 | [SubQueryExtensions](#subqueryextensions) | `EntityPath<T>` | `exists`, `notExists` |
@@ -144,6 +144,7 @@ Comparison and range operators for `Comparable` types (dates, strings, enums, et
 | `between` (reverse) | `T?.between(Pair<ComparableExpression<T>?, ComparableExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
+| `rangeTo` | `ComparableExpression<T>..ComparableExpression<T>` | _(creates Pair for between)_ |
 
 All comparison functions also have `Expression<T>` overloads for comparing against other columns.
 
@@ -170,6 +171,10 @@ All comparison functions also have `Expression<T>` overloads for comparing again
     // Reverse BETWEEN -- value on left, expression bounds on right
     now between (sale.startAt to sale.endAt)
     // -> start_at <= now AND end_at >= now
+
+    // rangeTo operator (..) -- syntactic sugar for creating Pair
+    entity.date between (entity.startDate..entity.endDate)
+    // equivalent to: entity.date between (entity.startDate to entity.endDate)
     ```
 
 === "SQL"
@@ -261,6 +266,7 @@ operators specifically typed for `NumberExpression`.
 | `between` (reverse) | `T?.between(Pair<NumberExpression<T>?, NumberExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
+| `rangeTo` | `NumberExpression<T>..NumberExpression<T>` | _(creates Pair for between)_ |
 
 ### Examples
 
@@ -275,6 +281,9 @@ operators specifically typed for `NumberExpression`.
     // Reverse BETWEEN -- value on left, expression bounds on right
     orderAmount between (tier.minAmount to tier.maxAmount)
     // -> min_amount <= orderAmount AND max_amount >= orderAmount
+
+    // rangeTo operator (..) -- syntactic sugar for creating Pair
+    orderAmount between (tier.minAmount..tier.maxAmount)
     ```
 
 === "SQL"
@@ -308,6 +317,11 @@ Pattern matching and string comparison operators.
 | `likeIgnoreCase` | `StringExpression?.likeIgnoreCase(String?)` | `LOWER(col) LIKE LOWER(?)` |
 | `notLike` | `StringExpression?.notLike(String?)` | `NOT LIKE ?` |
 | `matches` | `StringExpression?.matches(String?)` | `REGEXP ?` |
+| `contains` | `StringExpression?.contains(Expression<String>?)` | `LIKE '%' \|\| other_col \|\| '%'` |
+| `nullif` | `StringExpression?.nullif(Expression<String>?)` | `NULLIF(col, other_col)` |
+| `nullif` | `StringExpression?.nullif(String?)` | `NULLIF(col, ?)` |
+| `coalesce` | `StringExpression?.coalesce(Expression<String>?)` | `COALESCE(col, other_col)` |
+| `coalesce` | `StringExpression?.coalesce(String?)` | `COALESCE(col, ?)` |
 
 `contains` and `startsWith` also have `Expression<String>` overloads.
 
