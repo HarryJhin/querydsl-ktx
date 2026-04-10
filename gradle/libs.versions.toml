@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.9.25"
 querydsl = "5.1.0"
-spring-boot = "3.0.0"
+spring-boot = "4.0.5"
 spring-framework = "6.0.2"  # must match spring-boot version (Boot 3.0.x → Framework 6.0.x)
 spring-data = "3.0.0"
 jakarta-persistence = "3.1.0"
