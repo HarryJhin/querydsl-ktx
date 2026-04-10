@@ -126,6 +126,37 @@ class PaginationTest {
 
     // -- page with custom count query --
 
+    // -- Sort order verification (non-SortSpec path) --
+
+    @Test
+    fun `slice with Sort - results are ordered correctly`() {
+        val pageable = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "age"))
+        val result = memberRepository.findSliceDirect(pageable)
+        // Should be ordered by age DESC: Charlie(35), Bob(30), Eve(28)
+        assertEquals("Charlie", result.content[0].name)
+        assertEquals("Bob", result.content[1].name)
+        assertEquals("Eve", result.content[2].name)
+    }
+
+    @Test
+    fun `page with Sort - results are ordered correctly`() {
+        val pageable = PageRequest.of(0, 3, Sort.by(Sort.Direction.ASC, "age"))
+        val result = memberRepository.findPageDirect(pageable)
+        // Should be ordered by age ASC: Diana(20), Alice(25), Eve(28)
+        assertEquals("Diana", result.content[0].name)
+        assertEquals("Alice", result.content[1].name)
+        assertEquals("Eve", result.content[2].name)
+    }
+
+    @Test
+    fun `slice without Sort - still returns results`() {
+        val pageable = PageRequest.of(0, 10)
+        val result = memberRepository.findSliceDirect(pageable)
+        assertEquals(5, result.content.size)
+    }
+
+    // -- page with custom count query --
+
     @Test
     fun `page with custom count query - filters correctly`() {
         val pageable = PageRequest.of(0, 10, Sort.by("name"))

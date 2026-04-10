@@ -179,6 +179,7 @@ abstract class QuerydslSupport<T : Any> {
      * @return a [Page] containing the current page data and total count
      */
     protected fun <R> JPAQuery<R>.page(pageable: Pageable): Page<R> {
+        // clone BEFORE fetch — prevents sort/offset/limit from leaking into count query
         val countQuery: JPAQuery<R> = this.clone()
         val content: List<R> = this.fetch(pageable)
         return PageableExecutionUtils.getPage(content, pageable) {
@@ -205,6 +206,7 @@ abstract class QuerydslSupport<T : Any> {
         spec: SortSpec,
         fallback: (() -> OrderSpecifier<*>?)? = null,
     ): Page<R> {
+        // clone BEFORE applySort — prevents sort from leaking into count query
         val countQuery: JPAQuery<R> = this.clone()
         val unsorted = pageable.withoutSort
         val content: List<R> = this.applySort(pageable.sort, spec, fallback).fetch(unsorted)

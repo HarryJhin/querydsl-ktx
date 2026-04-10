@@ -104,4 +104,11 @@ class MemberRepository : QuerydslRepository<Member>() {
         selectFrom(member)
             .where(member.id inChunked ids)
             .fetch()
+
+    // Non-SortSpec pagination — uses Pageable's own Sort
+    fun findPageDirect(pageable: Pageable): Page<Member> =
+        selectFrom(member).page(pageable)
+
+    fun findSliceDirect(pageable: Pageable): Slice<Member> =
+        selectFrom(member).slice(pageable)
 }
