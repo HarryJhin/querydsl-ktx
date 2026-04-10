@@ -335,4 +335,19 @@ interface NumberExpressionExtensions {
             else -> null
         }
     }
+
+    /**
+     * Creates a [Pair] of expressions using the `..` operator, for use with reverse [between].
+     *
+     * ```kotlin
+     * score between (entity.minScore..entity.maxScore)
+     * // equivalent to: score between (entity.minScore to entity.maxScore)
+     * ```
+     *
+     * @param other the upper bound expression
+     * @return a pair of `(this, other)`
+     */
+    operator fun <T> NumberExpression<T>.rangeTo(
+        other: NumberExpression<T>,
+    ): Pair<NumberExpression<T>, NumberExpression<T>> where T : Number, T : Comparable<*> = this to other
 }

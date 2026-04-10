@@ -416,4 +416,12 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
         val result = "M" between (null as ComparableExpression<String>? to null as ComparableExpression<String>?)
         assertNull(result)
     }
+
+    // ── rangeTo operator ──
+
+    @Test
+    fun `rangeTo creates Pair for reverse between`() {
+        val result = "M" between (code..otherCode)
+        assertNotNull(result)
+    }
 }

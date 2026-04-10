@@ -415,4 +415,12 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         val result = 30000 between (null as NumberExpression<Int>? to null as NumberExpression<Int>?)
         assertNull(result)
     }
+
+    // ── rangeTo operator ──
+
+    @Test
+    fun `rangeTo creates Pair for reverse between`() {
+        val result = 30000 between (price..minPrice)
+        assertNotNull(result)
+    }
 }

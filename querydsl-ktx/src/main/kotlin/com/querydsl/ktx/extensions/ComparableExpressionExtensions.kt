@@ -320,4 +320,19 @@ interface ComparableExpressionExtensions {
             else -> null
         }
     }
+
+    /**
+     * Creates a [Pair] of expressions using the `..` operator, for use with reverse [between].
+     *
+     * ```kotlin
+     * now between (entity.startAt..entity.endAt)
+     * // equivalent to: now between (entity.startAt to entity.endAt)
+     * ```
+     *
+     * @param other the upper bound expression
+     * @return a pair of `(this, other)`
+     */
+    operator fun <T : Comparable<T>> ComparableExpression<T>.rangeTo(
+        other: ComparableExpression<T>,
+    ): Pair<ComparableExpression<T>, ComparableExpression<T>> = this to other
 }
