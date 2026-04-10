@@ -183,13 +183,13 @@ fun findAllWithDepartment(
 
 ---
 
-## modifying { } + @Transactional
+## modifying { } — Bulk DML
 
 `modifying { }`은 블록 실행 전에 `entityManager.flush()`, 후에 `entityManager.clear()`를
-호출합니다. 따라서 활성 트랜잭션이 필요합니다.
+호출합니다. 따라서 활성 트랜잭션이 필요하며, **트랜잭션은 서비스 계층에서 선언**합니다.
 
 ```kotlin
-@Transactional
+// Repository — bulk DML 메서드만 제공
 fun deactivateMembers(status: MemberStatus): Long =
     modifying {
         update(member)
@@ -199,17 +199,29 @@ fun deactivateMembers(status: MemberStatus): Long =
     }
 ```
 
-!!! warning "반드시 @Transactional 안에서 사용"
-    `@Transactional` 없이 사용하면 `flush()` 호출이 실패합니다. 활성 트랜잭션이 없기
-    때문입니다. `@Transactional`은 리포지토리 메서드 자체에 있든, 호출하는 서비스
-    메서드에 있든 상관없습니다.
+```kotlin
+// Service — 트랜잭션은 여기서 선언
+@Service
+@Transactional
+class MemberService(
+    private val memberRepository: MemberRepository,
+) {
+    fun deactivateNormalMembers(): Long =
+        memberRepository.deactivateMembers(MemberStatus.NORMAL)
+}
+```
+
+!!! warning "@Transactional은 서비스 계층에서 — 리포지토리가 아님"
+    `@Transactional` 없이 사용하면 `flush()` 호출이 실패합니다. 트랜잭션은 일반적으로
+    서비스 계층에서 선언하고, 리포지토리 메서드는 그 트랜잭션에 참여합니다.
+    리포지토리에 `@Transactional`을 직접 붙이지 마세요.
 
 !!! note "여러 문이 하나의 flush/clear 사이클을 공유"
     하나의 `modifying { }` 블록에 여러 DML 문을 넣으면, flush는 첫 번째 문 전에 한 번,
     clear는 마지막 문 후에 한 번 발생합니다. 각각 따로 감싸는 것보다 효율적입니다.
 
     ```kotlin
-    @Transactional
+    // Repository
     fun archiveAndNotify(cutoffDate: LocalDate): Pair<Long, Long> =
         modifying {
             val archived = update(member)
@@ -321,8 +333,7 @@ class MemberRepository : QuerydslRepository<Member>() {
                     .fetchOne() ?: 0L
             }
 
-    // 패턴 4: modifying + @Transactional
-    @Transactional
+    // 패턴 4: modifying (서비스 계층에서 @Transactional 선언)
     fun deactivateInactive(cutoffDate: LocalDate): Long =
         modifying {
             update(member)

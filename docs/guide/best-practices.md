@@ -183,13 +183,13 @@ fun findAllWithDepartment(
 
 ---
 
-## modifying { } with @Transactional
+## modifying { } — Bulk DML
 
 `modifying { }` calls `entityManager.flush()` before and `entityManager.clear()` after
-the block. This requires an active transaction.
+the block. This requires an active transaction — typically provided by the **service layer**.
 
 ```kotlin
-@Transactional
+// Repository — bulk DML 메서드만 제공
 fun deactivateMembers(status: MemberStatus): Long =
     modifying {
         update(member)
@@ -199,10 +199,22 @@ fun deactivateMembers(status: MemberStatus): Long =
     }
 ```
 
-!!! warning "Always use within @Transactional"
-    Without `@Transactional`, the `flush()` call will fail because there is no active
-    transaction to flush against. This applies whether `@Transactional` is on the
-    repository method itself or on a calling service method.
+```kotlin
+// Service — 트랜잭션은 여기서 선언
+@Service
+@Transactional
+class MemberService(
+    private val memberRepository: MemberRepository,
+) {
+    fun deactivateNormalMembers(): Long =
+        memberRepository.deactivateMembers(MemberStatus.NORMAL)
+}
+```
+
+!!! warning "@Transactional is required — but on the service, not the repository"
+    Without an active transaction, `flush()` will fail. `@Transactional` is typically
+    declared on the service layer, and the repository method participates in that
+    transaction. Do not put `@Transactional` on repository methods.
 
 !!! note "Multiple statements share one flush/clear cycle"
     When you put multiple DML statements in a single `modifying { }` block, flush
@@ -210,7 +222,7 @@ fun deactivateMembers(status: MemberStatus): Long =
     This is more efficient than wrapping each statement separately.
 
     ```kotlin
-    @Transactional
+    // Repository
     fun archiveAndNotify(cutoffDate: LocalDate): Pair<Long, Long> =
         modifying {
             val archived = update(member)
@@ -322,8 +334,7 @@ class MemberRepository : QuerydslRepository<Member>() {
                     .fetchOne() ?: 0L
             }
 
-    // Pattern 4: modifying with @Transactional
-    @Transactional
+    // Pattern 4: modifying (service layer provides @Transactional)
     fun deactivateInactive(cutoffDate: LocalDate): Long =
         modifying {
             update(member)
