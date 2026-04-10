@@ -14,13 +14,13 @@
 === "Gradle (Kotlin DSL)"
 
     ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0")
+    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
     ```
 
 === "Gradle (Groovy DSL)"
 
     ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0'
+    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
     ```
 
 === "Maven"
@@ -29,7 +29,7 @@
     <dependency>
         <groupId>io.github.harryjhin</groupId>
         <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-        <version>0.2.0</version>
+        <version>{{ version }}</version>
     </dependency>
     ```
 
@@ -51,14 +51,14 @@
 
 ```kotlin
 // querydsl-ktx와 querydsl-ktx-spring-boot를 모두 포함
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.2.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
 ```
 
 ### Core만 사용
 
 ```kotlin
 // 확장 인터페이스만 -- AutoConfiguration 없음
-implementation("io.github.harryjhin:querydsl-ktx:0.2.0")
+implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
 ```
 
 !!! note "Core만 사용하는 경우"

@@ -10,10 +10,13 @@
 5. dead code 체크
 6. 문서 최신화 — AGENTS.md, llms.txt, docs/, README
 7. 커밋 — Closes #N
-8. 마일스톤 완료 시:
-   a. 버전 범프 (build.gradle.kts)
-   b. 전체 이전 버전 참조 교체 (README, llms.txt, docs, installation)
-   c. push + 태그 (git tag vX.Y.Z && git push origin vX.Y.Z)
+8. 마일스톤 완료 시 릴리스:
+   a. gradle.properties의 version 범프
+   b. mkdocs.yml의 extra.version 범프
+   c. README.md, README.ko.md, llms-full.txt의 버전 참조 교체
+   d. 커밋: "v{X.Y.Z} 버전 범프"
+   e. push + 태그: git tag vX.Y.Z && git push origin main && git push origin vX.Y.Z
+   f. GitHub Releases에 릴리스 노트 작성
 ```
 
 ## Version Strategy

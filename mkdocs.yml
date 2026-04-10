@@ -41,6 +41,7 @@ theme:
 
 plugins:
   - search
+  - macros
   - i18n:
       docs_structure: suffix
       default_language: en
@@ -66,6 +67,7 @@ plugins:
             API Reference: API 레퍼런스
 
 extra:
+  version: "0.2.0"
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/HarryJhin/querydsl-ktx
