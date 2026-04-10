@@ -109,3 +109,14 @@ class TestRepository : QuerydslRepository<YourEntity>() {
 ```
 
 If this compiles and runs, your setup is complete. Head to [Quick Start](quick-start.md) to write your first dynamic query.
+
+## GraalVM Native Image
+
+querydsl-ktx provides `RuntimeHintsRegistrar` for GraalVM native image compatibility.
+The auto-configuration automatically registers reflection hints needed by the library.
+
+!!! warning "QueryDSL Upstream Limitation"
+    QueryDSL 5.1.0 does not officially support GraalVM native image
+    ([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
+    You may need additional reflection configuration for QueryDSL core classes
+    when building native images.

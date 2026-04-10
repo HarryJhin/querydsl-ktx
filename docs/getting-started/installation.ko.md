@@ -109,3 +109,14 @@ class TestRepository : QuerydslRepository<YourEntity>() {
 ```
 
 컴파일되고 실행되면 설정이 완료된 것입니다. [빠른 시작](quick-start.md)으로 이동하여 첫 동적 쿼리를 작성하세요.
+
+## GraalVM 네이티브 이미지
+
+querydsl-ktx는 GraalVM 네이티브 이미지 호환을 위한 `RuntimeHintsRegistrar`를 제공합니다.
+Auto-configuration이 라이브러리에 필요한 리플렉션 힌트를 자동 등록합니다.
+
+!!! warning "QueryDSL 상위 제한사항"
+    QueryDSL 5.1.0은 GraalVM 네이티브 이미지를 공식 지원하지 않습니다
+    ([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
+    네이티브 이미지 빌드 시 QueryDSL 코어 클래스에 대한 추가 리플렉션 설정이
+    필요할 수 있습니다.

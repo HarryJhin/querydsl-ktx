@@ -25,6 +25,7 @@ dependencies {
 
     testImplementation(libs.spring.boot.test.autoconfigure)
     testImplementation(libs.spring.boot.test)
+    testImplementation(libs.spring.core.test)
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito.core)
     testImplementation(libs.querydsl.jpa) {

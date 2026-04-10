@@ -16,6 +16,7 @@ spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-aut
 spring-boot-autoconfigure-processor = { module = "org.springframework.boot:spring-boot-autoconfigure-processor", version.ref = "spring-boot" }
 spring-boot-test-autoconfigure = { module = "org.springframework.boot:spring-boot-test-autoconfigure", version.ref = "spring-boot" }
 spring-boot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "spring-boot" }
+spring-core-test = { module = "org.springframework:spring-core-test", version = "6.0.2" }  # matches spring-boot 3.0.0
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 spring-data-commons = { module = "org.springframework.data:spring-data-commons", version.ref = "spring-data" }
