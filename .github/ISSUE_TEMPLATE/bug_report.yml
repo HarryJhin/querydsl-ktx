@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report a bug in querydsl-ktx
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+  - type: input
+    id: version
+    attributes:
+      label: querydsl-ktx version
+      placeholder: "e.g., 0.2.0"
+    validations:
+      required: true
+  - type: input
+    id: spring-boot-version
+    attributes:
+      label: Spring Boot version
+      placeholder: "e.g., 3.4.1"
+    validations:
+      required: true
+  - type: input
+    id: kotlin-version
+    attributes:
+      label: Kotlin version
+      placeholder: "e.g., 1.9.25"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal code to reproduce the issue.
+      render: kotlin
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
