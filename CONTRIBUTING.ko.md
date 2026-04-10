@@ -49,7 +49,7 @@ PR은 해당 버전의 브랜치로 보내주세요. v1 버그 수정은 `1.x`, 
 
 ### 다른 Spring Boot 버전으로 테스트
 
-CI는 **Java 17/21** x **Spring Boot 3.2/3.3/3.4** 매트릭스를 실행합니다. 로컬에서 동일하게 재현할 수 있습니다:
+CI는 **Java 17/21** x **Spring Boot 3.0/3.2/3.3/3.4** 매트릭스를 실행합니다. 로컬에서 동일하게 재현할 수 있습니다:
 
 ```bash
 ./gradlew build -PspringBootVersion=3.4.4

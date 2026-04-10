@@ -3,7 +3,7 @@
 [![CI](https://github.com/HarryJhin/querydsl-ktx/actions/workflows/ci.yml/badge.svg)](https://github.com/HarryJhin/querydsl-ktx/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.harryjhin/querydsl-ktx)](https://central.sonatype.com/artifact/io.github.harryjhin/querydsl-ktx)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7%2B-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2%2B-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0%2B-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 [한국어](README.ko.md) | [Documentation](https://harryjhin.github.io/querydsl-ktx/)
@@ -105,7 +105,7 @@ Extensions are scoped through **interface implementation** -- no global namespac
 
 | Dependency | Version | Note |
 |------------|---------|------|
-| Spring Boot | 3.2+ | Recommended 3.4+. Compiled against 3.0 APIs, but 3.0/3.1 are EOL. CI tests 3.2, 3.3, 3.4. |
+| Spring Boot | 3.0+ | CI tests 3.0, 3.2, 3.3, 3.4. |
 | QueryDSL | 5.1.0+ | |
 | Kotlin | 1.7+ | |
 | Java | 17+ | |

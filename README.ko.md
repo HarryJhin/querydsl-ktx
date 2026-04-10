@@ -3,7 +3,7 @@
 [![CI](https://github.com/HarryJhin/querydsl-ktx/actions/workflows/ci.yml/badge.svg)](https://github.com/HarryJhin/querydsl-ktx/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.harryjhin/querydsl-ktx)](https://central.sonatype.com/artifact/io.github.harryjhin/querydsl-ktx)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7%2B-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2%2B-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0%2B-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 [English](README.md) | [문서 사이트](https://harryjhin.github.io/querydsl-ktx/ko/)
@@ -105,7 +105,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 
 | 의존성 | 버전 | 비고 |
 |--------|------|------|
-| Spring Boot | 3.2+ | 권장 3.4+. 3.0 API 기준 컴파일되지만 3.0/3.1은 EOL. CI에서 3.2, 3.3, 3.4 테스트. |
+| Spring Boot | 3.0+ | CI에서 3.0, 3.2, 3.3, 3.4 테스트. |
 | QueryDSL | 5.1.0+ | |
 | Kotlin | 1.7+ | |
 | Java | 17+ | |

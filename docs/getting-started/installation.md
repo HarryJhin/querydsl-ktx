@@ -4,7 +4,7 @@
 
 | Dependency   | Version | Note |
 |--------------|---------|------|
-| Spring Boot  | 3.2+    | Recommended 3.4+. Compiled against 3.0 APIs, but 3.0/3.1 are EOL. CI tests 3.2, 3.3, 3.4. |
+| Spring Boot  | 3.0+    | CI tests 3.0, 3.2, 3.3, 3.4. |
 | QueryDSL     | 5.1.0+  | |
 | Kotlin       | 1.7+    | |
 | Java         | 17+     | |

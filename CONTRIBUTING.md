@@ -49,7 +49,7 @@ The project version is managed in `gradle.properties` (single source of truth fo
 
 ### Testing Against Different Spring Boot Versions
 
-CI runs a matrix of **Java 17/21** and **Spring Boot 3.2/3.3/3.4**. You can reproduce any combination locally:
+CI runs a matrix of **Java 17/21** and **Spring Boot 3.0/3.2/3.3/3.4**. You can reproduce any combination locally:
 
 ```bash
 ./gradlew build -PspringBootVersion=3.4.4

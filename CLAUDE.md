@@ -33,7 +33,7 @@ querydsl-ktx-spring-boot-starter/      # 편의 aggregator (위 두 모듈 통�
 
 - JDK 17+
 - Gradle 8.5 (Kotlin DSL)
-- Spring Boot 3.2+ 권장 (최소 3.0)
+- Spring Boot 3.0+ (CI에서 3.0, 3.2, 3.3, 3.4 테스트)
 - QueryDSL 5.1.0+ (jakarta classifier)
 
 ## Development Workflow
