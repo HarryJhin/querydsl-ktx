@@ -39,7 +39,7 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - uses: gradle/actions/wrapper-validation@v4
+      - uses: gradle/actions/wrapper-validation@v6
 
       - name: Build & Test
         run: ./gradlew build -PspringBootVersion=${{ matrix.spring-boot }}
