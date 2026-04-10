@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class TemporalExpressionExtensionsTest : TemporalExpressionExtensions {
+class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, ComparableExpressionExtensions {
 
     private val createdAt: DateTimePath<LocalDateTime> =
         Expressions.dateTimePath(LocalDateTime::class.java, "createdAt")
@@ -119,5 +119,19 @@ class TemporalExpressionExtensionsTest : TemporalExpressionExtensions {
     fun `before expression - both null returns null`() {
         val result = nullExpr before (null as DateTimePath<LocalDateTime>?)
         assertNull(result)
+    }
+
+    // ── between(Pair) from ComparableExpressionExtensions ──
+
+    @Test
+    fun `between Pair from ComparableExpressionExtensions works with TemporalExpression`() {
+        val result = createdAt between (LocalDateTime.of(2024, 1, 1, 0, 0) to LocalDateTime.of(2024, 12, 31, 23, 59))
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `between Pair - partial range with TemporalExpression`() {
+        val result = createdAt between (LocalDateTime.of(2024, 1, 1, 0, 0) to null)
+        assertNotNull(result)
     }
 }
