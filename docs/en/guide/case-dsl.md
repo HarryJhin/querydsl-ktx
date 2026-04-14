@@ -4,7 +4,7 @@ description: Type-safe CASE/WHEN DSL for QueryDSL with automatic null-branch pru
 
 # Case/When DSL
 
-SQL CASE expressions show up more often than you'd think -- status-based pricing tiers,
+SQL CASE expressions show up more often than you'd think: status-based pricing tiers,
 conditional display names, mapping enums to human-readable labels. In vanilla QueryDSL,
 building these means wrestling with `CaseBuilder`, backtick-escaped `when`, and verbose
 `.then()` chains.
@@ -17,7 +17,7 @@ Null-safe: null predicates skip branches. If all branches are skipped, the resul
 ## When to Use CASE in SQL
 
 ::: tip CASE vs application layer
-Use SQL CASE when you need the result **in the query itself** -- for ordering,
+Use SQL CASE when you need the result **in the query itself**: for ordering,
 grouping, aggregation, or projections sent directly to the client.
 If you're just mapping values for display after fetching, do it in Kotlin.
 
@@ -37,7 +37,7 @@ If you're just mapping values for display after fetching, do it in Kotlin.
 
 ## Searched CASE
 
-The most common form. Each branch has an independent predicate -- like a chain of `if/else if`.
+The most common form. Each branch has an independent predicate, like a chain of `if/else if`.
 
 ```kotlin
 fun <T> case(block: SearchedCaseDsl<T>.() -> Unit): Expression<T>?
@@ -143,7 +143,7 @@ FROM product p
 ## Simple CASE
 
 Matches a single expression against constant values. Cleaner when you're comparing
-one column against multiple literals -- like a SQL `switch` statement.
+one column against multiple literals, like a SQL `switch` statement.
 
 Internally converts to a searched CASE using `expression.eq(value)`.
 
@@ -240,7 +240,7 @@ case<Int> {
     otherwise(0)
 }
 
-// Null-safe branches -- just works
+// Null-safe branches: just works
 case<Int> {
     `when`(product.name.eq(keyword)) then 100  // null keyword → skipped
     `when`(product.active.eq(true)) then 10
@@ -252,9 +252,9 @@ case<Int> {
 
 The DSL version gives you:
 
-- **Infix `then`** -- reads like SQL, no `.then()` chain
-- **Null-safe branches** -- null predicates are silently skipped
-- **Type inference** -- `case<Int>` sets the return type once
+- **Infix `then`**: reads like SQL, no `.then()` chain
+- **Null-safe branches**: null predicates are silently skipped
+- **Type inference**: `case<Int>` sets the return type once
 
 ---
 

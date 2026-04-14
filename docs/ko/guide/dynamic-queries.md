@@ -8,7 +8,7 @@ description: null-safe infix 연산자로 동적 WHERE 절을 작성합니다. B
 
 Kotlin에서 QueryDSL을 써봤다면, 아마 이런 순서로 발전해 왔을 겁니다:
 
-**1단계: BooleanBuilder** -- 대부분 처음 배우는 패턴입니다.
+**1단계: BooleanBuilder**: 대부분 처음 배우는 패턴입니다.
 
 ```kotlin
 val builder = BooleanBuilder()
@@ -16,7 +16,7 @@ if (name != null) builder.and(member.name.contains(name))
 if (status != null) builder.and(member.status.eq(status))
 ```
 
-**2단계: 필드별 헬퍼 함수** -- `BooleanExpression?`을 반환하는 메서드를 조건마다 작성합니다.
+**2단계: 필드별 헬퍼 함수**: `BooleanExpression?`을 반환하는 메서드를 조건마다 작성합니다.
 인프런 김영한 강의에서 소개하는 패턴이 이것입니다:
 
 ```kotlin
@@ -32,7 +32,7 @@ selectFrom(member)
     .fetch()
 ```
 
-**3단계: querydsl-ktx** -- 동일한 null-safe 동작이지만, 필드마다 헬퍼 함수를 작성할 필요가 없습니다.
+**3단계: querydsl-ktx**: 동일한 null-safe 동작이지만, 필드마다 헬퍼 함수를 작성할 필요가 없습니다.
 
 ```kotlin
 selectFrom(member)
@@ -138,7 +138,7 @@ fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
 
 :::
 
-querydsl-ktx 버전은 정확히 같은 일을 합니다 -- `member.status eq null`은 `null`을 반환하고,
+querydsl-ktx 버전은 정확히 같은 일을 합니다. `member.status eq null`은 `null`을 반환하고,
 `.where()`가 이를 무시합니다. `Pair`를 사용한 `between`은 네 가지 조합
 (양쪽 값, min만, max만, 둘 다 없음)을 하나의 표현식으로 처리합니다.
 
@@ -253,14 +253,14 @@ WHERE e.active = true
 
 ::: warning null 표현식 vs null 인자
 `this`가 null인 경우는 QueryDSL 표현식 자체가 null인 것입니다 (실제로는 드묾).
-`arg`가 null인 경우는 필터 파라미터가 제공되지 않은 것입니다 -- 일반적인 경우.
+`arg`가 null인 경우는 필터 파라미터가 제공되지 않은 것입니다. 일반적인 경우입니다.
 :::
 
 ---
 
 ## 복합 조건
 
-### andAnyOf -- AND와 OR 그룹
+### andAnyOf: AND와 OR 그룹
 
 "기본 조건 AND (이 중 하나라도)":
 
@@ -281,7 +281,7 @@ active = true AND (role = ? OR department = ?)
 
 `role`과 `department`가 모두 null이면 OR 그룹이 null로 축소되고, 기본 조건만 남습니다.
 
-### orAllOf -- OR과 AND 그룹
+### orAllOf: OR과 AND 그룹
 
 "기본 조건 OR (이것 모두)":
 
@@ -321,7 +321,7 @@ fun search(criteria: SearchCriteria): List<Entity> {
         )
     }
 
-    // Null-safe 조건 -- if 검사 불필요
+    // Null-safe 조건: if 검사 불필요
     where = where and (entity.status eq criteria.status)
     where = where and (entity.createdAt between (criteria.from to criteria.to))
 
@@ -330,8 +330,8 @@ fun search(criteria: SearchCriteria): List<Entity> {
 ```
 
 ::: tip `if` vs null-safety 사용 시점
-- **단순 null 검사** -- 확장 함수에 맡기세요. `entity.status eq criteria.status`로 충분합니다.
-- **복잡한 로직** (예: 여러 필드에 걸친 키워드 검색) -- 명시적 `if` 블록으로 서브 표현식을 구성한 후 `and`로 결합하세요.
+- **단순 null 검사**: 확장 함수에 맡기세요. `entity.status eq criteria.status`로 충분합니다.
+- **복잡한 로직** (예: 여러 필드에 걸친 키워드 검색): 명시적 `if` 블록으로 서브 표현식을 구성한 후 `and`로 결합하세요.
 :::
 
 ---

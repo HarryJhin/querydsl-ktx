@@ -34,6 +34,7 @@ export default defineConfig({
 
   srcExclude: [
     'superpowers/**',
+    'CLAUDE.md',
   ],
 
   rewrites: {

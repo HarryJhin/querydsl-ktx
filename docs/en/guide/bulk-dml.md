@@ -14,12 +14,12 @@ that handles `EntityManager.flush()` and `EntityManager.clear()` automatically.
 When executing bulk DML (UPDATE or DELETE) through QueryDSL, the SQL runs directly
 against the database, bypassing the persistence context. This creates two issues:
 
-1. **Stale writes** -- Unflushed changes in the persistence context are lost.
-2. **Stale reads** -- The persistence context still holds old entity state.
+1. **Stale writes**: unflushed changes in the persistence context are lost.
+2. **Stale reads**: the persistence context still holds old entity state.
 
 ::: code-group
 
-```kotlin [Before -- Easy to forget]
+```kotlin [Before: Easy to forget]
 fun deactivateAll() {
     entityManager.flush()   // flush before
     queryFactory.update(member)
@@ -30,7 +30,7 @@ fun deactivateAll() {
 }
 ```
 
-```kotlin [After -- Guaranteed]
+```kotlin [After: Guaranteed]
 fun deactivateAll() {
     modifying {
         update(member)
@@ -64,9 +64,9 @@ protected fun <R> modifying(
 
 The execution order is:
 
-1. **flush** -- Writes any pending entity changes to the database
-2. **execute** -- Runs your bulk DML statement
-3. **clear** -- Evicts all entities from the persistence context (in `finally`)
+1. **flush**: writes any pending entity changes to the database
+2. **execute**: runs your bulk DML statement
+3. **clear**: evicts all entities from the persistence context (in `finally`)
 
 The `clear` runs in a `finally` block, so the persistence context is cleaned up
 even if the DML statement throws an exception.
@@ -118,8 +118,8 @@ modifying(flushAutomatically = false, clearAutomatically = false) {
 ::: warning Know what you're skipping
 Only disable these flags when you understand the implications:
 
-- **Skip flush** -- Safe when no entities were modified before the bulk DML.
-- **Skip clear** -- Safe when the method returns immediately after, or
+- **Skip flush**: safe when no entities were modified before the bulk DML.
+- **Skip clear**: safe when the method returns immediately after, or
   when subsequent code doesn't read the affected entities.
 :::
 

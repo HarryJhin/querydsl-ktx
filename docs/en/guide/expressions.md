@@ -5,7 +5,7 @@ description: Reified Kotlin wrappers for QueryDSL template expressions including
 # Expressions
 
 QueryDSL's built-in operators cover most cases, but sometimes you need to reach for
-database-specific functions -- `GROUP_CONCAT`, `CAST`, window functions, or custom stored
+database-specific functions like `GROUP_CONCAT`, `CAST`, window functions, or custom stored
 procedures. That's when you use template expressions.
 
 In vanilla QueryDSL, every template call requires passing `YourType::class.java` explicitly.
@@ -18,11 +18,11 @@ querydsl-ktx uses Kotlin's reified type parameters to eliminate that boilerplate
 ::: tip When QueryDSL's built-in operators aren't enough
 You'll reach for template expressions when you need:
 
-- **Database-specific functions** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
-- **Type casting** -- `CAST(column AS DECIMAL)` for aggregation precision
-- **Window functions** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
-- **Custom SQL functions** -- registered via `@FunctionContributor` or Hibernate dialects
-- **Date/time functions** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
+- **Database-specific functions**: `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
+- **Type casting**: `CAST(column AS DECIMAL)` for aggregation precision
+- **Window functions**: `ROW_NUMBER() OVER (PARTITION BY ...)`
+- **Custom SQL functions**: registered via `@FunctionContributor` or Hibernate dialects
+- **Date/time functions**: `DATE_FORMAT()`, `TIMESTAMPDIFF()`
 :::
 
 ---
@@ -66,7 +66,7 @@ numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
 
 ### GROUP_CONCAT for Comma-Separated Lists
 
-Collecting tags or categories into a single string -- common in admin dashboards:
+Collecting tags or categories into a single string, which is common in admin dashboards:
 
 ::: code-group
 
@@ -167,7 +167,7 @@ selectFrom(product)
 
 ### Random Ordering
 
-A simple but common need -- randomizing results:
+A simple but common need: randomizing results:
 
 ```kotlin
 selectFrom(product)

@@ -43,7 +43,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 - 페이지네이션 헬퍼 (`page`, `slice`, `fetch`)
 - 벌크 DML 헬퍼 (`modifying`)
 
-타입 파라미터 `T`는 자동으로 추론됩니다 -- `domainClass`를 오버라이드할 필요 없습니다.
+타입 파라미터 `T`는 자동으로 추론됩니다. `domainClass`를 오버라이드할 필요 없습니다.
 
 ---
 
@@ -90,7 +90,7 @@ class MemberService(
         pageable = PageRequest.of(0, 20),
     )
 
-    // 이름 필터만 -- 나머지 조건은 자동으로 건너뛰어짐
+    // 이름 필터만, 나머지 조건은 자동으로 건너뛰어짐
     fun searchByName() = memberQueryRepository.search(
         name = "John",
         status = null,
@@ -123,7 +123,7 @@ LIMIT 20 OFFSET 0
 
 ::: tip BooleanBuilder도, if 검사도 없습니다
 같은 리포지토리 메서드가 어떤 필터 조합이든 처리합니다.
-null 파라미터는 단순히 무시됩니다 -- 조건 분기 로직이 필요 없습니다.
+null 파라미터는 단순히 무시됩니다. 조건 분기 로직이 필요 없습니다.
 :::
 
 ---
@@ -174,7 +174,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 
 ## 다음 단계
 
-- [동적 쿼리](../guide/dynamic-queries.md) -- null-safety 계약을 깊이 이해하기
-- [확장 함수 레퍼런스](../guide/extensions.md) -- 8개 인터페이스와 함수 목록
-- [페이지네이션](../guide/pagination.md) -- slice vs page vs fetch
-- [벌크 DML](../guide/bulk-dml.md) -- 안전한 update, delete 작업
+- [동적 쿼리](../guide/dynamic-queries.md): null-safety 계약을 깊이 이해하기
+- [확장 함수 레퍼런스](../guide/extensions.md): 8개 인터페이스와 함수 목록
+- [페이지네이션](../guide/pagination.md): slice vs page vs fetch
+- [벌크 DML](../guide/bulk-dml.md): 안전한 update, delete 작업

@@ -63,7 +63,7 @@ implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
 ### Core만 사용
 
 ```kotlin
-// 확장 인터페이스만 -- AutoConfiguration 없음
+// 확장 인터페이스만, AutoConfiguration 없음
 implementation("io.github.harryjhin:querydsl-ktx:0.5.0")
 ```
 

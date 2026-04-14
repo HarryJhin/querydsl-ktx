@@ -8,7 +8,7 @@ description: Build dynamic WHERE clauses with null-safe infix operators. No Bool
 
 If you've worked with QueryDSL in Kotlin, you've probably gone through this progression:
 
-**Stage 1: BooleanBuilder** -- the first thing most people learn.
+**Stage 1: BooleanBuilder**: the first thing most people learn.
 
 ```kotlin
 val builder = BooleanBuilder()
@@ -16,7 +16,7 @@ if (name != null) builder.and(member.name.contains(name))
 if (status != null) builder.and(member.status.eq(status))
 ```
 
-**Stage 2: Per-field helper functions** -- returning `BooleanExpression?` for each condition.
+**Stage 2: Per-field helper functions**: returning `BooleanExpression?` for each condition.
 This is the pattern popularized by many blog posts and tutorials:
 
 ```kotlin
@@ -32,7 +32,7 @@ selectFrom(member)
     .fetch()
 ```
 
-**Stage 3: querydsl-ktx** -- the same null-safe behavior, but without writing a helper function per field.
+**Stage 3: querydsl-ktx**: the same null-safe behavior, but without writing a helper function per field.
 
 ```kotlin
 selectFrom(member)
@@ -138,7 +138,7 @@ fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
 
 :::
 
-The querydsl-ktx version does exactly the same thing -- `member.status eq null` returns `null`,
+The querydsl-ktx version does exactly the same thing: `member.status eq null` returns `null`,
 which `.where()` ignores. The `between` with a `Pair` handles all four combinations
 (both, min-only, max-only, neither) in a single expression.
 
@@ -253,14 +253,14 @@ All extension functions follow consistent null behavior:
 
 ::: warning Null expression vs null argument
 `this` being null means the QueryDSL expression itself is null (rare in practice).
-`arg` being null means the filter parameter was not provided -- the common case.
+`arg` being null means the filter parameter was not provided, which is the common case.
 :::
 
 ---
 
 ## Complex Conditions
 
-### andAnyOf -- AND with OR group
+### andAnyOf: AND with OR group
 
 "Base condition AND (any of these)":
 
@@ -281,7 +281,7 @@ active = true AND (role = ? OR department = ?)
 
 If both `role` and `department` are null, the OR group collapses to null and only the base condition remains.
 
-### orAllOf -- OR with AND group
+### orAllOf: OR with AND group
 
 "Base condition OR (all of these)":
 
@@ -321,7 +321,7 @@ fun search(criteria: SearchCriteria): List<Entity> {
         )
     }
 
-    // Null-safe conditions -- no if-check needed
+    // Null-safe conditions: no if-check needed
     where = where and (entity.status eq criteria.status)
     where = where and (entity.createdAt between (criteria.from to criteria.to))
 
@@ -330,8 +330,8 @@ fun search(criteria: SearchCriteria): List<Entity> {
 ```
 
 ::: tip When to use `if` vs null-safety
-- **Simple null check** -- Let the extension handle it. `entity.status eq criteria.status` is enough.
-- **Complex logic** (e.g., keyword search across multiple fields) -- Use an explicit `if` block to build the sub-expression, then combine with `and`.
+- **Simple null check**: let the extension handle it. `entity.status eq criteria.status` is enough.
+- **Complex logic** (e.g., keyword search across multiple fields): use an explicit `if` block to build the sub-expression, then combine with `and`.
 :::
 
 ---

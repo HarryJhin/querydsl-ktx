@@ -45,7 +45,7 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 ::: code-group
 
 ```kotlin [Kotlin]
-// AND -- null 쪽은 무시됨
+// AND: null 쪽은 무시됨
 val predicate = (entity.active eq true) and (entity.name eq name)
 
 // OR 그룹
@@ -164,7 +164,7 @@ entity.date goe startDate      // date >= ?
 entity.date lt endDate         // date < ?
 entity.date loe endDate        // date <= ?
 
-// Pair를 사용한 BETWEEN -- 부분 범위 지원
+// Pair를 사용한 BETWEEN (부분 범위 지원)
 entity.date between (from to to)       // BETWEEN ? AND ?
 entity.date between (from to null)     // date >= ?
 entity.date between (null to to)       // date <= ?
@@ -173,11 +173,11 @@ entity.date between (null to null)     // null (건너뛰기)
 // ClosedRange를 사용한 BETWEEN
 entity.age between (20..60)            // BETWEEN 20 AND 60
 
-// 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+// 역방향 BETWEEN: 값이 왼쪽, 표현식 경계가 오른쪽
 now between (sale.startAt to sale.endAt)
 // -> start_at <= now AND end_at >= now
 
-// rangeTo 연산자 (..) -- Pair 생성 구문 설탕
+// rangeTo 연산자 (..): Pair 생성 구문 설탕
 entity.date between (entity.startDate..entity.endDate)
 // 동일: entity.date between (entity.startDate to entity.endDate)
 ```
@@ -204,12 +204,12 @@ age BETWEEN 20 AND 60
 그렇지 않으면 4분기 `if/else`가 필요합니다.
 :::
 
-### 역방향 Between -- 실전 활용 사례
+### 역방향 Between: 실전 활용 사례
 
 역방향 `between`은 **값이 왼쪽**, **컬럼 경계가 오른쪽**에 옵니다.
 실무에서 의외로 자주 필요한 패턴입니다:
 
-**할인 기간 검증 -- 쿠폰이 지금 유효한지 확인:**
+**할인 기간 검증: 쿠폰이 지금 유효한지 확인:**
 
 ```kotlin
 val now = LocalDateTime.now()
@@ -244,7 +244,7 @@ selectFrom(order)
 김영한 강의에서 배운 BooleanExpression 반환 메서드 패턴을 기억하시나요?
 
 ```kotlin
-// 강의 스타일 -- 필드마다 메서드 하나씩
+// 강의 스타일: 필드마다 메서드 하나씩
 fun isWithinPeriod(now: LocalDateTime?): BooleanExpression? {
     if (now == null) return null
     return event.startAt.loe(now).and(event.endAt.goe(now))
@@ -254,7 +254,7 @@ fun isWithinPeriod(now: LocalDateTime?): BooleanExpression? {
 querydsl-ktx에서는 이 패턴이 별도 메서드 없이 인라인으로 표현됩니다:
 
 ```kotlin
-// querydsl-ktx -- 메서드 추출 불필요
+// querydsl-ktx: 메서드 추출 불필요
 now between (event.startAt to event.endAt)
 ```
 :::
@@ -268,7 +268,7 @@ now between (event.startAt to event.endAt)
 ### 별도 인터페이스인 이유
 
 QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 **확장하지 않습니다**.
-이는 QueryDSL의 설계 결정입니다 -- `NumberExpression`은 `ComparableExpressionBase`를 상속하고,
+이는 QueryDSL의 설계 결정입니다. `NumberExpression`은 `ComparableExpressionBase`를 상속하고,
 `ComparableExpression`은 별도의 분기입니다. 따라서 querydsl-ktx는 `NumberExpression`에
 특화된 병렬 연산자 세트를 제공합니다.
 
@@ -298,11 +298,11 @@ entity.price between (minPrice to maxPrice)
 entity.score between (0..100)
 entity.quantity loe maxQuantity
 
-// 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+// 역방향 BETWEEN: 값이 왼쪽, 표현식 경계가 오른쪽
 orderAmount between (tier.minAmount to tier.maxAmount)
 // -> min_amount <= orderAmount AND max_amount >= orderAmount
 
-// rangeTo 연산자 (..) -- Pair 생성 구문 설탕
+// rangeTo 연산자 (..): Pair 생성 구문 설탕
 orderAmount between (tier.minAmount..tier.maxAmount)
 ```
 
@@ -468,13 +468,13 @@ EXISTS / NOT EXISTS 서브쿼리 단축 빌더.
 ::: code-group
 
 ```kotlin [Kotlin]
-// Before -- 장황한 서브쿼리
+// Before: 장황한 서브쿼리
 JPAExpressions.selectOne()
     .from(orderItem)
     .where(orderItem.orderId.eq(order.id))
     .exists()
 
-// After -- 간결
+// After: 간결
 orderItem.exists(orderItem.orderId eq order.id)
 
 // NOT EXISTS

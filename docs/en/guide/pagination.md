@@ -51,7 +51,7 @@ The `slice()` method avoids count queries entirely using the N+1 technique.
 
 ::: tip When to use which
 **Use `slice`** (default) for infinite scroll and mobile apps.
-Fetches exactly pageSize rows -- if a full page comes back, it assumes more data exists.
+Fetches exactly pageSize rows. If a full page comes back, it assumes more data exists.
 When the total row count is an exact multiple of pageSize, this results in one extra
 empty request at the end, which is invisible in infinite-scroll UIs.
 
@@ -60,11 +60,11 @@ empty request at the end, which is invisible in infinite-scroll UIs.
 Fetches pageSize + 1 rows, so the extra row also goes through all joins in the query.
 
 **Use `page`** when the UI shows "Page 3 of 15" or total result count.
-Note that the count query can be expensive on large tables -- consider caching
+Note that the count query can be expensive on large tables, so consider caching
 the total count if the underlying data doesn't change often.
 :::
 
-### slice -- No count query
+### slice: No count query
 
 Fetches exactly `pageSize` rows. If the result count equals pageSize, `hasNext` is `true`.
 
@@ -94,7 +94,7 @@ acceptable for infinite-scroll UIs where `slice` is most commonly used.
 If you need exact hasNext detection, use `exactSlice` instead.
 :::
 
-### exactSlice -- Exact hasNext detection
+### exactSlice: Exact hasNext detection
 
 Fetches `pageSize + 1` rows to determine `hasNext` accurately, then trims the result.
 
@@ -124,7 +124,7 @@ extra row adds up. Prefer `slice` for join-heavy queries and `exactSlice` when
 hasNext accuracy matters more than that marginal cost.
 :::
 
-### page -- With count query
+### page: With count query
 
 Generates a count query automatically from the main query.
 
@@ -170,7 +170,7 @@ selectFrom(member)
 ```
 :::
 
-### fetch -- Plain list
+### fetch: Plain list
 
 Applies pagination (offset/limit + sorting) and returns a raw list.
 
@@ -235,12 +235,12 @@ query.slice(pageable)
 query.exactSlice(pageable)
 query.page(pageable)
 
-// Value-based -- zero-indexed page number
+// Value-based: zero-indexed page number
 query.slice(page = 0, size = 20)
 query.exactSlice(page = 0, size = 20)
 query.page(page = 0, size = 20)
 
-// Offset/limit -- for fetch
+// Offset/limit: for fetch
 query.fetch(offset = 0, limit = 20)
 ```
 
@@ -286,7 +286,7 @@ fun searchWithJoin(name: String?): Page<Member> =
 
 :::
 
-The count query lambda is **lazy** -- it only executes when `Page.getTotalElements()` is called,
+The count query lambda is **lazy**: it only executes when `Page.getTotalElements()` is called,
 thanks to `PageableExecutionUtils.getPage()`.
 
 ---
@@ -372,19 +372,19 @@ fun searchManual(name: String?, pageable: Pageable): Slice<Member> {
 ```
 
 ```kotlin [After]
-// Slice -- no count query, optimistic hasNext (ideal for infinite scroll)
+// Slice: no count query, optimistic hasNext (ideal for infinite scroll)
 fun search(name: String?, pageable: Pageable): Slice<Member> =
     selectFrom(member)
         .where(member.name contains name)
         .slice(pageable)
 
-// Slice -- no count query, exact hasNext
+// Slice: no count query, exact hasNext
 fun searchExact(name: String?, pageable: Pageable): Slice<Member> =
     selectFrom(member)
         .where(member.name contains name)
         .exactSlice(pageable)
 
-// Page -- with auto count query
+// Page: with auto count query
 fun searchPage(name: String?, pageable: Pageable): Page<Member> =
     selectFrom(member)
         .where(member.name contains name)
@@ -395,7 +395,7 @@ fun searchPage(name: String?, pageable: Pageable): Page<Member> =
 
 ---
 
-## SortSpec -- Type-Safe Dynamic Ordering
+## SortSpec: Type-Safe Dynamic Ordering
 
 Spring Data `Sort` uses string property names, which `PathBuilder` resolves implicitly.
 This has limitations:
@@ -412,7 +412,7 @@ This has limitations:
 private val memberSort = sortSpec {
     "name"       by qMember.name
     "createdAt"  by qMember.createdAt
-    "department" by qDepartment.name   // join column -- PathBuilder can't resolve this
+    "department" by qDepartment.name   // join column: PathBuilder can't resolve this
 }
 ```
 

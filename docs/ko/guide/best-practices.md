@@ -15,7 +15,7 @@ description: Condition Object, SortSpec, 커스텀 count 쿼리, 벌크 DML 등 
 
 ::: code-group
 
-```kotlin [이전 -- BooleanBuilder]
+```kotlin [이전: BooleanBuilder]
 fun findAll(
     condition: MemberSearchCondition,
     pageable: Pageable,
@@ -55,7 +55,7 @@ fun findAll(
 }
 ```
 
-```kotlin [이후 -- Condition 객체]
+```kotlin [이후: Condition 객체]
 // 1. Condition DTO
 data class MemberSearchCondition(
     val name: String? = null,
@@ -66,7 +66,7 @@ data class MemberSearchCondition(
     val to: LocalDateTime? = null,
 )
 
-// 2. Private where 확장 함수 -- 조건 필드를 null-safe 프레디킷으로 매핑
+// 2. Private where 확장 함수: 조건 필드를 null-safe 프레디킷으로 매핑
 private fun <T> JPAQuery<T>.where(
     condition: MemberSearchCondition,
 ): JPAQuery<T> = this.where(
@@ -87,7 +87,7 @@ fun findAll(condition: MemberSearchCondition, pageable: Pageable): Page<Member> 
 
 ::: tip 이 패턴이 효과적인 이유
 - 조건 필드 하나가 코드 한 줄에 대응
-- null 필드는 자동으로 건너뜀 -- `if` 분기 불필요
+- null 필드는 자동으로 건너뜀. `if` 분기 불필요
 - 부분 범위(`from`만, `minAge`만)도 추가 분기 없이 자연스럽게 처리
 - 동일한 `where(condition)` 확장 함수를 여러 쿼리 메서드에서 재사용 가능
 :::
@@ -180,7 +180,7 @@ fun findAllWithDepartment(
 
 ::: warning 왜 중요한가
 자동 생성된 카운트 쿼리는 메인 쿼리를 복제하고 select를 `COUNT(*)`로 교체합니다.
-fetch join이 있으면 카운트가 뻥튀기됩니다 -- 엔티티 수가 아닌 조인된 행 수를 셉니다.
+fetch join이 있으면 카운트가 뻥튀기됩니다. 엔티티 수가 아닌 조인된 행 수를 셉니다.
 이것은 QueryDSL의 한계이며, querydsl-ktx의 버그가 아닙니다.
 :::
 
@@ -261,7 +261,7 @@ fun archiveAndNotify(cutoffDate: LocalDate): Pair<Long, Long> =
 
 ---
 
-## 역방향 Between -- 날짜 범위 유효성 검사
+## 역방향 Between: 날짜 범위 유효성 검사
 
 일반 `between`은 컬럼 값이 범위 안에 있는지 확인합니다.
 **역방향 between**은 값이 컬럼으로 정의된 범위 안에 있는지 확인합니다.

@@ -15,7 +15,7 @@ The most impactful pattern: wrap a search DTO into a private `where` extension o
 
 ::: code-group
 
-```kotlin [Before -- BooleanBuilder]
+```kotlin [Before: BooleanBuilder]
 fun findAll(
     condition: MemberSearchCondition,
     pageable: Pageable,
@@ -55,7 +55,7 @@ fun findAll(
 }
 ```
 
-```kotlin [After -- Condition Object]
+```kotlin [After: Condition Object]
 // 1. Condition DTO
 data class MemberSearchCondition(
     val name: String? = null,
@@ -66,7 +66,7 @@ data class MemberSearchCondition(
     val to: LocalDateTime? = null,
 )
 
-// 2. Private where extension -- maps condition fields to null-safe predicates
+// 2. Private where extension: maps condition fields to null-safe predicates
 private fun <T> JPAQuery<T>.where(
     condition: MemberSearchCondition,
 ): JPAQuery<T> = this.where(
@@ -87,7 +87,7 @@ fun findAll(condition: MemberSearchCondition, pageable: Pageable): Page<Member> 
 
 ::: tip Why this works
 - Each condition field maps to exactly one line
-- Null fields are automatically skipped -- no `if` checks
+- Null fields are automatically skipped. No `if` checks needed.
 - Partial ranges (only `from`, only `minAge`) degrade gracefully without extra branching
 - The same `where(condition)` extension is reusable across multiple query methods
 :::
@@ -119,7 +119,7 @@ fun count(condition: MemberSearchCondition): Long =
 
 ## SortSpec as a Repository Property
 
-`SortSpec` is stateless -- define it once as a property and reuse it in every pagination method.
+`SortSpec` is stateless. Define it once as a property and reuse it in every pagination method.
 
 ```kotlin
 @Repository
@@ -180,13 +180,13 @@ fun findAllWithDepartment(
 
 ::: warning Why this matters
 The auto-generated count query clones the main query and replaces the select with
-`COUNT(*)`. Fetch joins cause the count to multiply -- you get the joined row count
+`COUNT(*)`. Fetch joins cause the count to multiply. You get the joined row count
 instead of the entity count. This is a QueryDSL limitation, not a querydsl-ktx bug.
 :::
 
 ::: tip Reuse the condition object
 The same `where(condition)` private extension works in both the data query and the
-count query. This guarantees the count always matches the data -- no risk of
+count query. This guarantees the count always matches the data, with no risk of
 forgetting to update one when the other changes.
 :::
 

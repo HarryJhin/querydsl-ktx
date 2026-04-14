@@ -43,7 +43,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 - Pagination helpers (`page`, `slice`, `fetch`)
 - Bulk DML helper (`modifying`)
 
-The type parameter `T` is resolved automatically -- no need to override `domainClass`.
+The type parameter `T` is resolved automatically, so there is no need to override `domainClass`.
 
 ---
 
@@ -90,7 +90,7 @@ class MemberService(
         pageable = PageRequest.of(0, 20),
     )
 
-    // Only name filter -- other conditions skipped automatically
+    // Only name filter; other conditions skipped automatically
     fun searchByName() = memberQueryRepository.search(
         name = "John",
         status = null,
@@ -123,7 +123,7 @@ LIMIT 20 OFFSET 0
 
 ::: tip No BooleanBuilder, no if-checks
 The same repository method handles any combination of filters.
-Null parameters are simply ignored -- no conditional logic needed.
+Null parameters are simply ignored. No conditional logic needed.
 :::
 
 ---
@@ -174,7 +174,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 
 ## What's Next?
 
-- [Dynamic Queries](../guide/dynamic-queries.md) -- Understand the null-safety contract in depth
-- [Extension Reference](../guide/extensions.md) -- All 8 interfaces with function listings
-- [Pagination](../guide/pagination.md) -- slice vs page vs fetch
-- [Bulk DML](../guide/bulk-dml.md) -- Safe update and delete operations
+- [Dynamic Queries](../guide/dynamic-queries.md): Understand the null-safety contract in depth
+- [Extension Reference](../guide/extensions.md): All 8 interfaces with function listings
+- [Pagination](../guide/pagination.md): slice vs page vs fetch
+- [Bulk DML](../guide/bulk-dml.md): Safe update and delete operations

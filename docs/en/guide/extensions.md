@@ -45,7 +45,7 @@ Null-safe AND/OR combinators. The foundation for building dynamic WHERE clauses.
 ::: code-group
 
 ```kotlin [Kotlin]
-// AND -- null side is ignored
+// AND: null side is ignored
 val predicate = (entity.active eq true) and (entity.name eq name)
 
 // OR group
@@ -164,7 +164,7 @@ entity.date goe startDate      // date >= ?
 entity.date lt endDate         // date < ?
 entity.date loe endDate        // date <= ?
 
-// BETWEEN with Pair -- partial range support
+// BETWEEN with Pair: partial range support
 entity.date between (from to to)       // BETWEEN ? AND ?
 entity.date between (from to null)     // date >= ?
 entity.date between (null to to)       // date <= ?
@@ -173,11 +173,11 @@ entity.date between (null to null)     // null (skipped)
 // BETWEEN with ClosedRange
 entity.age between (20..60)            // BETWEEN 20 AND 60
 
-// Reverse BETWEEN -- value on left, expression bounds on right
+// Reverse BETWEEN: value on left, expression bounds on right
 now between (sale.startAt to sale.endAt)
 // -> start_at <= now AND end_at >= now
 
-// rangeTo operator (..) -- syntactic sugar for creating Pair
+// rangeTo operator (..): syntactic sugar for creating Pair
 entity.date between (entity.startDate..entity.endDate)
 // equivalent to: entity.date between (entity.startDate to entity.endDate)
 ```
@@ -204,7 +204,7 @@ A single expression handles all four combinations (both, from-only, to-only, nei
 that would otherwise require a 4-branch `if/else`.
 :::
 
-### Reverse Between -- Real-World Use Cases
+### Reverse Between: Real-World Use Cases
 
 The reverse `between` puts a **value on the left** and **column bounds on the right**.
 This pattern is surprisingly common:
@@ -254,7 +254,7 @@ Same API as `ComparableExpressionExtensions`, but for `NumberExpression`.
 ### Why a separate interface?
 
 In QueryDSL's type hierarchy, `NumberExpression` does **not** extend `ComparableExpression`.
-This is a QueryDSL design decision -- `NumberExpression` inherits from `ComparableExpressionBase`
+This is a QueryDSL design decision: `NumberExpression` inherits from `ComparableExpressionBase`
 while `ComparableExpression` is a separate branch. So querydsl-ktx provides a parallel set of
 operators specifically typed for `NumberExpression`.
 
@@ -284,11 +284,11 @@ entity.price between (minPrice to maxPrice)
 entity.score between (0..100)
 entity.quantity loe maxQuantity
 
-// Reverse BETWEEN -- value on left, expression bounds on right
+// Reverse BETWEEN: value on left, expression bounds on right
 orderAmount between (tier.minAmount to tier.maxAmount)
 // -> min_amount <= orderAmount AND max_amount >= orderAmount
 
-// rangeTo operator (..) -- syntactic sugar for creating Pair
+// rangeTo operator (..): syntactic sugar for creating Pair
 orderAmount between (tier.minAmount..tier.maxAmount)
 ```
 
@@ -454,13 +454,13 @@ Shorthand EXISTS / NOT EXISTS sub-query builders.
 ::: code-group
 
 ```kotlin [Kotlin]
-// Before -- verbose sub-query
+// Before: verbose sub-query
 JPAExpressions.selectOne()
     .from(orderItem)
     .where(orderItem.orderId.eq(order.id))
     .exists()
 
-// After -- concise
+// After: concise
 orderItem.exists(orderItem.orderId eq order.id)
 
 // NOT EXISTS
