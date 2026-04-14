@@ -13,11 +13,11 @@ Write your first null-safe dynamic query in 5 minutes.
 ::: code-group
 
 ```kotlin [Gradle (Kotlin DSL)]
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
 ```
 
 ```groovy [Gradle (Groovy DSL)]
-implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
 ```
 
 :::

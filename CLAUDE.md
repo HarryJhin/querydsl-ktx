@@ -59,14 +59,12 @@ querydsl-ktx-spring-boot-starter/      # 편의 aggregator (위 두 모듈 통�
 ## Release Workflow
 
 ```
-1. gradle.properties의 version 범프
-2. docs/en/config.ts, docs/ko/config.ts의 nav 버전 텍스트 범프
-3. docs/en/getting-started/installation.md, docs/ko/getting-started/installation.md의 버전 교체
-4. README.md, README.ko.md, llms-full.txt의 버전 참조 교체
-5. 커밋: "vX.Y.Z 버전 범프"
-6. push: git push origin main
-7. 태그: git tag vX.Y.Z && git push origin vX.Y.Z
-8. GitHub Release: gh release create vX.Y.Z --generate-notes
+1. gradle.properties의 version 범프 (문서 버전은 빌드 시 자동 반영)
+2. README.md, README.ko.md, llms-full.txt의 버전 참조 교체
+3. 커밋: "vX.Y.Z 버전 범프"
+4. push: git push origin main
+5. 태그: git tag vX.Y.Z && git push origin vX.Y.Z
+6. GitHub Release: gh release create vX.Y.Z --generate-notes
    - PR 기반이면 자동 분류됨 (.github/release.yml)
    - 직접 커밋이면 수동 보충 필요
 ```

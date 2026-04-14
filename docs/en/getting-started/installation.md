@@ -22,18 +22,18 @@ QueryDSL Q-class generation (APT or KSP) must be configured in your project. See
 ::: code-group
 
 ```kotlin [Gradle (Kotlin DSL)]
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
 ```
 
 ```groovy [Gradle (Groovy DSL)]
-implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>io.github.harryjhin</groupId>
     <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-    <version>0.5.0</version>
+    <version>{{ version }}</version>
 </dependency>
 ```
 
@@ -57,14 +57,14 @@ The library ships three modules. Choose based on your needs:
 
 ```kotlin
 // Pulls in both querydsl-ktx and querydsl-ktx-spring-boot
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
 ```
 
 ### Core only
 
 ```kotlin
 // Extension interfaces only, no AutoConfiguration
-implementation("io.github.harryjhin:querydsl-ktx:0.5.0")
+implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
 ```
 
 ::: info When to use core only

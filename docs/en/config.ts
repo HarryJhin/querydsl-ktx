@@ -1,4 +1,5 @@
 import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress'
+import { version } from '../.vitepress/config'
 
 export default {
   themeConfig: {
@@ -17,7 +18,7 @@ export default {
         target: '_self',
       },
       {
-        text: 'v0.5.0',
+        text: `v${version}`,
         items: [
           { text: 'Changelog', link: 'https://github.com/HarryJhin/querydsl-ktx/releases' },
           { text: 'Contributing', link: 'https://github.com/HarryJhin/querydsl-ktx/blob/main/CONTRIBUTING.md' },

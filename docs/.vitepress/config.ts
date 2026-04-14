@@ -1,7 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { defineConfig } from 'vitepress'
 import { groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 import enConfig from '../en/config'
 import koConfig from '../ko/config'
+
+export const version = readFileSync(resolve(__dirname, '../../gradle.properties'), 'utf-8')
+  .match(/version=(.*)/)?.[1]?.trim() ?? '0.0.0'
 
 export default defineConfig({
   title: 'querydsl-ktx',
@@ -69,6 +74,12 @@ export default defineConfig({
       dark: 'github-dark',
     },
     lineNumbers: true,
+    config: (md) => {
+      const defaultRender = md.render.bind(md)
+      md.render = (src: string, env: any) => {
+        return defaultRender(src.replaceAll('{{ version }}', version), env)
+      }
+    },
   },
 
   vite: {
