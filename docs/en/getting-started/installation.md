@@ -1,5 +1,5 @@
 ---
-description: Install querydsl-ktx via Gradle or Maven. Requires JDK 17+, Spring Boot 3.0+, and QueryDSL 5.1.0.
+description: Install querydsl-ktx via Gradle or Maven. Supports both original QueryDSL 5.1.0+ and OpenFeign fork 6.x.
 ---
 
 # Installation
@@ -9,7 +9,7 @@ description: Install querydsl-ktx via Gradle or Maven. Requires JDK 17+, Spring 
 | Dependency   | Version | Note |
 |--------------|---------|------|
 | Spring Boot  | 3.0+    | CI tests 3.0, 3.2, 3.3, 3.4. |
-| QueryDSL     | 5.1.0+  | |
+| QueryDSL     | 5.1.0+  | Both original (`com.querydsl`) and [OpenFeign fork](https://github.com/OpenFeign/querydsl) (`io.github.openfeign.querydsl` 6.x) are supported. CI tests both. |
 | Kotlin       | 1.7+    | |
 | Java         | 17+     | |
 

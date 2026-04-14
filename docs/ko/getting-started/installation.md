@@ -1,5 +1,5 @@
 ---
-description: Gradle 또는 Maven으로 querydsl-ktx를 설치합니다. JDK 17+, Spring Boot 3.0+, QueryDSL 5.1.0 필요.
+description: Gradle 또는 Maven으로 querydsl-ktx를 설치합니다. 원본 QueryDSL 5.1.0+과 OpenFeign fork 6.x 모두 지원.
 ---
 
 # 설치
@@ -9,7 +9,7 @@ description: Gradle 또는 Maven으로 querydsl-ktx를 설치합니다. JDK 17+,
 | 의존성       | 버전    | 비고 |
 |--------------|---------|------|
 | Spring Boot  | 3.0+    | CI에서 3.0, 3.2, 3.3, 3.4 테스트. |
-| QueryDSL     | 5.1.0+  | |
+| QueryDSL     | 5.1.0+  | 원본(`com.querydsl`)과 [OpenFeign fork](https://github.com/OpenFeign/querydsl)(`io.github.openfeign.querydsl` 6.x) 모두 지원. CI에서 양쪽 테스트. |
 | Kotlin       | 1.7+    | |
 | Java         | 17+     | |
 
