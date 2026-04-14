@@ -8,6 +8,19 @@ export default defineConfig({
   description: 'Null-safe infix Kotlin extensions for QueryDSL dynamic queries',
   base: '/querydsl-ktx/',
 
+  head: [
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: 'querydsl-ktx' }],
+    ['meta', { property: 'og:description', content: 'Null-safe infix Kotlin extensions for QueryDSL dynamic queries' }],
+    ['meta', { property: 'og:url', content: 'https://harryjhin.github.io/querydsl-ktx/' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['link', { rel: 'canonical', href: 'https://harryjhin.github.io/querydsl-ktx/' }],
+  ],
+
+  sitemap: {
+    hostname: 'https://harryjhin.github.io/querydsl-ktx/',
+  },
+
   srcExclude: [
     'superpowers/**',
   ],
