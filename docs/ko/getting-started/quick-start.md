@@ -1,3 +1,7 @@
+---
+description: querydsl-ktx로 첫 번째 null-safe 동적 쿼리를 5분 안에 작성합니다.
+---
+
 # 빠른 시작
 
 5분 만에 첫 null-safe 동적 쿼리를 작성하세요.

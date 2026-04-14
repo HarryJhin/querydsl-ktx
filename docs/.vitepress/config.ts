@@ -15,6 +15,17 @@ export default defineConfig({
     ['meta', { property: 'og:url', content: 'https://harryjhin.github.io/querydsl-ktx/' }],
     ['meta', { name: 'twitter:card', content: 'summary' }],
     ['link', { rel: 'canonical', href: 'https://harryjhin.github.io/querydsl-ktx/' }],
+    ['script', { type: 'application/ld+json' }, JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareSourceCode',
+      name: 'querydsl-ktx',
+      description: 'Null-safe infix Kotlin extensions for QueryDSL dynamic queries',
+      url: 'https://github.com/HarryJhin/querydsl-ktx',
+      codeRepository: 'https://github.com/HarryJhin/querydsl-ktx',
+      programmingLanguage: 'Kotlin',
+      runtimePlatform: 'JVM',
+      license: 'https://opensource.org/licenses/MIT',
+    })],
   ],
 
   sitemap: {

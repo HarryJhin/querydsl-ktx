@@ -1,3 +1,7 @@
+---
+description: numberTemplate, stringTemplate 등 QueryDSL 템플릿 표현식의 reified Kotlin 래퍼.
+---
+
 # Expressions
 
 QueryDSL의 내장 연산자로 대부분의 경우를 처리할 수 있지만, 때로는 DB 고유 함수가 필요합니다

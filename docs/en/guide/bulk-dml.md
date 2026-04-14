@@ -1,3 +1,7 @@
+---
+description: Safe bulk UPDATE and DELETE operations with automatic flush/clear via the modifying() wrapper.
+---
+
 # Bulk DML
 
 `QuerydslSupport` provides a `modifying { }` block for safe bulk update and delete operations

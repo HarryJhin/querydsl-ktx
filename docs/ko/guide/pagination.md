@@ -1,3 +1,7 @@
+---
+description: page(), slice(), exactSlice()와 타입 안전 SortSpec을 사용한 QueryDSL 페이지네이션 헬퍼.
+---
+
 # 페이지네이션
 
 `QuerydslSupport`(및 이를 확장하는 `QuerydslRepository`)는 QueryDSL 쿼리 객체에 대한

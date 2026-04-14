@@ -1,3 +1,7 @@
+---
+description: Condition Object, SortSpec, 커스텀 count 쿼리, 벌크 DML 등 querydsl-ktx 프로덕션 패턴.
+---
+
 # 베스트 프랙티스
 
 실무 리포지토리에서 querydsl-ktx와 잘 어울리는 패턴을 정리했습니다.

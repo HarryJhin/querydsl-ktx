@@ -1,3 +1,7 @@
+---
+description: Pagination helpers for QueryDSL including page(), slice(), exactSlice(), and type-safe SortSpec.
+---
+
 # Pagination
 
 `QuerydslSupport` (and by extension `QuerydslRepository`) provides pagination helpers

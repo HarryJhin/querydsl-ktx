@@ -1,3 +1,7 @@
+---
+description: Reified Kotlin wrappers for QueryDSL template expressions including numberTemplate, stringTemplate, and constants.
+---
+
 # Expressions
 
 QueryDSL's built-in operators cover most cases, but sometimes you need to reach for

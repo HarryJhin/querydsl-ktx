@@ -1,3 +1,7 @@
+---
+description: null 분기 자동 제거가 되는 타입 안전 CASE/WHEN DSL. Searched와 Simple CASE 지원.
+---
+
 # Case/When DSL
 
 SQL CASE 표현식은 생각보다 자주 필요합니다 -- 등급별 할인율, 조건부 표시명, enum을 사람이

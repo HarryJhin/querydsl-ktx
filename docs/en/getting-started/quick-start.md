@@ -1,3 +1,7 @@
+---
+description: Build your first null-safe dynamic query with querydsl-ktx in under 5 minutes.
+---
+
 # Quick Start
 
 Write your first null-safe dynamic query in 5 minutes.

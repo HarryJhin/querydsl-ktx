@@ -1,3 +1,7 @@
+---
+description: Reference for all 8 null-safe extension interfaces including eq, contains, between, exists, and more.
+---
+
 # Extension Interfaces
 
 querydsl-ktx provides **8 extension interfaces**, each scoped to a specific QueryDSL expression type.

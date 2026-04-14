@@ -1,3 +1,7 @@
+---
+description: Type-safe CASE/WHEN DSL for QueryDSL with automatic null-branch pruning. Searched and simple CASE supported.
+---
+
 # Case/When DSL
 
 SQL CASE expressions show up more often than you'd think -- status-based pricing tiers,

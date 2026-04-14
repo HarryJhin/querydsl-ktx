@@ -1,3 +1,7 @@
+---
+description: Build dynamic WHERE clauses with null-safe infix operators. No BooleanBuilder or if-checks needed.
+---
+
 # Dynamic Queries
 
 ## The Evolution of QueryDSL Dynamic Queries

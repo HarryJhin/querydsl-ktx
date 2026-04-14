@@ -1,3 +1,7 @@
+---
+description: Production patterns for querydsl-ktx including Condition Objects, SortSpec, custom count queries, and bulk DML.
+---
+
 # Best Practices
 
 Patterns that work well with querydsl-ktx in production repositories.

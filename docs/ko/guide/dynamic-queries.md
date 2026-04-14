@@ -1,3 +1,7 @@
+---
+description: null-safe infix 연산자로 동적 WHERE 절을 작성합니다. BooleanBuilder나 if 검사가 필요 없습니다.
+---
+
 # 동적 쿼리
 
 ## QueryDSL 동적 쿼리의 발전 과정

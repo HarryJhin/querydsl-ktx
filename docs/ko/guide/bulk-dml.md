@@ -1,3 +1,7 @@
+---
+description: modifying() 래퍼를 통한 안전한 벌크 UPDATE, DELETE. 자동 flush/clear 지원.
+---
+
 # 벌크 DML
 
 `QuerydslSupport`는 벌크 update 및 delete 작업을 위한 `modifying { }` 블록을 제공하며,

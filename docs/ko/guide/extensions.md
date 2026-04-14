@@ -1,3 +1,7 @@
+---
+description: eq, contains, between, exists 등 8개 null-safe 확장 인터페이스 레퍼런스.
+---
+
 # 확장 인터페이스
 
 querydsl-ktx는 **8개의 확장 인터페이스**를 제공하며, 각각 특정 QueryDSL 표현식 타입에 스코프가 지정됩니다.

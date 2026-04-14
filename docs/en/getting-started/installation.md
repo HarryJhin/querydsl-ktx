@@ -1,3 +1,7 @@
+---
+description: Install querydsl-ktx via Gradle or Maven. Requires JDK 17+, Spring Boot 3.0+, and QueryDSL 5.1.0.
+---
+
 # Installation
 
 ## Requirements
