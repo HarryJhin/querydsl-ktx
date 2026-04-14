@@ -3,8 +3,7 @@ plugins {
     kotlin("kapt")
 }
 
-val useOpenFeign = findProperty("querydslGroupId") != null
-val jpaClassifier = if (useOpenFeign) null else "jakarta"
+val jpaClassifier = extra["jpaClassifier"] as String?
 
 dependencies {
     implementation(projects.querydslKtx)

@@ -30,6 +30,10 @@ subprojects {
 
     val querydslGroupId = findProperty("querydslGroupId") as String?
     val querydslVersion = findProperty("querydslVersion") as String?
+    val useOpenFeign = querydslGroupId != null
+    extra["jpaClassifier"] = if (useOpenFeign) null else "jakarta"
+    extra["aptClassifier"] = if (useOpenFeign) "jpa" else "jakarta"
+
     if (querydslGroupId != null && querydslVersion != null) {
         configurations.configureEach {
             resolutionStrategy.eachDependency {
