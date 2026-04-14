@@ -3,11 +3,14 @@ plugins {
     kotlin("kapt")
 }
 
+val useOpenFeign = findProperty("querydslGroupId") != null
+val jpaClassifier = if (useOpenFeign) null else "jakarta"
+
 dependencies {
     implementation(projects.querydslKtx)
     compileOnly(libs.spring.boot.autoconfigure)
     compileOnly(libs.querydsl.jpa) {
-        artifact { classifier = "jakarta" }
+        if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
     compileOnly(libs.jakarta.persistence.api)
     kapt(libs.spring.boot.autoconfigure.processor)
@@ -18,7 +21,7 @@ dependencies {
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito.core)
     testImplementation(libs.querydsl.jpa) {
-        artifact { classifier = "jakarta" }
+        if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
     testImplementation(libs.jakarta.persistence.api)
     testImplementation(kotlin("test"))
