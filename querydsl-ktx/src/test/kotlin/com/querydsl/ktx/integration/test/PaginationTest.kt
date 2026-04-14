@@ -94,6 +94,65 @@ class PaginationTest {
         assertFalse(slice.hasNext())
     }
 
+    @Test
+    fun `slice - optimistic hasNext when total equals pageSize`() {
+        val pageable = PageRequest.of(0, 5, Sort.by("name"))
+        val slice = memberRepository.findSlice(pageable)
+
+        assertEquals(5, slice.content.size)
+        assertTrue(slice.hasNext()) // optimistic: 5 >= 5 → true (false positive)
+    }
+
+    @Test
+    fun `slice - optimistic empty next page`() {
+        val pageable = PageRequest.of(1, 5, Sort.by("name"))
+        val slice = memberRepository.findSlice(pageable)
+
+        assertEquals(0, slice.content.size)
+        assertFalse(slice.hasNext())
+    }
+
+    // -- exactSlice --
+
+    @Test
+    fun `exactSlice - first slice has next`() {
+        val pageable = PageRequest.of(0, 3, Sort.by("name"))
+        val slice = memberRepository.findExactSlice(pageable)
+
+        assertEquals(3, slice.content.size)
+        assertTrue(slice.hasNext())
+        assertEquals("Alice", slice.content[0].name)
+    }
+
+    @Test
+    fun `exactSlice - last slice has no next`() {
+        val pageable = PageRequest.of(1, 3, Sort.by("name"))
+        val slice = memberRepository.findExactSlice(pageable)
+
+        assertEquals(2, slice.content.size)
+        assertFalse(slice.hasNext())
+    }
+
+    @Test
+    fun `exactSlice - no false positive when total equals pageSize`() {
+        val pageable = PageRequest.of(0, 5, Sort.by("name"))
+        val slice = memberRepository.findExactSlice(pageable)
+
+        assertEquals(5, slice.content.size)
+        assertFalse(slice.hasNext()) // exact: fetched 6, got 5 → false
+    }
+
+    @Test
+    fun `exactSlice direct - results are ordered correctly`() {
+        val pageable = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "age"))
+        val result = memberRepository.findExactSliceDirect(pageable)
+
+        assertEquals("Charlie", result.content[0].name)
+        assertEquals("Bob", result.content[1].name)
+        assertEquals("Eve", result.content[2].name)
+        assertTrue(result.hasNext())
+    }
+
     // -- SortSpec --
 
     @Test

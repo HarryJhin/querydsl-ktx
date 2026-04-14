@@ -35,17 +35,24 @@ as extension functions on QueryDSL query objects.
 
 ---
 
-## slice vs page vs fetch
+## slice vs exactSlice vs page vs fetch
 
-| Method | Returns | Count Query | Use When |
-|--------|---------|-------------|----------|
-| `slice(pageable)` | `Slice<R>` | No (fetches N+1 rows) | Infinite scroll, forward-only navigation |
-| `page(pageable)` | `Page<R>` | Yes (auto-generated) | Traditional pagination with total count |
-| `fetch(pageable)` | `List<R>` | No | You just need a windowed list |
+| Method | Returns | Count Query | hasNext Detection | Use When |
+|--------|---------|-------------|-------------------|----------|
+| `slice(pageable)` | `Slice<R>` | No | Optimistic (pageSize rows) | Infinite scroll |
+| `exactSlice(pageable)` | `Slice<R>` | No | Exact (pageSize + 1 rows) | Forward-only navigation where hasNext must be accurate |
+| `page(pageable)` | `Page<R>` | Yes (auto-generated) | Via total count | Traditional pagination with total count |
+| `fetch(pageable)` | `List<R>` | No | N/A | You just need a windowed list |
 
-!!! tip "When to use slice vs page"
-    **Use `slice`** for mobile apps, infinite scroll, or any UI where "total count"
-    isn't displayed. It's faster because it never runs a count query.
+!!! tip "When to use which"
+    **Use `slice`** (default) for infinite scroll and mobile apps.
+    Fetches exactly pageSize rows -- if a full page comes back, it assumes more data exists.
+    When the total row count is an exact multiple of pageSize, this results in one extra
+    empty request at the end, which is invisible in infinite-scroll UIs.
+
+    **Use `exactSlice`** when your UI relies on an accurate `hasNext` signal
+    (e.g., a "Load more" button that should disappear on the last page).
+    Fetches pageSize + 1 rows, so the extra row also goes through all joins in the query.
 
     **Use `page`** when the UI shows "Page 3 of 15" or total result count.
     Note that the count query can be expensive on large tables -- consider caching
@@ -53,7 +60,7 @@ as extension functions on QueryDSL query objects.
 
 ### slice -- No count query
 
-Fetches `pageSize + 1` rows to determine `hasNext` accurately, then trims the result.
+Fetches exactly `pageSize` rows. If the result count equals pageSize, `hasNext` is `true`.
 
 === "Kotlin"
 
@@ -70,14 +77,44 @@ Fetches `pageSize + 1` rows to determine `hasNext` accurately, then trims the re
     SELECT m.*
     FROM member m
     WHERE m.name LIKE '%keyword%'
+    LIMIT 20  -- exactly pageSize
+    OFFSET 0
+    ```
+
+!!! note "Optimistic hasNext"
+    When the total row count is an exact multiple of pageSize, the last full page will
+    report `hasNext = true`, leading to one additional empty request. This is typically
+    acceptable for infinite-scroll UIs where `slice` is most commonly used.
+    If you need exact hasNext detection, use `exactSlice` instead.
+
+### exactSlice -- Exact hasNext detection
+
+Fetches `pageSize + 1` rows to determine `hasNext` accurately, then trims the result.
+
+=== "Kotlin"
+
+    ```kotlin
+    fun searchMembers(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .exactSlice(pageable)
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT m.*
+    FROM member m
+    WHERE m.name LIKE '%keyword%'
     LIMIT 21  -- pageSize(20) + 1
     OFFSET 0
     ```
 
-!!! tip "Why pageSize + 1?"
-    If 21 rows come back, we know there's a next page. We return only the first 20.
-    If 20 or fewer come back, there's no next page. This is more accurate than
-    checking `content.size == pageSize`, which gives false positives on the last full page.
+!!! tip "When to prefer exactSlice over slice"
+    The extra row goes through all joins in the query. For simple `selectFrom` queries
+    the overhead is negligible, but for queries with multiple joins the cost of that
+    extra row adds up. Prefer `slice` for join-heavy queries and `exactSlice` when
+    hasNext accuracy matters more than that marginal cost.
 
 ### page -- With count query
 
@@ -164,12 +201,12 @@ fun recentMembers(pageable: Pageable): List<Member> =
     -- First page (lastId = null): no ID filter
     SELECT m.* FROM member m
     WHERE m.name LIKE '%keyword%'
-    ORDER BY m.id ASC LIMIT 21
+    ORDER BY m.id ASC LIMIT 20
 
     -- Subsequent pages (lastId = 1000):
     SELECT m.* FROM member m
     WHERE m.name LIKE '%keyword%' AND m.id > 1000
-    ORDER BY m.id ASC LIMIT 21
+    ORDER BY m.id ASC LIMIT 20
     ```
 
     This works naturally with querydsl-ktx because `member.id gt null` returns `null`
@@ -185,10 +222,12 @@ instead of a `Pageable` object:
 ```kotlin
 // Pageable-based
 query.slice(pageable)
+query.exactSlice(pageable)
 query.page(pageable)
 
 // Value-based -- zero-indexed page number
 query.slice(page = 0, size = 20)
+query.exactSlice(page = 0, size = 20)
 query.page(page = 0, size = 20)
 
 // Offset/limit -- for fetch
@@ -325,11 +364,17 @@ fun complexSearch(pageable: Pageable): Page<MemberDto> {
 === "After"
 
     ```kotlin
-    // Slice -- no count query, accurate hasNext
+    // Slice -- no count query, optimistic hasNext (ideal for infinite scroll)
     fun search(name: String?, pageable: Pageable): Slice<Member> =
         selectFrom(member)
             .where(member.name contains name)
             .slice(pageable)
+
+    // Slice -- no count query, exact hasNext
+    fun searchExact(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .exactSlice(pageable)
 
     // Page -- with auto count query
     fun searchPage(name: String?, pageable: Pageable): Page<Member> =
@@ -371,11 +416,12 @@ fun search(name: String?, pageable: Pageable): Page<Member> =
         .page(pageable, memberSort)
 ```
 
-The `page` and `slice` methods accept an optional `SortSpec`:
+The `page`, `slice`, and `exactSlice` methods accept an optional `SortSpec`:
 
 | Method | Signature |
 |--------|-----------|
 | `slice` | `JPQLQuery<R>.slice(pageable, spec, fallback?)` |
+| `exactSlice` | `JPQLQuery<R>.exactSlice(pageable, spec, fallback?)` |
 | `page` | `JPAQuery<R>.page(pageable, spec, fallback?)` |
 | `page` | `JPQLQuery<R>.page(pageable, spec, fallback?, countQuery)` |
 

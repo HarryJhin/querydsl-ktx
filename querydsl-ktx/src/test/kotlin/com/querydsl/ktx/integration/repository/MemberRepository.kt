@@ -111,4 +111,10 @@ class MemberRepository : QuerydslRepository<Member>() {
 
     fun findSliceDirect(pageable: Pageable): Slice<Member> =
         selectFrom(member).slice(pageable)
+
+    fun findExactSlice(pageable: Pageable): Slice<Member> =
+        selectFrom(member).exactSlice(pageable, memberSort)
+
+    fun findExactSliceDirect(pageable: Pageable): Slice<Member> =
+        selectFrom(member).exactSlice(pageable)
 }

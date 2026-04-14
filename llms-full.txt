@@ -303,9 +303,13 @@ protected fun insert(path: EntityPath<*>): JPAInsertClause
 ### Pagination Helpers
 
 ```kotlin
-// Slice (no count query, uses pageSize+1 trick for hasNext)
+// Slice (no count query, optimistic hasNext -- fetches exactly pageSize rows)
 protected fun <R> JPQLQuery<R>.slice(pageable: Pageable): Slice<R>
 protected fun <R> JPQLQuery<R>.slice(page: Int, size: Int): Slice<R>
+
+// Exact Slice (no count query, exact hasNext -- fetches pageSize+1 rows)
+protected fun <R> JPQLQuery<R>.exactSlice(pageable: Pageable): Slice<R>
+protected fun <R> JPQLQuery<R>.exactSlice(page: Int, size: Int): Slice<R>
 
 // Page (with count query)
 protected fun <R> JPAQuery<R>.page(pageable: Pageable): Page<R>                          // auto count
@@ -323,6 +327,7 @@ protected fun <R> JPQLQuery<R>.fetch(sort: Sort): List<R>
 
 // SortSpec-based sorting + pagination
 protected fun <R> JPQLQuery<R>.slice(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Slice<R>
+protected fun <R> JPQLQuery<R>.exactSlice(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Slice<R>
 protected fun <R> JPAQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): Page<R>
 protected fun <R> JPQLQuery<R>.page(pageable: Pageable, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }, countQuery: () -> Long?): Page<R>
 protected fun <R> JPQLQuery<R>.applySort(sort: Sort, spec: SortSpec, fallback: () -> OrderSpecifier<*>? = { null }): JPQLQuery<R>

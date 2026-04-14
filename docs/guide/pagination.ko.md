@@ -35,25 +35,32 @@
 
 ---
 
-## slice vs page vs fetch
+## slice vs exactSlice vs page vs fetch
 
-| 메서드 | 반환 타입 | 카운트 쿼리 | 사용 시기 |
-|--------|---------|-------------|----------|
-| `slice(pageable)` | `Slice<R>` | 아니오 (N+1개 행 조회) | 무한 스크롤, 전방 탐색만 필요한 경우 |
-| `page(pageable)` | `Page<R>` | 예 (자동 생성) | 전체 건수가 필요한 전통적 페이지네이션 |
-| `fetch(pageable)` | `List<R>` | 아니오 | 윈도우 처리된 리스트만 필요한 경우 |
+| 메서드 | 반환 타입 | 카운트 쿼리 | hasNext 판별 | 사용 시기 |
+|--------|---------|-------------|-------------|----------|
+| `slice(pageable)` | `Slice<R>` | 아니오 | 낙관적 (pageSize행) | 무한 스크롤 |
+| `exactSlice(pageable)` | `Slice<R>` | 아니오 | 정확 (pageSize + 1행) | hasNext가 정확해야 하는 전방 탐색 |
+| `page(pageable)` | `Page<R>` | 예 (자동 생성) | 전체 건수 기반 | 전체 건수가 필요한 전통적 페이지네이션 |
+| `fetch(pageable)` | `List<R>` | 아니오 | 해당 없음 | 윈도우 처리된 리스트만 필요한 경우 |
 
-!!! tip "slice vs page 선택 기준"
-    **`slice`를 사용하세요** -- 모바일 앱, 무한 스크롤, "전체 건수"를 표시하지 않는 UI.
-    카운트 쿼리가 없으므로 더 빠릅니다.
+!!! tip "어떤 메서드를 사용할까"
+    **`slice`**(기본)를 사용하세요 -- 무한 스크롤, 모바일 앱.
+    정확히 pageSize개만 조회합니다. 꽉 찬 페이지가 반환되면 다음 데이터가 있다고 가정합니다.
+    전체 데이터가 pageSize의 정확한 배수인 경우, 마지막에 빈 요청이 1회 발생하지만
+    무한 스크롤 UI에서는 사용자에게 노출되지 않습니다.
 
-    **`page`를 사용하세요** -- "3 / 15 페이지"나 전체 결과 수를 표시하는 UI.
+    **`exactSlice`**를 사용하세요 -- `hasNext` 신호가 정확해야 하는 UI
+    (예: 마지막 페이지에서 사라져야 하는 "더 보기" 버튼).
+    pageSize + 1행을 조회하므로, 추가 행도 쿼리의 모든 join을 거칩니다.
+
+    **`page`**를 사용하세요 -- "3 / 15 페이지"나 전체 결과 수를 표시하는 UI.
     대용량 테이블에서 카운트 쿼리가 느릴 수 있으니, 데이터가 자주 변하지 않는다면
     전체 건수를 캐싱하는 것도 고려하세요.
 
 ### slice -- 카운트 쿼리 없음
 
-`pageSize + 1`개의 행을 조회하여 `hasNext`를 정확히 판단한 후 결과를 잘라냅니다.
+정확히 `pageSize`개의 행을 조회합니다. 결과 수가 pageSize와 같으면 `hasNext`는 `true`입니다.
 
 === "Kotlin"
 
@@ -70,14 +77,44 @@
     SELECT m.*
     FROM member m
     WHERE m.name LIKE '%keyword%'
+    LIMIT 20  -- 정확히 pageSize
+    OFFSET 0
+    ```
+
+!!! note "낙관적 hasNext"
+    전체 데이터가 pageSize의 정확한 배수인 경우, 마지막 꽉 찬 페이지에서
+    `hasNext = true`를 반환하여 빈 요청이 1회 추가로 발생합니다.
+    이는 `slice`가 주로 사용되는 무한 스크롤 UI에서는 문제가 되지 않습니다.
+    정확한 hasNext 판별이 필요하면 `exactSlice`를 사용하세요.
+
+### exactSlice -- 정확한 hasNext 판별
+
+`pageSize + 1`개의 행을 조회하여 `hasNext`를 정확히 판단한 후 결과를 잘라냅니다.
+
+=== "Kotlin"
+
+    ```kotlin
+    fun searchMembers(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .exactSlice(pageable)
+    ```
+
+=== "SQL"
+
+    ```sql
+    SELECT m.*
+    FROM member m
+    WHERE m.name LIKE '%keyword%'
     LIMIT 21  -- pageSize(20) + 1
     OFFSET 0
     ```
 
-!!! tip "왜 pageSize + 1인가?"
-    21개의 행이 반환되면 다음 페이지가 있다는 것을 알 수 있습니다. 처음 20개만 반환합니다.
-    20개 이하가 반환되면 다음 페이지가 없습니다. 이는 `content.size == pageSize` 검사보다
-    정확합니다 -- 마지막 페이지가 꽉 찬 경우 false positive가 발생하지 않습니다.
+!!! tip "slice보다 exactSlice를 선호해야 할 때"
+    추가 행도 쿼리의 모든 join을 거칩니다. 단순한 `selectFrom` 쿼리에서는
+    오버헤드가 무시할 수 있지만, join이 많은 쿼리에서는 추가 행의 비용이 누적됩니다.
+    join이 많은 쿼리에는 `slice`를, hasNext 정확성이 더 중요한 경우에는
+    `exactSlice`를 사용하세요.
 
 ### page -- 카운트 쿼리 포함
 
@@ -164,12 +201,12 @@ fun recentMembers(pageable: Pageable): List<Member> =
     -- 첫 페이지 (lastId = null): ID 필터 없음
     SELECT m.* FROM member m
     WHERE m.name LIKE '%keyword%'
-    ORDER BY m.id ASC LIMIT 21
+    ORDER BY m.id ASC LIMIT 20
 
     -- 다음 페이지 (lastId = 1000):
     SELECT m.* FROM member m
     WHERE m.name LIKE '%keyword%' AND m.id > 1000
-    ORDER BY m.id ASC LIMIT 21
+    ORDER BY m.id ASC LIMIT 20
     ```
 
     querydsl-ktx에서는 `member.id gt null`이 `null`을 반환하므로(건너뜀) 첫 페이지
@@ -185,10 +222,12 @@ fun recentMembers(pageable: Pageable): List<Member> =
 ```kotlin
 // Pageable 기반
 query.slice(pageable)
+query.exactSlice(pageable)
 query.page(pageable)
 
 // 값 기반 -- 0부터 시작하는 페이지 번호
 query.slice(page = 0, size = 20)
+query.exactSlice(page = 0, size = 20)
 query.page(page = 0, size = 20)
 
 // Offset/limit -- fetch용
@@ -325,11 +364,17 @@ fun complexSearch(pageable: Pageable): Page<MemberDto> {
 === "이후"
 
     ```kotlin
-    // Slice -- 카운트 쿼리 없음, 정확한 hasNext
+    // Slice -- 카운트 쿼리 없음, 낙관적 hasNext (무한 스크롤에 적합)
     fun search(name: String?, pageable: Pageable): Slice<Member> =
         selectFrom(member)
             .where(member.name contains name)
             .slice(pageable)
+
+    // Slice -- 카운트 쿼리 없음, 정확한 hasNext
+    fun searchExact(name: String?, pageable: Pageable): Slice<Member> =
+        selectFrom(member)
+            .where(member.name contains name)
+            .exactSlice(pageable)
 
     // Page -- 자동 카운트 쿼리
     fun searchPage(name: String?, pageable: Pageable): Page<Member> =
@@ -371,11 +416,12 @@ fun search(name: String?, pageable: Pageable): Page<Member> =
         .page(pageable, memberSort)
 ```
 
-`page`와 `slice` 메서드는 선택적으로 `SortSpec`을 받습니다:
+`page`, `slice`, `exactSlice` 메서드는 선택적으로 `SortSpec`을 받습니다:
 
 | 메서드 | 시그니처 |
 |--------|----------|
 | `slice` | `JPQLQuery<R>.slice(pageable, spec, fallback?)` |
+| `exactSlice` | `JPQLQuery<R>.exactSlice(pageable, spec, fallback?)` |
 | `page` | `JPAQuery<R>.page(pageable, spec, fallback?)` |
 | `page` | `JPQLQuery<R>.page(pageable, spec, fallback?, countQuery)` |
 

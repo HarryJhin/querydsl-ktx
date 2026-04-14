@@ -122,14 +122,42 @@ abstract class QuerydslSupport<T : Any> {
     // ========================================
 
     /**
-     * Performs slice-based pagination by fetching pageSize + 1 rows to determine hasNext.
+     * Performs slice-based pagination by fetching exactly [pageSize][Pageable.getPageSize] rows.
      *
-     * Use this instead of [page] when you only need forward navigation without a total count.
+     * Determines [hasNext][Slice.hasNext] optimistically: if the returned row count equals pageSize,
+     * it assumes more data exists. This avoids fetching an extra row, which can matter when
+     * the query involves joins.
+     *
+     * When the total row count is an exact multiple of pageSize, the last full page will
+     * report `hasNext = true`, resulting in one additional empty request.
+     * This is typically acceptable for infinite-scroll UIs where Slice is most commonly used.
+     *
+     * If you need exact hasNext detection, use [exactSlice] instead.
      *
      * @param pageable the page request
-     * @return a [Slice] with accurate hasNext information
+     * @return a [Slice] with optimistic hasNext information
      */
     protected fun <R> JPQLQuery<R>.slice(pageable: Pageable): Slice<R> {
+        val limit = pageable.pageSize
+        val content: List<R> = this
+            .applySort(pageable.sort)
+            .offset(pageable.offset)
+            .limit(limit.toLong())
+            .fetch()
+        val hasNext = content.size >= limit
+        return SliceImpl(content, pageable, hasNext)
+    }
+
+    /**
+     * Performs slice-based pagination by fetching pageSize + 1 rows to determine hasNext.
+     *
+     * Unlike [slice], this fetches one extra row to guarantee accurate hasNext detection,
+     * at the cost of that extra row going through all joins in the query.
+     *
+     * @param pageable the page request
+     * @return a [Slice] with exact hasNext information
+     */
+    protected fun <R> JPQLQuery<R>.exactSlice(pageable: Pageable): Slice<R> {
         val limit = pageable.pageSize
         val content: List<R> = this
             .applySort(pageable.sort)
@@ -146,6 +174,8 @@ abstract class QuerydslSupport<T : Any> {
      * Sorting is resolved through [spec] instead of the [Pageable]'s own sort,
      * so client-supplied property names are validated against the explicit mapping.
      *
+     * Uses optimistic hasNext detection. See [slice] for details.
+     *
      * ```kotlin
      * selectFrom(qMember)
      *     .where(condition)
@@ -155,7 +185,7 @@ abstract class QuerydslSupport<T : Any> {
      * @param pageable the page request (sort is ignored; use [spec] instead)
      * @param spec the [SortSpec] mapping property names to expressions
      * @param fallback optional default order when sort resolves to nothing
-     * @return a [Slice] with accurate hasNext information
+     * @return a [Slice] with optimistic hasNext information
      */
     protected fun <R> JPQLQuery<R>.slice(
         pageable: Pageable,
@@ -163,6 +193,32 @@ abstract class QuerydslSupport<T : Any> {
         fallback: (() -> OrderSpecifier<*>?)? = null,
     ): Slice<R> =
         this.applySort(pageable.sort, spec, fallback).slice(pageable.withoutSort)
+
+    /**
+     * Performs slice-based pagination with [SortSpec]-based sorting and exact hasNext detection.
+     *
+     * Sorting is resolved through [spec] instead of the [Pageable]'s own sort,
+     * so client-supplied property names are validated against the explicit mapping.
+     *
+     * Uses exact hasNext detection by fetching one extra row. See [exactSlice] for details.
+     *
+     * ```kotlin
+     * selectFrom(qMember)
+     *     .where(condition)
+     *     .exactSlice(pageable, memberSort)
+     * ```
+     *
+     * @param pageable the page request (sort is ignored; use [spec] instead)
+     * @param spec the [SortSpec] mapping property names to expressions
+     * @param fallback optional default order when sort resolves to nothing
+     * @return a [Slice] with exact hasNext information
+     */
+    protected fun <R> JPQLQuery<R>.exactSlice(
+        pageable: Pageable,
+        spec: SortSpec,
+        fallback: (() -> OrderSpecifier<*>?)? = null,
+    ): Slice<R> =
+        this.applySort(pageable.sort, spec, fallback).exactSlice(pageable.withoutSort)
 
     /**
      * Performs pagination with an auto-generated count query.
@@ -269,13 +325,27 @@ abstract class QuerydslSupport<T : Any> {
      * Performs slice-based pagination using page number and page size.
      *
      * Convenience overload that accepts raw values instead of [Pageable].
+     * Uses optimistic hasNext detection. See [slice] for details.
      *
      * @param page zero-based page number
      * @param size number of items per page
-     * @return a [Slice] with accurate hasNext information
+     * @return a [Slice] with optimistic hasNext information
      */
     protected fun <R> JPQLQuery<R>.slice(page: Int, size: Int): Slice<R> =
         slice(PageRequest.of(page, size))
+
+    /**
+     * Performs slice-based pagination with exact hasNext detection using page number and page size.
+     *
+     * Convenience overload that accepts raw values instead of [Pageable].
+     * Fetches one extra row for accurate hasNext detection. See [exactSlice] for details.
+     *
+     * @param page zero-based page number
+     * @param size number of items per page
+     * @return a [Slice] with exact hasNext information
+     */
+    protected fun <R> JPQLQuery<R>.exactSlice(page: Int, size: Int): Slice<R> =
+        exactSlice(PageRequest.of(page, size))
 
     /**
      * Performs pagination with an auto-generated count query using page number and page size.

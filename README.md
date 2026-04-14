@@ -84,7 +84,7 @@ Extensions are scoped through **interface implementation** -- no global namespac
 
 - **Null-safe dynamic queries** -- `entity.status eq null` returns `null` (skipped), no `if` check needed. Replaces both BooleanBuilder and per-field helper functions.
 - **One-sided range survival** -- `entity.date between (from to null)` becomes `date >= from`. A single expression handles 4 combinations that used to need 3-branch `if/else`.
-- **Pagination without fetchResults()** -- `fetchResults()` is deprecated since QueryDSL 5.0. `page()` auto-generates count queries for simple cases and accepts a lambda for complex ones. `slice()` avoids count queries entirely.
+- **Pagination without fetchResults()** -- `fetchResults()` is deprecated since QueryDSL 5.0. `page()` auto-generates count queries for simple cases and accepts a lambda for complex ones. `slice()` and `exactSlice()` avoid count queries entirely.
 - **Type-safe dynamic sorting** -- `SortSpec` provides a whitelist mapping for `Sort` property names. No more `?sort=password,asc` security holes or broken join-column sorting.
 - **8 extension interfaces** -- null-safe infix operators for Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery expressions.
 - **Reified expression templates** -- `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`.

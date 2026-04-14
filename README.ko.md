@@ -84,7 +84,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 
 - **Null-safe 동적 쿼리** -- `entity.status eq null`은 `null`을 반환합니다(건너뜀). `if` 체크가 필요 없습니다. BooleanBuilder와 필드별 헬퍼 함수를 모두 대체합니다.
 - **단측 범위 생존** -- `entity.date between (from to null)`은 `date >= from`이 됩니다. 기존에 3분기 `if/else`가 필요했던 4가지 조합을 하나의 표현식으로 처리합니다.
-- **fetchResults() 없는 페이지네이션** -- `fetchResults()`는 QueryDSL 5.0부터 deprecated입니다. `page()`는 단순한 경우 카운트 쿼리를 자동 생성하고, 복잡한 경우 람다를 받습니다. `slice()`는 카운트 쿼리를 완전히 회피합니다.
+- **fetchResults() 없는 페이지네이션** -- `fetchResults()`는 QueryDSL 5.0부터 deprecated입니다. `page()`는 단순한 경우 카운트 쿼리를 자동 생성하고, 복잡한 경우 람다를 받습니다. `slice()`와 `exactSlice()`는 카운트 쿼리를 완전히 회피합니다.
 - **타입 세이프 동적 정렬** -- `SortSpec`은 `Sort` 프로퍼티명에 대한 화이트리스트 매핑을 제공합니다. `?sort=password,asc` 보안 구멍이나 조인 컬럼 정렬 오류가 없습니다.
 - **8개 확장 인터페이스** -- Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery 표현식용 null-safe infix 연산자.
 - **Reified 표현식 템플릿** -- `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`.

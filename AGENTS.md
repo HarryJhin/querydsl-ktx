@@ -101,6 +101,6 @@ mkdocs build                              # Build docs site
 ## Conventions
 
 - Dependencies: `compileOnly` for all external libraries (user provides versions)
-- Pagination: `slice()` returns Slice, `page()` returns Page, `fetch()` returns List
+- Pagination: `slice()` (optimistic hasNext) and `exactSlice()` (exact hasNext) return Slice, `page()` returns Page, `fetch()` returns List
 - Bulk DML: wrap in `modifying { }` for flush + clear
 - Naming: verb form (slice, page, fetch), not gerund (slicing, paging, fetching)
