@@ -1,12 +1,8 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { defineConfig } from 'vitepress'
 import { groupIconVitePlugin } from 'vitepress-plugin-group-icons'
+import { version } from './version'
 import enConfig from '../en/config'
 import koConfig from '../ko/config'
-
-export const version = readFileSync(resolve(__dirname, '../../gradle.properties'), 'utf-8')
-  .match(/version=(.*)/)?.[1]?.trim() ?? '0.0.0'
 
 export default defineConfig({
   title: 'querydsl-ktx',

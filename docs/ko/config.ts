@@ -1,5 +1,5 @@
 import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress'
-import { version } from '../.vitepress/config'
+import { version } from '../.vitepress/version'
 
 export default {
   themeConfig: {
