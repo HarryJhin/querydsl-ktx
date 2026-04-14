@@ -6,17 +6,17 @@ Write your first null-safe dynamic query in 5 minutes.
 
 ## Step 1: Add the dependency
 
-=== "Gradle (Kotlin DSL)"
+::: code-group
 
-    ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
-    ```
+```kotlin [Gradle (Kotlin DSL)]
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+```
 
-=== "Gradle (Groovy DSL)"
+```groovy [Gradle (Groovy DSL)]
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+```
 
-    ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
-    ```
+:::
 
 See [Installation](installation.md) for Maven and module selection details.
 
@@ -34,7 +34,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 
 `QuerydslRepository<T>` gives you:
 
-- All 7 null-safe infix extension interfaces
+- All 8 null-safe infix extension interfaces
 - `JPAQueryFactory` wrappers (`selectFrom`, `select`, `update`, `delete`)
 - Pagination helpers (`page`, `slice`, `fetch`)
 - Bulk DML helper (`modifying`)
@@ -52,7 +52,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
     private val member = QMember.member
 
     fun search(
-        name: String?,       // (1)!
+        name: String?,       // nullable parameter
         status: Status?,
         minAge: Int?,
         maxAge: Int?,
@@ -60,19 +60,13 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
     ): Page<Member> =
         selectFrom(member)
             .where(
-                member.name contains name,       // (2)!
-                member.status eq status,          // (3)!
-                member.age between (minAge to maxAge), // (4)!
+                member.name contains name,       // null ⟹ skip
+                member.status eq status,          // null ⟹ skip
+                member.age between (minAge to maxAge), // null pair ⟹ skip
             )
-            .page(pageable)                      // (5)!
+            .page(pageable)                      // auto count query
 }
 ```
-
-1. All parameters are nullable -- the caller decides which filters to apply.
-2. `contains` on a `StringExpression` generates `LIKE '%name%'`. When `name` is null, the condition is skipped entirely.
-3. `eq` on a `SimpleExpression` generates `status = ?`. When `status` is null, skipped.
-4. `between` with a `Pair` handles partial ranges: both null = skip, one null = `>=` or `<=`, both present = `BETWEEN`.
-5. `page()` applies offset/limit and runs a count query automatically.
 
 ---
 
@@ -103,29 +97,30 @@ class MemberService(
 }
 ```
 
-=== "All filters (generated SQL)"
+::: code-group
 
-    ```sql
-    SELECT m.*
-    FROM member m
-    WHERE m.name LIKE '%John%'
-      AND m.status = 'ACTIVE'
-      AND m.age BETWEEN 20 AND 60
-    LIMIT 20 OFFSET 0
-    ```
+```sql [All filters (generated SQL)]
+SELECT m.*
+FROM member m
+WHERE m.name LIKE '%John%'
+  AND m.status = 'ACTIVE'
+  AND m.age BETWEEN 20 AND 60
+LIMIT 20 OFFSET 0
+```
 
-=== "Name only (generated SQL)"
+```sql [Name only (generated SQL)]
+SELECT m.*
+FROM member m
+WHERE m.name LIKE '%John%'
+LIMIT 20 OFFSET 0
+```
 
-    ```sql
-    SELECT m.*
-    FROM member m
-    WHERE m.name LIKE '%John%'
-    LIMIT 20 OFFSET 0
-    ```
+:::
 
-!!! tip "No BooleanBuilder, no if-checks"
-    The same repository method handles any combination of filters.
-    Null parameters are simply ignored -- no conditional logic needed.
+::: tip No BooleanBuilder, no if-checks
+The same repository method handles any combination of filters.
+Null parameters are simply ignored -- no conditional logic needed.
+:::
 
 ---
 
@@ -176,6 +171,6 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 ## What's Next?
 
 - [Dynamic Queries](../guide/dynamic-queries.md) -- Understand the null-safety contract in depth
-- [Extension Reference](../guide/extensions.md) -- All 7 interfaces with function listings
+- [Extension Reference](../guide/extensions.md) -- All 8 interfaces with function listings
 - [Pagination](../guide/pagination.md) -- slice vs page vs fetch
 - [Bulk DML](../guide/bulk-dml.md) -- Safe update and delete operations

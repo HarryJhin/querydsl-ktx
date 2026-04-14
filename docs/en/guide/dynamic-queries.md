@@ -51,29 +51,29 @@ Every extension function in querydsl-ktx follows one rule:
 
 This eliminates the `BooleanBuilder` + `if-null-check` pattern entirely.
 
-=== "Before"
+::: code-group
 
-    ```kotlin
-    val builder = BooleanBuilder()
-    if (name != null) builder.and(entity.name.contains(name))
-    if (status != null) builder.and(entity.status.eq(status))
-    if (from != null && to != null) {
-        builder.and(entity.createdAt.between(from, to))
-    } else if (from != null) {
-        builder.and(entity.createdAt.goe(from))
-    } else if (to != null) {
-        builder.and(entity.createdAt.loe(to))
-    }
-    ```
+```kotlin [Before]
+val builder = BooleanBuilder()
+if (name != null) builder.and(entity.name.contains(name))
+if (status != null) builder.and(entity.status.eq(status))
+if (from != null && to != null) {
+    builder.and(entity.createdAt.between(from, to))
+} else if (from != null) {
+    builder.and(entity.createdAt.goe(from))
+} else if (to != null) {
+    builder.and(entity.createdAt.loe(to))
+}
+```
 
-=== "After"
+```kotlin [After]
+var where: BooleanExpression? = null
+where = where and (entity.name contains name)
+where = where and (entity.status eq status)
+where = where and (entity.createdAt between (from to to))
+```
 
-    ```kotlin
-    var where: BooleanExpression? = null
-    where = where and (entity.name contains name)
-    where = where and (entity.status eq status)
-    where = where and (entity.createdAt between (from to to))
-    ```
+:::
 
 Or even shorter inside a `QuerydslRepository`:
 
@@ -87,10 +87,11 @@ selectFrom(entity)
     .fetch()
 ```
 
-!!! note "How `.where()` handles nulls"
-    QueryDSL's `.where()` already ignores null predicates in its vararg overload.
-    Combined with querydsl-ktx's null-returning extensions, null parameters are
-    transparently filtered at every level.
+::: info How `.where()` handles nulls
+QueryDSL's `.where()` already ignores null predicates in its vararg overload.
+Combined with querydsl-ktx's null-returning extensions, null parameters are
+transparently filtered at every level.
+:::
 
 ---
 
@@ -98,59 +99,60 @@ selectFrom(entity)
 
 You've probably written (or seen) per-field helper functions like these:
 
-=== "Per-field helpers (hand-written)"
+::: code-group
 
-    ```kotlin
-    private fun statusEq(status: String?): BooleanExpression? =
-        status?.let { member.status.eq(it) }
+```kotlin [Per-field helpers (hand-written)]
+private fun statusEq(status: String?): BooleanExpression? =
+    status?.let { member.status.eq(it) }
 
-    private fun nameLike(name: String?): BooleanExpression? =
-        name?.let { member.name.contains(it) }
+private fun nameLike(name: String?): BooleanExpression? =
+    name?.let { member.name.contains(it) }
 
-    private fun ageBetween(min: Int?, max: Int?): BooleanExpression? {
-        if (min != null && max != null) return member.age.between(min, max)
-        if (min != null) return member.age.goe(min)
-        if (max != null) return member.age.loe(max)
-        return null
-    }
+private fun ageBetween(min: Int?, max: Int?): BooleanExpression? {
+    if (min != null && max != null) return member.age.between(min, max)
+    if (min != null) return member.age.goe(min)
+    if (max != null) return member.age.loe(max)
+    return null
+}
 
-    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
-        selectFrom(member)
-            .where(statusEq(status), nameLike(name), ageBetween(minAge, maxAge))
-            .fetch()
-    ```
+fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+    selectFrom(member)
+        .where(statusEq(status), nameLike(name), ageBetween(minAge, maxAge))
+        .fetch()
+```
 
-=== "querydsl-ktx (no helpers needed)"
+```kotlin [querydsl-ktx (no helpers needed)]
+fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
+    selectFrom(member)
+        .where(
+            member.status eq status,
+            member.name contains name,
+            member.age between (minAge to maxAge),
+        )
+        .fetch()
+```
 
-    ```kotlin
-    fun search(status: String?, name: String?, minAge: Int?, maxAge: Int?) =
-        selectFrom(member)
-            .where(
-                member.status eq status,
-                member.name contains name,
-                member.age between (minAge to maxAge),
-            )
-            .fetch()
-    ```
+:::
 
 The querydsl-ktx version does exactly the same thing -- `member.status eq null` returns `null`,
 which `.where()` ignores. The `between` with a `Pair` handles all four combinations
 (both, min-only, max-only, neither) in a single expression.
 
-!!! tip "When to still extract helpers"
-    querydsl-ktx doesn't mean you should never extract methods. Complex conditions
-    that combine multiple fields or contain business logic are still better as named methods:
+::: tip When to still extract helpers
+querydsl-ktx doesn't mean you should never extract methods. Complex conditions
+that combine multiple fields or contain business logic are still better as named methods:
 
-    ```kotlin
-    // This is still cleaner as a named method
-    private fun isEligibleForPromotion(): BooleanExpression? =
-        (member.grade eq "VIP") or (
-            (member.totalPurchase goe 100000) and (member.active eq true)
-        )
-    ```
+```kotlin
+// This is still cleaner as a named method
+private fun isEligibleForPromotion(): BooleanExpression? =
+    (member.grade eq "VIP") or (
+        (member.totalPurchase goe 100000) and (member.active eq true)
+    )
+```
 
-    The rule of thumb: if a condition maps 1:1 to a field, use the inline extension.
-    If it encodes business logic, extract it.
+The rule of thumb: if a condition maps 1:1 to a field, use the inline extension.
+If it encodes business logic, extract it.
+:::
 
 ---
 
@@ -197,25 +199,25 @@ val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
 val predicate = (entity.active eq true) and rolePredicate
 ```
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    selectFrom(entity)
-        .where(
-            entity.active eq true,
-            (entity.role eq "ADMIN") or (entity.role eq "MANAGER"),
-        )
-        .fetch()
-    ```
+```kotlin [Kotlin]
+selectFrom(entity)
+    .where(
+        entity.active eq true,
+        (entity.role eq "ADMIN") or (entity.role eq "MANAGER"),
+    )
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT e.*
+FROM entity e
+WHERE e.active = true
+  AND (e.role = 'ADMIN' OR e.role = 'MANAGER')
+```
 
-    ```sql
-    SELECT e.*
-    FROM entity e
-    WHERE e.active = true
-      AND (e.role = 'ADMIN' OR e.role = 'MANAGER')
-    ```
+:::
 
 ---
 
@@ -245,9 +247,10 @@ All extension functions follow consistent null behavior:
 |-------------|------------|-----------|--------|
 | `null` | `null` | `null` | `null` (skipped) |
 
-!!! warning "Null expression vs null argument"
-    `this` being null means the QueryDSL expression itself is null (rare in practice).
-    `arg` being null means the filter parameter was not provided -- the common case.
+::: warning Null expression vs null argument
+`this` being null means the QueryDSL expression itself is null (rare in practice).
+`arg` being null means the filter parameter was not provided -- the common case.
+:::
 
 ---
 
@@ -257,20 +260,20 @@ All extension functions follow consistent null behavior:
 
 "Base condition AND (any of these)":
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val predicate = (entity.active eq true) andAnyOf listOf(
-        entity.role eq role,
-        entity.department eq department,
-    )
-    ```
+```kotlin [Kotlin]
+val predicate = (entity.active eq true) andAnyOf listOf(
+    entity.role eq role,
+    entity.department eq department,
+)
+```
 
-=== "SQL"
+```sql [SQL]
+active = true AND (role = ? OR department = ?)
+```
 
-    ```sql
-    active = true AND (role = ? OR department = ?)
-    ```
+:::
 
 If both `role` and `department` are null, the OR group collapses to null and only the base condition remains.
 
@@ -278,20 +281,20 @@ If both `role` and `department` are null, the OR group collapses to null and onl
 
 "Base condition OR (all of these)":
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val predicate = (entity.vip eq true) orAllOf listOf(
-        entity.age goe minAge,
-        entity.active eq true,
-    )
-    ```
+```kotlin [Kotlin]
+val predicate = (entity.vip eq true) orAllOf listOf(
+    entity.age goe minAge,
+    entity.active eq true,
+)
+```
 
-=== "SQL"
+```sql [SQL]
+vip = true OR (age >= ? AND active = true)
+```
 
-    ```sql
-    vip = true OR (age >= ? AND active = true)
-    ```
+:::
 
 ---
 
@@ -322,9 +325,10 @@ fun search(criteria: SearchCriteria): List<Entity> {
 }
 ```
 
-!!! tip "When to use `if` vs null-safety"
-    - **Simple null check** -- Let the extension handle it. `entity.status eq criteria.status` is enough.
-    - **Complex logic** (e.g., keyword search across multiple fields) -- Use an explicit `if` block to build the sub-expression, then combine with `and`.
+::: tip When to use `if` vs null-safety
+- **Simple null check** -- Let the extension handle it. `entity.status eq criteria.status` is enough.
+- **Complex logic** (e.g., keyword search across multiple fields) -- Use an explicit `if` block to build the sub-expression, then combine with `and`.
+:::
 
 ---
 

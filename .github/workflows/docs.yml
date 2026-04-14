@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
-      - 'mkdocs.yml'
+      - 'package.json'
       - 'querydsl-ktx/src/main/kotlin/**'
 
 permissions:
@@ -29,26 +29,26 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
-
-      - name: Install MkDocs Material
-        run: pip install mkdocs-material "mkdocs-static-i18n>=1.2.0,<2" mkdocs-macros-plugin
+          node-version: '20'
 
       - name: Generate Dokka API docs
         run: ./gradlew dokkaHtmlMultiModule
 
-      - name: Copy Dokka into MkDocs
-        run: cp -r build/dokka/htmlMultiModule docs/api
+      - name: Copy Dokka into VitePress public
+        run: cp -r build/dokka/htmlMultiModule docs/public/api
 
-      - name: Build MkDocs
-        run: mkdocs build
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build VitePress
+        run: npm run docs:build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: docs/.vitepress/dist
 
       - name: Cleanup Gradle Cache
         run: |

@@ -11,14 +11,15 @@ querydsl-ktx는 Kotlin의 reified 타입 파라미터로 이 보일러플레이�
 
 ## 템플릿이 필요한 경우
 
-!!! tip "QueryDSL의 내장 연산자로 부족할 때"
-    다음과 같은 경우에 템플릿 표현식이 필요합니다:
+::: tip QueryDSL의 내장 연산자로 부족할 때
+다음과 같은 경우에 템플릿 표현식이 필요합니다:
 
-    - **DB 고유 함수** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
-    - **타입 캐스팅** -- 집계 정밀도를 위한 `CAST(column AS DECIMAL)`
-    - **윈도우 함수** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
-    - **커스텀 SQL 함수** -- `@FunctionContributor`나 Hibernate dialect로 등록한 함수
-    - **날짜/시간 함수** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
+- **DB 고유 함수** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
+- **타입 캐스팅** -- 집계 정밀도를 위한 `CAST(column AS DECIMAL)`
+- **윈도우 함수** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
+- **커스텀 SQL 함수** -- `@FunctionContributor`나 Hibernate dialect로 등록한 함수
+- **날짜/시간 함수** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
+:::
 
 ---
 
@@ -39,21 +40,21 @@ querydsl-ktx는 Kotlin의 reified 타입 파라미터로 이 보일러플레이�
 
 ### Before / After
 
-=== "Before (기본 QueryDSL)"
+::: code-group
 
-    ```kotlin
-    Expressions.numberTemplate(Float::class.java, "RAND()")
-    Expressions.dateTimeTemplate(LocalDateTime::class.java, "NOW()")
-    Expressions.numberTemplate(Long::class.java, "CAST({0} AS BIGINT)", order.price)
-    ```
+```kotlin [Before (기본 QueryDSL)]
+Expressions.numberTemplate(Float::class.java, "RAND()")
+Expressions.dateTimeTemplate(LocalDateTime::class.java, "NOW()")
+Expressions.numberTemplate(Long::class.java, "CAST({0} AS BIGINT)", order.price)
+```
 
-=== "After (querydsl-ktx)"
+```kotlin [After (querydsl-ktx)]
+numberTemplate<Float>("RAND()")
+dateTimeTemplate<LocalDateTime>("NOW()")
+numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
+```
 
-    ```kotlin
-    numberTemplate<Float>("RAND()")
-    dateTimeTemplate<LocalDateTime>("NOW()")
-    numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
-    ```
+:::
 
 ---
 
@@ -63,85 +64,85 @@ querydsl-ktx는 Kotlin의 reified 타입 파라미터로 이 보일러플레이�
 
 태그나 카테고리를 하나의 문자열로 모으기 -- 어드민 대시보드에서 자주 쓰입니다:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val tagList = stringTemplate(
-        "GROUP_CONCAT({0} SEPARATOR ', ')",
-        productTag.name,
-    )
+```kotlin [Kotlin]
+val tagList = stringTemplate(
+    "GROUP_CONCAT({0} SEPARATOR ', ')",
+    productTag.name,
+)
 
-    select(product.name, tagList)
-        .from(product)
-        .join(productTag).on(productTag.productId.eq(product.id))
-        .groupBy(product.id)
-        .fetch()
-    ```
+select(product.name, tagList)
+    .from(product)
+    .join(productTag).on(productTag.productId.eq(product.id))
+    .groupBy(product.id)
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT p.name, GROUP_CONCAT(pt.name SEPARATOR ', ')
+FROM product p
+JOIN product_tag pt ON pt.product_id = p.id
+GROUP BY p.id
+```
 
-    ```sql
-    SELECT p.name, GROUP_CONCAT(pt.name SEPARATOR ', ')
-    FROM product p
-    JOIN product_tag pt ON pt.product_id = p.id
-    GROUP BY p.id
-    ```
+:::
 
 ### CAST로 집계 정밀도 확보
 
 정수 컬럼의 `SUM`이나 `AVG`에서 소수점이 날아가는 경우:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val avgPrice = numberTemplate<Double>(
-        "CAST(AVG({0}) AS DOUBLE)",
-        orderItem.price,
-    )
+```kotlin [Kotlin]
+val avgPrice = numberTemplate<Double>(
+    "CAST(AVG({0}) AS DOUBLE)",
+    orderItem.price,
+)
 
-    select(product.category, avgPrice)
-        .from(orderItem)
-        .join(product).on(orderItem.productId.eq(product.id))
-        .groupBy(product.category)
-        .fetch()
-    ```
+select(product.category, avgPrice)
+    .from(orderItem)
+    .join(product).on(orderItem.productId.eq(product.id))
+    .groupBy(product.category)
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT p.category, CAST(AVG(oi.price) AS DOUBLE)
+FROM order_item oi
+JOIN product p ON oi.product_id = p.id
+GROUP BY p.category
+```
 
-    ```sql
-    SELECT p.category, CAST(AVG(oi.price) AS DOUBLE)
-    FROM order_item oi
-    JOIN product p ON oi.product_id = p.id
-    GROUP BY p.category
-    ```
+:::
 
 ### 날짜 포맷팅
 
 리포트용 날짜 포맷팅이나 월별 그룹핑:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val yearMonth = stringTemplate(
-        "DATE_FORMAT({0}, '%Y-%m')",
-        order.createdAt,
-    )
+```kotlin [Kotlin]
+val yearMonth = stringTemplate(
+    "DATE_FORMAT({0}, '%Y-%m')",
+    order.createdAt,
+)
 
-    select(yearMonth, order.count())
-        .from(order)
-        .groupBy(yearMonth)
-        .orderBy(yearMonth.asc())
-        .fetch()
-    ```
+select(yearMonth, order.count())
+    .from(order)
+    .groupBy(yearMonth)
+    .orderBy(yearMonth.asc())
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT DATE_FORMAT(o.created_at, '%Y-%m'), COUNT(o.id)
+FROM orders o
+GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+ORDER BY DATE_FORMAT(o.created_at, '%Y-%m') ASC
+```
 
-    ```sql
-    SELECT DATE_FORMAT(o.created_at, '%Y-%m'), COUNT(o.id)
-    FROM orders o
-    GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
-    ORDER BY DATE_FORMAT(o.created_at, '%Y-%m') ASC
-    ```
+:::
 
 ### 커스텀 Hibernate 함수
 
@@ -235,23 +236,24 @@ Reified 타입 추론을 사용하여 상수 표현식을 생성합니다. 상�
 inline fun <reified T> constant(value: T): Expression<T>
 ```
 
-=== "Before (기본 QueryDSL)"
+::: code-group
 
-    ```kotlin
-    Expressions.constant(42)
-    ```
+```kotlin [Before (기본 QueryDSL)]
+Expressions.constant(42)
+```
 
-=== "After (querydsl-ktx)"
+```kotlin [After (querydsl-ktx)]
+constant(42)
+```
 
-    ```kotlin
-    constant(42)
-    ```
+:::
 
-!!! warning "상수 vs 파라미터"
-    상수는 바인드 파라미터가 아니라 쿼리 문자열에 직접 포함됩니다.
-    진짜 고정된 값(예: EXISTS 서브쿼리의 `SELECT 1`)에만 사용하세요.
-    사용자 입력에는 사용하지 마세요. 사용자 제공 값은 `as*` 래핑 함수를
-    사용하거나 `eq` 같은 확장 연산자에 직접 전달하세요.
+::: warning 상수 vs 파라미터
+상수는 바인드 파라미터가 아니라 쿼리 문자열에 직접 포함됩니다.
+진짜 고정된 값(예: EXISTS 서브쿼리의 `SELECT 1`)에만 사용하세요.
+사용자 입력에는 사용하지 마세요. 사용자 제공 값은 `as*` 래핑 함수를
+사용하거나 `eq` 같은 확장 연산자에 직접 전달하세요.
+:::
 
 ---
 

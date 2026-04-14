@@ -38,37 +38,37 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // AND -- null 쪽은 무시됨
-    val predicate = (entity.active eq true) and (entity.name eq name)
+```kotlin [Kotlin]
+// AND -- null 쪽은 무시됨
+val predicate = (entity.active eq true) and (entity.name eq name)
 
-    // OR 그룹
-    val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
+// OR 그룹
+val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
 
-    // AND와 OR 서브그룹
-    val complex = (entity.active eq true) andAnyOf listOf(
-        entity.role eq role,
-        entity.department eq department,
-    )
-    ```
+// AND와 OR 서브그룹
+val complex = (entity.active eq true) andAnyOf listOf(
+    entity.role eq role,
+    entity.department eq department,
+)
+```
 
-=== "SQL"
+```sql [SQL]
+-- AND (name = 'John')
+active = true AND name = 'John'
 
-    ```sql
-    -- AND (name = 'John')
-    active = true AND name = 'John'
+-- AND (name = null) -> 왼쪽만 남음
+active = true
 
-    -- AND (name = null) -> 왼쪽만 남음
-    active = true
+-- OR 그룹
+role = 'ADMIN' OR role = 'MANAGER'
 
-    -- OR 그룹
-    role = 'ADMIN' OR role = 'MANAGER'
+-- AND와 OR 서브그룹
+active = true AND (role = ? OR department = ?)
+```
 
-    -- AND와 OR 서브그룹
-    active = true AND (role = ? OR department = ?)
-    ```
+:::
 
 ---
 
@@ -90,39 +90,40 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // 동등성
-    entity.status eq "ACTIVE"              // status = 'ACTIVE'
-    entity.status eq null                  // null (건너뛰기)
+```kotlin [Kotlin]
+// 동등성
+entity.status eq "ACTIVE"              // status = 'ACTIVE'
+entity.status eq null                  // null (건너뛰기)
 
-    // 부등식
-    entity.status ne "DELETED"             // status != 'DELETED'
+// 부등식
+entity.status ne "DELETED"             // status != 'DELETED'
 
-    // IN / NOT IN
-    entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
-    entity.status notIn listOf("C")       // status NOT IN ('C')
-    entity.status `in` null               // null (건너뛰기)
+// IN / NOT IN
+entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
+entity.status notIn listOf("C")       // status NOT IN ('C')
+entity.status `in` null               // null (건너뛰기)
 
-    // 대량 IN절 자동 분할 (기본 1000개씩)
-    entity.id inChunked largeIdList   // id IN (1..1000) OR id IN (1001..2000)
-    entity.id.inChunked(ids, 500)     // 커스텀 청크 사이즈
-    ```
+// 대량 IN절 자동 분할 (기본 1000개씩)
+entity.id inChunked largeIdList   // id IN (1..1000) OR id IN (1001..2000)
+entity.id.inChunked(ids, 500)     // 커스텀 청크 사이즈
+```
 
-=== "SQL"
+```sql [SQL]
+status = 'ACTIVE'
+status != 'DELETED'
+status IN ('A', 'B')
+status NOT IN ('C')
+```
 
-    ```sql
-    status = 'ACTIVE'
-    status != 'DELETED'
-    status IN ('A', 'B')
-    status NOT IN ('C')
-    ```
+:::
 
-!!! tip "Oracle의 IN 절 제한 대응"
-    Oracle은 단일 IN 절에 1000개 항목 제한이 있습니다.
-    `inChunked`는 대량 컬렉션을 자동으로 여러 IN 절로 분할하고 OR로 연결합니다.
-    기본 청크 사이즈는 1000이며, 커스텀 사이즈 지정이 가능합니다.
+::: tip Oracle의 IN 절 제한 대응
+Oracle은 단일 IN 절에 1000개 항목 제한이 있습니다.
+`inChunked`는 대량 컬렉션을 자동으로 여러 IN 절로 분할하고 OR로 연결합니다.
+기본 청크 사이즈는 1000이며, 커스텀 사이즈 지정이 가능합니다.
+:::
 
 ---
 
@@ -150,53 +151,54 @@ Null-safe AND/OR 결합자. 동적 WHERE 절 구성의 기반입니다.
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // 단순 비교
-    entity.date gt startDate       // date > ?
-    entity.date goe startDate      // date >= ?
-    entity.date lt endDate         // date < ?
-    entity.date loe endDate        // date <= ?
+```kotlin [Kotlin]
+// 단순 비교
+entity.date gt startDate       // date > ?
+entity.date goe startDate      // date >= ?
+entity.date lt endDate         // date < ?
+entity.date loe endDate        // date <= ?
 
-    // Pair를 사용한 BETWEEN -- 부분 범위 지원
-    entity.date between (from to to)       // BETWEEN ? AND ?
-    entity.date between (from to null)     // date >= ?
-    entity.date between (null to to)       // date <= ?
-    entity.date between (null to null)     // null (건너뛰기)
+// Pair를 사용한 BETWEEN -- 부분 범위 지원
+entity.date between (from to to)       // BETWEEN ? AND ?
+entity.date between (from to null)     // date >= ?
+entity.date between (null to to)       // date <= ?
+entity.date between (null to null)     // null (건너뛰기)
 
-    // ClosedRange를 사용한 BETWEEN
-    entity.age between (20..60)            // BETWEEN 20 AND 60
+// ClosedRange를 사용한 BETWEEN
+entity.age between (20..60)            // BETWEEN 20 AND 60
 
-    // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
-    now between (sale.startAt to sale.endAt)
-    // -> start_at <= now AND end_at >= now
+// 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+now between (sale.startAt to sale.endAt)
+// -> start_at <= now AND end_at >= now
 
-    // rangeTo 연산자 (..) -- Pair 생성 구문 설탕
-    entity.date between (entity.startDate..entity.endDate)
-    // 동일: entity.date between (entity.startDate to entity.endDate)
-    ```
+// rangeTo 연산자 (..) -- Pair 생성 구문 설탕
+entity.date between (entity.startDate..entity.endDate)
+// 동일: entity.date between (entity.startDate to entity.endDate)
+```
 
-=== "SQL"
+```sql [SQL]
+-- 전체 범위
+created_at BETWEEN '2024-01-01' AND '2024-12-31'
 
-    ```sql
-    -- 전체 범위
-    created_at BETWEEN '2024-01-01' AND '2024-12-31'
+-- 단측 (from만)
+created_at >= '2024-01-01'
 
-    -- 단측 (from만)
-    created_at >= '2024-01-01'
+-- 단측 (to만)
+created_at <= '2024-12-31'
 
-    -- 단측 (to만)
-    created_at <= '2024-12-31'
+-- ClosedRange
+age BETWEEN 20 AND 60
+```
 
-    -- ClosedRange
-    age BETWEEN 20 AND 60
-    ```
+:::
 
-!!! tip "선택적 날짜 범위를 위한 Pair 기반 between"
-    `Pair` 오버로드는 날짜 범위 필터에서 가장 강력한 기능입니다.
-    하나의 표현식으로 네 가지 조합(양쪽 값, from만, to만, 둘 다 없음)을 모두 처리합니다.
-    그렇지 않으면 4분기 `if/else`가 필요합니다.
+::: tip 선택적 날짜 범위를 위한 Pair 기반 between
+`Pair` 오버로드는 날짜 범위 필터에서 가장 강력한 기능입니다.
+하나의 표현식으로 네 가지 조합(양쪽 값, from만, to만, 둘 다 없음)을 모두 처리합니다.
+그렇지 않으면 4분기 `if/else`가 필요합니다.
+:::
 
 ### 역방향 Between -- 실전 활용 사례
 
@@ -234,23 +236,24 @@ selectFrom(order)
 
 역방향 between도 null-safe입니다: 값이 null이면 전체 표현식이 null을 반환합니다(건너뜀).
 
-!!! tip "인프런에서 배운 BooleanExpression 패턴과의 비교"
-    김영한 강의에서 배운 BooleanExpression 반환 메서드 패턴을 기억하시나요?
+::: tip 인프런에서 배운 BooleanExpression 패턴과의 비교
+김영한 강의에서 배운 BooleanExpression 반환 메서드 패턴을 기억하시나요?
 
-    ```kotlin
-    // 강의 스타일 -- 필드마다 메서드 하나씩
-    fun isWithinPeriod(now: LocalDateTime?): BooleanExpression? {
-        if (now == null) return null
-        return event.startAt.loe(now).and(event.endAt.goe(now))
-    }
-    ```
+```kotlin
+// 강의 스타일 -- 필드마다 메서드 하나씩
+fun isWithinPeriod(now: LocalDateTime?): BooleanExpression? {
+    if (now == null) return null
+    return event.startAt.loe(now).and(event.endAt.goe(now))
+}
+```
 
-    querydsl-ktx에서는 이 패턴이 별도 메서드 없이 인라인으로 표현됩니다:
+querydsl-ktx에서는 이 패턴이 별도 메서드 없이 인라인으로 표현됩니다:
 
-    ```kotlin
-    // querydsl-ktx -- 메서드 추출 불필요
-    now between (event.startAt to event.endAt)
-    ```
+```kotlin
+// querydsl-ktx -- 메서드 추출 불필요
+now between (event.startAt to event.endAt)
+```
+:::
 
 ---
 
@@ -283,30 +286,30 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.price gt 10000
-    entity.price between (minPrice to maxPrice)
-    entity.score between (0..100)
-    entity.quantity loe maxQuantity
+```kotlin [Kotlin]
+entity.price gt 10000
+entity.price between (minPrice to maxPrice)
+entity.score between (0..100)
+entity.quantity loe maxQuantity
 
-    // 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
-    orderAmount between (tier.minAmount to tier.maxAmount)
-    // -> min_amount <= orderAmount AND max_amount >= orderAmount
+// 역방향 BETWEEN -- 값이 왼쪽, 표현식 경계가 오른쪽
+orderAmount between (tier.minAmount to tier.maxAmount)
+// -> min_amount <= orderAmount AND max_amount >= orderAmount
 
-    // rangeTo 연산자 (..) -- Pair 생성 구문 설탕
-    orderAmount between (tier.minAmount..tier.maxAmount)
-    ```
+// rangeTo 연산자 (..) -- Pair 생성 구문 설탕
+orderAmount between (tier.minAmount..tier.maxAmount)
+```
 
-=== "SQL"
+```sql [SQL]
+price > 10000
+price BETWEEN ? AND ?
+score BETWEEN 0 AND 100
+quantity <= ?
+```
 
-    ```sql
-    price > 10000
-    price BETWEEN ? AND ?
-    score BETWEEN 0 AND 100
-    quantity <= ?
-    ```
+:::
 
 ---
 
@@ -336,40 +339,40 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 | `coalesce` | `StringExpression?.coalesce(Expression<String>?)` | `COALESCE(col, other_col)` |
 | `coalesce` | `StringExpression?.coalesce(String?)` | `COALESCE(col, ?)` |
 
-`contains`와 `startsWith`에는 `Expression<String>` 오버로드도 있습니다.
+`contains`에는 `Expression<String>` 오버로드도 있습니다.
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // 부분 문자열 검색
-    entity.name contains keyword              // name LIKE '%keyword%'
-    entity.name containsIgnoreCase keyword     // 대소문자 무시
+```kotlin [Kotlin]
+// 부분 문자열 검색
+entity.name contains keyword              // name LIKE '%keyword%'
+entity.name containsIgnoreCase keyword     // 대소문자 무시
 
-    // 접두사 / 접미사
-    entity.name startsWith prefix             // name LIKE 'prefix%'
-    entity.name endsWith suffix               // name LIKE '%suffix'
+// 접두사 / 접미사
+entity.name startsWith prefix             // name LIKE 'prefix%'
+entity.name endsWith suffix               // name LIKE '%suffix'
 
-    // 패턴과 정규식
-    entity.name like "J%n"                    // name LIKE 'J%n'
-    entity.email matches "^[a-z]+@.*"         // name REGEXP '^[a-z]+@.*'
+// 패턴과 정규식
+entity.name like "J%n"                    // name LIKE 'J%n'
+entity.email matches "^[a-z]+@.*"         // name REGEXP '^[a-z]+@.*'
 
-    // 대소문자 무시 동등성
-    entity.email equalsIgnoreCase email       // LOWER(email) = LOWER(?)
-    ```
+// 대소문자 무시 동등성
+entity.email equalsIgnoreCase email       // LOWER(email) = LOWER(?)
+```
 
-=== "SQL"
+```sql [SQL]
+name LIKE '%keyword%'
+LOWER(name) LIKE LOWER('%keyword%')
+name LIKE 'prefix%'
+name LIKE '%suffix'
+name LIKE 'J%n'
+email REGEXP '^[a-z]+@.*'
+LOWER(email) = LOWER(?)
+```
 
-    ```sql
-    name LIKE '%keyword%'
-    LOWER(name) LIKE LOWER('%keyword%')
-    name LIKE 'prefix%'
-    name LIKE '%suffix'
-    name LIKE 'J%n'
-    email REGEXP '^[a-z]+@.*'
-    LOWER(email) = LOWER(?)
-    ```
+:::
 
 ---
 
@@ -388,31 +391,32 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.createdAt after startDate     // created_at > ?
-    entity.createdAt before endDate      // created_at < ?
+```kotlin [Kotlin]
+entity.createdAt after startDate     // created_at > ?
+entity.createdAt before endDate      // created_at < ?
 
-    // 컬럼 비교
-    entity.endDate after entity.startDate  // end_date > start_date
+// 컬럼 비교
+entity.endDate after entity.startDate  // end_date > start_date
 
-    // Null-safe
-    entity.createdAt after null          // null (건너뛰기)
-    ```
+// Null-safe
+entity.createdAt after null          // null (건너뛰기)
+```
 
-=== "SQL"
+```sql [SQL]
+created_at > '2024-01-01'
+created_at < '2024-12-31'
+end_date > start_date
+```
 
-    ```sql
-    created_at > '2024-01-01'
-    created_at < '2024-12-31'
-    end_date > start_date
-    ```
+:::
 
-!!! tip "after/before vs gt/goe/lt/loe"
-    `TemporalExpression`(날짜, 타임스탬프)에는 `after`/`before`를 사용하고,
-    `ComparableExpression`이나 `NumberExpression`에는 `gt`/`goe`/`lt`/`loe`를 사용하세요.
-    생성되는 SQL은 같지만 서로 다른 QueryDSL 타입에 정의되어 있습니다.
+::: tip after/before vs gt/goe/lt/loe
+`TemporalExpression`(날짜, 타임스탬프)에는 `after`/`before`를 사용하고,
+`ComparableExpression`이나 `NumberExpression`에는 `gt`/`goe`/`lt`/`loe`를 사용하세요.
+생성되는 SQL은 같지만 서로 다른 QueryDSL 타입에 정의되어 있습니다.
+:::
 
 ---
 
@@ -429,18 +433,18 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 
 ### 예제
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
-    entity.tags contains tag            // ? IN (tags), null-safe
-    ```
+```kotlin [Kotlin]
+entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
+entity.tags contains tag            // ? IN (tags), null-safe
+```
 
-=== "SQL"
+```sql [SQL]
+'ADMIN' IN (roles)
+```
 
-    ```sql
-    'ADMIN' IN (roles)
-    ```
+:::
 
 ---
 
@@ -457,31 +461,32 @@ EXISTS / NOT EXISTS 서브쿼리 단축 빌더.
 
 ### 예시
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // Before -- 장황한 서브쿼리
-    JPAExpressions.selectOne()
-        .from(orderItem)
-        .where(orderItem.orderId.eq(order.id))
-        .exists()
+```kotlin [Kotlin]
+// Before -- 장황한 서브쿼리
+JPAExpressions.selectOne()
+    .from(orderItem)
+    .where(orderItem.orderId.eq(order.id))
+    .exists()
 
-    // After -- 간결
-    orderItem.exists(orderItem.orderId eq order.id)
+// After -- 간결
+orderItem.exists(orderItem.orderId eq order.id)
 
-    // NOT EXISTS
-    orderItem.notExists(orderItem.orderId eq order.id)
-    ```
+// NOT EXISTS
+orderItem.notExists(orderItem.orderId eq order.id)
+```
 
-=== "SQL"
+```sql [SQL]
+EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+NOT EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+```
 
-    ```sql
-    EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
-    NOT EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
-    ```
+:::
 
-!!! note "Null 처리"
-    vararg의 null predicate는 자동으로 필터링됩니다.
+::: info Null 처리
+vararg의 null predicate는 자동으로 필터링됩니다.
+:::
 
 ---
 
@@ -521,9 +526,10 @@ class PredicateBuilder : BooleanExpressionExtensions, SimpleExpressionExtensions
 }
 ```
 
-!!! note "QuerydslRepository vs QuerydslSupport"
-    | | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
-    |---|---|---|
-    | 확장 인터페이스 | 8개 전체 포함 | 없음 (필요한 것만 추가) |
-    | `domainClass` | 제네릭을 통해 자동 추론 | 수동 오버라이드 필요 |
-    | 사용 시기 | 전체 기능이 필요할 때 | 최소한의 API 표면만 원할 때 |
+::: info QuerydslRepository vs QuerydslSupport
+| | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
+|---|---|---|
+| 확장 인터페이스 | 8개 전체 포함 | 없음 (필요한 것만 추가) |
+| `domainClass` | 제네릭을 통해 자동 추론 | 수동 오버라이드 필요 |
+| 사용 시기 | 전체 기능이 필요할 때 | 최소한의 API 표면만 원할 때 |
+:::

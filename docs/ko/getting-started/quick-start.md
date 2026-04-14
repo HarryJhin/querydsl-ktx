@@ -4,25 +4,25 @@
 
 ---
 
-## Step 1: 의존성 추가
+## 1단계: 의존성 추가
 
-=== "Gradle (Kotlin DSL)"
+::: code-group
 
-    ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
-    ```
+```kotlin [Gradle (Kotlin DSL)]
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+```
 
-=== "Gradle (Groovy DSL)"
+```groovy [Gradle (Groovy DSL)]
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+```
 
-    ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
-    ```
+:::
 
 Maven 및 모듈 선택에 대한 자세한 내용은 [설치](installation.md)를 참고하세요.
 
 ---
 
-## Step 2: QuerydslRepository 상속
+## 2단계: QuerydslRepository 상속
 
 ```kotlin
 @Repository
@@ -34,7 +34,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 
 `QuerydslRepository<T>`는 다음을 제공합니다:
 
-- 7개의 null-safe infix 확장 인터페이스
+- 8개의 null-safe infix 확장 인터페이스
 - `JPAQueryFactory` 래퍼 (`selectFrom`, `select`, `update`, `delete`)
 - 페이지네이션 헬퍼 (`page`, `slice`, `fetch`)
 - 벌크 DML 헬퍼 (`modifying`)
@@ -43,7 +43,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 
 ---
 
-## Step 3: 동적 쿼리 작성
+## 3단계: 동적 쿼리 작성
 
 ```kotlin
 @Repository
@@ -52,7 +52,7 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
     private val member = QMember.member
 
     fun search(
-        name: String?,       // (1)!
+        name: String?,       // nullable 파라미터
         status: Status?,
         minAge: Int?,
         maxAge: Int?,
@@ -60,23 +60,17 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
     ): Page<Member> =
         selectFrom(member)
             .where(
-                member.name contains name,       // (2)!
-                member.status eq status,          // (3)!
-                member.age between (minAge to maxAge), // (4)!
+                member.name contains name,       // null이면 조건 생략
+                member.status eq status,          // null이면 조건 생략
+                member.age between (minAge to maxAge), // null pair이면 조건 생략
             )
-            .page(pageable)                      // (5)!
+            .page(pageable)                      // 자동 count 쿼리
 }
 ```
 
-1. 모든 파라미터가 nullable입니다 -- 호출자가 어떤 필터를 적용할지 결정합니다.
-2. `StringExpression`의 `contains`는 `LIKE '%name%'`을 생성합니다. `name`이 null이면 조건 자체가 건너뛰어집니다.
-3. `SimpleExpression`의 `eq`는 `status = ?`를 생성합니다. `status`가 null이면 건너뛰어집니다.
-4. `Pair`를 사용한 `between`은 부분 범위를 처리합니다: 둘 다 null = 건너뛰기, 하나만 null = `>=` 또는 `<=`, 둘 다 값 있음 = `BETWEEN`.
-5. `page()`는 offset/limit를 적용하고 카운트 쿼리를 자동으로 실행합니다.
-
 ---
 
-## Step 4: 호출하기
+## 4단계: 호출하기
 
 ```kotlin
 @Service
@@ -103,29 +97,30 @@ class MemberService(
 }
 ```
 
-=== "모든 필터 (생성된 SQL)"
+::: code-group
 
-    ```sql
-    SELECT m.*
-    FROM member m
-    WHERE m.name LIKE '%John%'
-      AND m.status = 'ACTIVE'
-      AND m.age BETWEEN 20 AND 60
-    LIMIT 20 OFFSET 0
-    ```
+```sql [모든 필터 (생성된 SQL)]
+SELECT m.*
+FROM member m
+WHERE m.name LIKE '%John%'
+  AND m.status = 'ACTIVE'
+  AND m.age BETWEEN 20 AND 60
+LIMIT 20 OFFSET 0
+```
 
-=== "이름만 (생성된 SQL)"
+```sql [이름만 (생성된 SQL)]
+SELECT m.*
+FROM member m
+WHERE m.name LIKE '%John%'
+LIMIT 20 OFFSET 0
+```
 
-    ```sql
-    SELECT m.*
-    FROM member m
-    WHERE m.name LIKE '%John%'
-    LIMIT 20 OFFSET 0
-    ```
+:::
 
-!!! tip "BooleanBuilder도, if 검사도 없습니다"
-    같은 리포지토리 메서드가 어떤 필터 조합이든 처리합니다.
-    null 파라미터는 단순히 무시됩니다 -- 조건 분기 로직이 필요 없습니다.
+::: tip BooleanBuilder도, if 검사도 없습니다
+같은 리포지토리 메서드가 어떤 필터 조합이든 처리합니다.
+null 파라미터는 단순히 무시됩니다 -- 조건 분기 로직이 필요 없습니다.
+:::
 
 ---
 
@@ -176,6 +171,6 @@ class MemberQueryRepository : QuerydslRepository<Member>() {
 ## 다음 단계
 
 - [동적 쿼리](../guide/dynamic-queries.md) -- null-safety 계약을 깊이 이해하기
-- [확장 함수 레퍼런스](../guide/extensions.md) -- 7개 인터페이스와 함수 목록
+- [확장 함수 레퍼런스](../guide/extensions.md) -- 8개 인터페이스와 함수 목록
 - [페이지네이션](../guide/pagination.md) -- slice vs page vs fetch
 - [벌크 DML](../guide/bulk-dml.md) -- 안전한 update, delete 작업

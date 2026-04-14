@@ -38,37 +38,37 @@ Null-safe AND/OR combinators. The foundation for building dynamic WHERE clauses.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // AND -- null side is ignored
-    val predicate = (entity.active eq true) and (entity.name eq name)
+```kotlin [Kotlin]
+// AND -- null side is ignored
+val predicate = (entity.active eq true) and (entity.name eq name)
 
-    // OR group
-    val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
+// OR group
+val rolePredicate = (entity.role eq "ADMIN") or (entity.role eq "MANAGER")
 
-    // AND with OR subgroup
-    val complex = (entity.active eq true) andAnyOf listOf(
-        entity.role eq role,
-        entity.department eq department,
-    )
-    ```
+// AND with OR subgroup
+val complex = (entity.active eq true) andAnyOf listOf(
+    entity.role eq role,
+    entity.department eq department,
+)
+```
 
-=== "SQL"
+```sql [SQL]
+-- AND (name = 'John')
+active = true AND name = 'John'
 
-    ```sql
-    -- AND (name = 'John')
-    active = true AND name = 'John'
+-- AND (name = null) -> only left side
+active = true
 
-    -- AND (name = null) -> only left side
-    active = true
+-- OR group
+role = 'ADMIN' OR role = 'MANAGER'
 
-    -- OR group
-    role = 'ADMIN' OR role = 'MANAGER'
+-- AND with OR subgroup
+active = true AND (role = ? OR department = ?)
+```
 
-    -- AND with OR subgroup
-    active = true AND (role = ? OR department = ?)
-    ```
+:::
 
 ---
 
@@ -90,39 +90,40 @@ Equality and membership operators for any expression type.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // Equality
-    entity.status eq "ACTIVE"              // status = 'ACTIVE'
-    entity.status eq null                  // null (skipped)
+```kotlin [Kotlin]
+// Equality
+entity.status eq "ACTIVE"              // status = 'ACTIVE'
+entity.status eq null                  // null (skipped)
 
-    // Not equal
-    entity.status ne "DELETED"             // status != 'DELETED'
+// Not equal
+entity.status ne "DELETED"             // status != 'DELETED'
 
-    // IN / NOT IN
-    entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
-    entity.status notIn listOf("C")       // status NOT IN ('C')
-    entity.status `in` null               // null (skipped)
+// IN / NOT IN
+entity.status `in` listOf("A", "B")   // status IN ('A', 'B')
+entity.status notIn listOf("C")       // status NOT IN ('C')
+entity.status `in` null               // null (skipped)
 
-    // Large IN clause auto-split (default 1000 per chunk)
-    entity.id inChunked largeIdList   // id IN (1..1000) OR id IN (1001..2000)
-    entity.id.inChunked(ids, 500)     // custom chunk size
-    ```
+// Large IN clause auto-split (default 1000 per chunk)
+entity.id inChunked largeIdList   // id IN (1..1000) OR id IN (1001..2000)
+entity.id.inChunked(ids, 500)     // custom chunk size
+```
 
-=== "SQL"
+```sql [SQL]
+status = 'ACTIVE'
+status != 'DELETED'
+status IN ('A', 'B')
+status NOT IN ('C')
+```
 
-    ```sql
-    status = 'ACTIVE'
-    status != 'DELETED'
-    status IN ('A', 'B')
-    status NOT IN ('C')
-    ```
+:::
 
-!!! tip "inChunked for Oracle"
-    Oracle has a hard limit of 1000 items in a single IN clause.
-    `inChunked` automatically splits large collections into multiple IN clauses
-    joined with OR. The default chunk size is 1000, but you can customize it.
+::: tip inChunked for Oracle
+Oracle has a hard limit of 1000 items in a single IN clause.
+`inChunked` automatically splits large collections into multiple IN clauses
+joined with OR. The default chunk size is 1000, but you can customize it.
+:::
 
 ---
 
@@ -150,53 +151,54 @@ All comparison functions also have `Expression<T>` overloads for comparing again
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // Simple comparison
-    entity.date gt startDate       // date > ?
-    entity.date goe startDate      // date >= ?
-    entity.date lt endDate         // date < ?
-    entity.date loe endDate        // date <= ?
+```kotlin [Kotlin]
+// Simple comparison
+entity.date gt startDate       // date > ?
+entity.date goe startDate      // date >= ?
+entity.date lt endDate         // date < ?
+entity.date loe endDate        // date <= ?
 
-    // BETWEEN with Pair -- partial range support
-    entity.date between (from to to)       // BETWEEN ? AND ?
-    entity.date between (from to null)     // date >= ?
-    entity.date between (null to to)       // date <= ?
-    entity.date between (null to null)     // null (skipped)
+// BETWEEN with Pair -- partial range support
+entity.date between (from to to)       // BETWEEN ? AND ?
+entity.date between (from to null)     // date >= ?
+entity.date between (null to to)       // date <= ?
+entity.date between (null to null)     // null (skipped)
 
-    // BETWEEN with ClosedRange
-    entity.age between (20..60)            // BETWEEN 20 AND 60
+// BETWEEN with ClosedRange
+entity.age between (20..60)            // BETWEEN 20 AND 60
 
-    // Reverse BETWEEN -- value on left, expression bounds on right
-    now between (sale.startAt to sale.endAt)
-    // -> start_at <= now AND end_at >= now
+// Reverse BETWEEN -- value on left, expression bounds on right
+now between (sale.startAt to sale.endAt)
+// -> start_at <= now AND end_at >= now
 
-    // rangeTo operator (..) -- syntactic sugar for creating Pair
-    entity.date between (entity.startDate..entity.endDate)
-    // equivalent to: entity.date between (entity.startDate to entity.endDate)
-    ```
+// rangeTo operator (..) -- syntactic sugar for creating Pair
+entity.date between (entity.startDate..entity.endDate)
+// equivalent to: entity.date between (entity.startDate to entity.endDate)
+```
 
-=== "SQL"
+```sql [SQL]
+-- Full range
+created_at BETWEEN '2024-01-01' AND '2024-12-31'
 
-    ```sql
-    -- Full range
-    created_at BETWEEN '2024-01-01' AND '2024-12-31'
+-- One-sided (from only)
+created_at >= '2024-01-01'
 
-    -- One-sided (from only)
-    created_at >= '2024-01-01'
+-- One-sided (to only)
+created_at <= '2024-12-31'
 
-    -- One-sided (to only)
-    created_at <= '2024-12-31'
+-- ClosedRange
+age BETWEEN 20 AND 60
+```
 
-    -- ClosedRange
-    age BETWEEN 20 AND 60
-    ```
+:::
 
-!!! tip "Pair-based between for optional date ranges"
-    The `Pair` overload is the most powerful feature for date range filters.
-    A single expression handles all four combinations (both, from-only, to-only, neither)
-    that would otherwise require a 4-branch `if/else`.
+::: tip Pair-based between for optional date ranges
+The `Pair` overload is the most powerful feature for date range filters.
+A single expression handles all four combinations (both, from-only, to-only, neither)
+that would otherwise require a 4-branch `if/else`.
+:::
 
 ### Reverse Between -- Real-World Use Cases
 
@@ -270,30 +272,30 @@ operators specifically typed for `NumberExpression`.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.price gt 10000
-    entity.price between (minPrice to maxPrice)
-    entity.score between (0..100)
-    entity.quantity loe maxQuantity
+```kotlin [Kotlin]
+entity.price gt 10000
+entity.price between (minPrice to maxPrice)
+entity.score between (0..100)
+entity.quantity loe maxQuantity
 
-    // Reverse BETWEEN -- value on left, expression bounds on right
-    orderAmount between (tier.minAmount to tier.maxAmount)
-    // -> min_amount <= orderAmount AND max_amount >= orderAmount
+// Reverse BETWEEN -- value on left, expression bounds on right
+orderAmount between (tier.minAmount to tier.maxAmount)
+// -> min_amount <= orderAmount AND max_amount >= orderAmount
 
-    // rangeTo operator (..) -- syntactic sugar for creating Pair
-    orderAmount between (tier.minAmount..tier.maxAmount)
-    ```
+// rangeTo operator (..) -- syntactic sugar for creating Pair
+orderAmount between (tier.minAmount..tier.maxAmount)
+```
 
-=== "SQL"
+```sql [SQL]
+price > 10000
+price BETWEEN ? AND ?
+score BETWEEN 0 AND 100
+quantity <= ?
+```
 
-    ```sql
-    price > 10000
-    price BETWEEN ? AND ?
-    score BETWEEN 0 AND 100
-    quantity <= ?
-    ```
+:::
 
 ---
 
@@ -323,40 +325,40 @@ Pattern matching and string comparison operators.
 | `coalesce` | `StringExpression?.coalesce(Expression<String>?)` | `COALESCE(col, other_col)` |
 | `coalesce` | `StringExpression?.coalesce(String?)` | `COALESCE(col, ?)` |
 
-`contains` and `startsWith` also have `Expression<String>` overloads.
+`contains` also has an `Expression<String>` overload.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // Substring search
-    entity.name contains keyword              // name LIKE '%keyword%'
-    entity.name containsIgnoreCase keyword     // case-insensitive
+```kotlin [Kotlin]
+// Substring search
+entity.name contains keyword              // name LIKE '%keyword%'
+entity.name containsIgnoreCase keyword     // case-insensitive
 
-    // Prefix / suffix
-    entity.name startsWith prefix             // name LIKE 'prefix%'
-    entity.name endsWith suffix               // name LIKE '%suffix'
+// Prefix / suffix
+entity.name startsWith prefix             // name LIKE 'prefix%'
+entity.name endsWith suffix               // name LIKE '%suffix'
 
-    // Pattern and regex
-    entity.name like "J%n"                    // name LIKE 'J%n'
-    entity.email matches "^[a-z]+@.*"         // name REGEXP '^[a-z]+@.*'
+// Pattern and regex
+entity.name like "J%n"                    // name LIKE 'J%n'
+entity.email matches "^[a-z]+@.*"         // name REGEXP '^[a-z]+@.*'
 
-    // Case-insensitive equality
-    entity.email equalsIgnoreCase email       // LOWER(email) = LOWER(?)
-    ```
+// Case-insensitive equality
+entity.email equalsIgnoreCase email       // LOWER(email) = LOWER(?)
+```
 
-=== "SQL"
+```sql [SQL]
+name LIKE '%keyword%'
+LOWER(name) LIKE LOWER('%keyword%')
+name LIKE 'prefix%'
+name LIKE '%suffix'
+name LIKE 'J%n'
+email REGEXP '^[a-z]+@.*'
+LOWER(email) = LOWER(?)
+```
 
-    ```sql
-    name LIKE '%keyword%'
-    LOWER(name) LIKE LOWER('%keyword%')
-    name LIKE 'prefix%'
-    name LIKE '%suffix'
-    name LIKE 'J%n'
-    email REGEXP '^[a-z]+@.*'
-    LOWER(email) = LOWER(?)
-    ```
+:::
 
 ---
 
@@ -375,31 +377,32 @@ Temporal comparison operators for date/time expressions.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.createdAt after startDate     // created_at > ?
-    entity.createdAt before endDate      // created_at < ?
+```kotlin [Kotlin]
+entity.createdAt after startDate     // created_at > ?
+entity.createdAt before endDate      // created_at < ?
 
-    // Column comparison
-    entity.endDate after entity.startDate  // end_date > start_date
+// Column comparison
+entity.endDate after entity.startDate  // end_date > start_date
 
-    // Null-safe
-    entity.createdAt after null          // null (skipped)
-    ```
+// Null-safe
+entity.createdAt after null          // null (skipped)
+```
 
-=== "SQL"
+```sql [SQL]
+created_at > '2024-01-01'
+created_at < '2024-12-31'
+end_date > start_date
+```
 
-    ```sql
-    created_at > '2024-01-01'
-    created_at < '2024-12-31'
-    end_date > start_date
-    ```
+:::
 
-!!! tip "after/before vs gt/goe/lt/loe"
-    Use `after`/`before` for `TemporalExpression` (dates, timestamps) and
-    `gt`/`goe`/`lt`/`loe` for `ComparableExpression` or `NumberExpression`.
-    They generate the same SQL but are defined on different QueryDSL types.
+::: tip after/before vs gt/goe/lt/loe
+Use `after`/`before` for `TemporalExpression` (dates, timestamps) and
+`gt`/`goe`/`lt`/`loe` for `ComparableExpression` or `NumberExpression`.
+They generate the same SQL but are defined on different QueryDSL types.
+:::
 
 ---
 
@@ -416,18 +419,18 @@ Membership check for mapped collection fields (e.g., `@ElementCollection`, `@Man
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
-    entity.tags contains tag            // ? IN (tags), null-safe
-    ```
+```kotlin [Kotlin]
+entity.roles contains "ADMIN"       // 'ADMIN' IN (roles)
+entity.tags contains tag            // ? IN (tags), null-safe
+```
 
-=== "SQL"
+```sql [SQL]
+'ADMIN' IN (roles)
+```
 
-    ```sql
-    'ADMIN' IN (roles)
-    ```
+:::
 
 ---
 
@@ -444,31 +447,32 @@ Shorthand EXISTS / NOT EXISTS sub-query builders.
 
 ### Examples
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    // Before -- verbose sub-query
-    JPAExpressions.selectOne()
-        .from(orderItem)
-        .where(orderItem.orderId.eq(order.id))
-        .exists()
+```kotlin [Kotlin]
+// Before -- verbose sub-query
+JPAExpressions.selectOne()
+    .from(orderItem)
+    .where(orderItem.orderId.eq(order.id))
+    .exists()
 
-    // After -- concise
-    orderItem.exists(orderItem.orderId eq order.id)
+// After -- concise
+orderItem.exists(orderItem.orderId eq order.id)
 
-    // NOT EXISTS
-    orderItem.notExists(orderItem.orderId eq order.id)
-    ```
+// NOT EXISTS
+orderItem.notExists(orderItem.orderId eq order.id)
+```
 
-=== "SQL"
+```sql [SQL]
+EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+NOT EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
+```
 
-    ```sql
-    EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
-    NOT EXISTS (SELECT 1 FROM order_item WHERE order_item.order_id = order.id)
-    ```
+:::
 
-!!! note "Null predicates"
-    Null predicates in the vararg are silently filtered out.
+::: info Null predicates
+Null predicates in the vararg are silently filtered out.
+:::
 
 ---
 
@@ -508,9 +512,10 @@ class PredicateBuilder : BooleanExpressionExtensions, SimpleExpressionExtensions
 }
 ```
 
-!!! note "QuerydslRepository vs QuerydslSupport"
-    | | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
-    |---|---|---|
-    | Extension interfaces | All 8 included | None (add what you need) |
-    | `domainClass` | Auto-resolved via generics | Must override manually |
-    | Use when | You want everything | You want minimal surface area |
+::: info QuerydslRepository vs QuerydslSupport
+| | `QuerydslRepository<T>` | `QuerydslSupport<T>` |
+|---|---|---|
+| Extension interfaces | All 8 included | None (add what you need) |
+| `domainClass` | Auto-resolved via generics | Must override manually |
+| Use when | You want everything | You want minimal surface area |
+:::

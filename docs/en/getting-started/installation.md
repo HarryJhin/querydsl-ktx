@@ -9,29 +9,31 @@
 | Kotlin       | 1.7+    | |
 | Java         | 17+     | |
 
+::: info Prerequisites
+QueryDSL Q-class generation (APT or KSP) must be configured in your project. See [QueryDSL documentation](http://querydsl.com/) for setup instructions.
+:::
+
 ## Add the Dependency
 
-=== "Gradle (Kotlin DSL)"
+::: code-group
 
-    ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
-    ```
+```kotlin [Gradle (Kotlin DSL)]
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+```
 
-=== "Gradle (Groovy DSL)"
+```groovy [Gradle (Groovy DSL)]
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+```
 
-    ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
-    ```
+```xml [Maven]
+<dependency>
+    <groupId>io.github.harryjhin</groupId>
+    <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
+    <version>0.5.0</version>
+</dependency>
+```
 
-=== "Maven"
-
-    ```xml
-    <dependency>
-        <groupId>io.github.harryjhin</groupId>
-        <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-        <version>{{ version }}</version>
-    </dependency>
-    ```
+:::
 
 That's it. The starter brings in everything you need.
 
@@ -51,22 +53,23 @@ The library ships three modules. Choose based on your needs:
 
 ```kotlin
 // Pulls in both querydsl-ktx and querydsl-ktx-spring-boot
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
 ```
 
 ### Core only
 
 ```kotlin
 // Extension interfaces only -- no AutoConfiguration
-implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
+implementation("io.github.harryjhin:querydsl-ktx:0.5.0")
 ```
 
-!!! note "When to use core only"
-    Use `querydsl-ktx` alone when:
+::: info When to use core only
+Use `querydsl-ktx` alone when:
 
-    - You register `JPAQueryFactory` with custom `JPQLTemplates`
-    - You use a non-Spring framework
-    - You want zero auto-configuration magic
+- You register `JPAQueryFactory` with custom `JPQLTemplates`
+- You use a non-Spring framework
+- You want zero auto-configuration magic
+:::
 
 ---
 
@@ -80,18 +83,19 @@ The starter auto-registers a `JPAQueryFactory` bean with these conditions:
 | `@ConditionalOnMissingBean` | Respects any custom `JPAQueryFactory` you define |
 | `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | Ensures `EntityManager` is ready first |
 
-!!! tip "Custom JPAQueryFactory"
-    If you register your own `JPAQueryFactory` bean (e.g., with custom `JPQLTemplates`),
-    the auto-configuration backs off automatically. No exclusions needed.
+::: tip Custom JPAQueryFactory
+If you register your own `JPAQueryFactory` bean (e.g., with custom `JPQLTemplates`),
+the auto-configuration backs off automatically. No exclusions needed.
 
-    ```kotlin
-    @Configuration
-    class QuerydslConfig {
-        @Bean
-        fun jpaQueryFactory(entityManager: EntityManager) =
-            JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
-    }
-    ```
+```kotlin
+@Configuration
+class QuerydslConfig {
+    @Bean
+    fun jpaQueryFactory(entityManager: EntityManager) =
+        JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
+}
+```
+:::
 
 ## Verify the Setup
 
@@ -115,8 +119,9 @@ If this compiles and runs, your setup is complete. Head to [Quick Start](quick-s
 querydsl-ktx provides `RuntimeHintsRegistrar` for GraalVM native image compatibility.
 The auto-configuration automatically registers reflection hints needed by the library.
 
-!!! warning "QueryDSL Upstream Limitation"
-    QueryDSL 5.1.0 does not officially support GraalVM native image
-    ([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
-    You may need additional reflection configuration for QueryDSL core classes
-    when building native images.
+::: warning QueryDSL Upstream Limitation
+QueryDSL 5.1.0 does not officially support GraalVM native image
+([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
+You may need additional reflection configuration for QueryDSL core classes
+when building native images.
+:::

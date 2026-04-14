@@ -9,29 +9,31 @@
 | Kotlin       | 1.7+    | |
 | Java         | 17+     | |
 
+::: info 사전 요구 사항
+프로젝트에 QueryDSL Q 클래스 생성(APT 또는 KSP)이 설정되어 있어야 합니다. 설정 방법은 [QueryDSL 문서](http://querydsl.com/)를 참고하세요.
+:::
+
 ## 의존성 추가
 
-=== "Gradle (Kotlin DSL)"
+::: code-group
 
-    ```kotlin
-    implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
-    ```
+```kotlin [Gradle (Kotlin DSL)]
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
+```
 
-=== "Gradle (Groovy DSL)"
+```groovy [Gradle (Groovy DSL)]
+implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0'
+```
 
-    ```groovy
-    implementation 'io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}'
-    ```
+```xml [Maven]
+<dependency>
+    <groupId>io.github.harryjhin</groupId>
+    <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
+    <version>0.5.0</version>
+</dependency>
+```
 
-=== "Maven"
-
-    ```xml
-    <dependency>
-        <groupId>io.github.harryjhin</groupId>
-        <artifactId>querydsl-ktx-spring-boot-starter</artifactId>
-        <version>{{ version }}</version>
-    </dependency>
-    ```
+:::
 
 이것으로 끝입니다. 스타터가 필요한 모든 것을 포함합니다.
 
@@ -51,22 +53,23 @@
 
 ```kotlin
 // querydsl-ktx와 querydsl-ktx-spring-boot를 모두 포함
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:{{ version }}")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:0.5.0")
 ```
 
 ### Core만 사용
 
 ```kotlin
 // 확장 인터페이스만 -- AutoConfiguration 없음
-implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
+implementation("io.github.harryjhin:querydsl-ktx:0.5.0")
 ```
 
-!!! note "Core만 사용하는 경우"
-    다음과 같은 경우 `querydsl-ktx`만 사용하세요:
+::: info Core만 사용하는 경우
+다음과 같은 경우 `querydsl-ktx`만 사용하세요:
 
-    - 커스텀 `JPQLTemplates`로 `JPAQueryFactory`를 등록하는 경우
-    - Spring이 아닌 프레임워크를 사용하는 경우
-    - 자동 설정을 전혀 원하지 않는 경우
+- 커스텀 `JPQLTemplates`로 `JPAQueryFactory`를 등록하는 경우
+- Spring이 아닌 프레임워크를 사용하는 경우
+- 자동 설정을 전혀 원하지 않는 경우
+:::
 
 ---
 
@@ -80,18 +83,19 @@ implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
 | `@ConditionalOnMissingBean` | 직접 정의한 `JPAQueryFactory`가 있으면 자동 설정을 적용하지 않음 |
 | `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | `EntityManager`가 먼저 준비되도록 보장 |
 
-!!! tip "커스텀 JPAQueryFactory"
-    직접 `JPAQueryFactory` 빈을 등록하면(예: 커스텀 `JPQLTemplates` 사용),
-    자동 설정은 자동으로 비활성화됩니다. 별도의 exclusion이 필요 없습니다.
+::: tip 커스텀 JPAQueryFactory
+직접 `JPAQueryFactory` 빈을 등록하면(예: 커스텀 `JPQLTemplates` 사용),
+자동 설정은 자동으로 비활성화됩니다. 별도의 exclusion이 필요 없습니다.
 
-    ```kotlin
-    @Configuration
-    class QuerydslConfig {
-        @Bean
-        fun jpaQueryFactory(entityManager: EntityManager) =
-            JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
-    }
-    ```
+```kotlin
+@Configuration
+class QuerydslConfig {
+    @Bean
+    fun jpaQueryFactory(entityManager: EntityManager) =
+        JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
+}
+```
+:::
 
 ## 설정 확인
 
@@ -115,8 +119,9 @@ class TestRepository : QuerydslRepository<YourEntity>() {
 querydsl-ktx는 GraalVM 네이티브 이미지 호환을 위한 `RuntimeHintsRegistrar`를 제공합니다.
 Auto-configuration이 라이브러리에 필요한 리플렉션 힌트를 자동 등록합니다.
 
-!!! warning "QueryDSL 상위 제한사항"
-    QueryDSL 5.1.0은 GraalVM 네이티브 이미지를 공식 지원하지 않습니다
-    ([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
-    네이티브 이미지 빌드 시 QueryDSL 코어 클래스에 대한 추가 리플렉션 설정이
-    필요할 수 있습니다.
+::: warning QueryDSL 상위 제한사항
+QueryDSL 5.1.0은 GraalVM 네이티브 이미지를 공식 지원하지 않습니다
+([querydsl/querydsl#3646](https://github.com/querydsl/querydsl/issues/3646)).
+네이티브 이미지 빌드 시 QueryDSL 코어 클래스에 대한 추가 리플렉션 설정이
+필요할 수 있습니다.
+:::

@@ -11,14 +11,15 @@ querydsl-ktx uses Kotlin's reified type parameters to eliminate that boilerplate
 
 ## When You Need Templates
 
-!!! tip "When QueryDSL's built-in operators aren't enough"
-    You'll reach for template expressions when you need:
+::: tip When QueryDSL's built-in operators aren't enough
+You'll reach for template expressions when you need:
 
-    - **Database-specific functions** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
-    - **Type casting** -- `CAST(column AS DECIMAL)` for aggregation precision
-    - **Window functions** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
-    - **Custom SQL functions** -- registered via `@FunctionContributor` or Hibernate dialects
-    - **Date/time functions** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
+- **Database-specific functions** -- `GROUP_CONCAT()`, `JSON_EXTRACT()`, `REGEXP_REPLACE()`
+- **Type casting** -- `CAST(column AS DECIMAL)` for aggregation precision
+- **Window functions** -- `ROW_NUMBER() OVER (PARTITION BY ...)`
+- **Custom SQL functions** -- registered via `@FunctionContributor` or Hibernate dialects
+- **Date/time functions** -- `DATE_FORMAT()`, `TIMESTAMPDIFF()`
+:::
 
 ---
 
@@ -39,21 +40,21 @@ Create typed QueryDSL template expressions without passing `Class<T>`.
 
 ### Before / After
 
-=== "Before (vanilla QueryDSL)"
+::: code-group
 
-    ```kotlin
-    Expressions.numberTemplate(Float::class.java, "RAND()")
-    Expressions.dateTimeTemplate(LocalDateTime::class.java, "NOW()")
-    Expressions.numberTemplate(Long::class.java, "CAST({0} AS BIGINT)", order.price)
-    ```
+```kotlin [Before (vanilla QueryDSL)]
+Expressions.numberTemplate(Float::class.java, "RAND()")
+Expressions.dateTimeTemplate(LocalDateTime::class.java, "NOW()")
+Expressions.numberTemplate(Long::class.java, "CAST({0} AS BIGINT)", order.price)
+```
 
-=== "After (querydsl-ktx)"
+```kotlin [After (querydsl-ktx)]
+numberTemplate<Float>("RAND()")
+dateTimeTemplate<LocalDateTime>("NOW()")
+numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
+```
 
-    ```kotlin
-    numberTemplate<Float>("RAND()")
-    dateTimeTemplate<LocalDateTime>("NOW()")
-    numberTemplate<Long>("CAST({0} AS BIGINT)", order.price)
-    ```
+:::
 
 ---
 
@@ -63,85 +64,85 @@ Create typed QueryDSL template expressions without passing `Class<T>`.
 
 Collecting tags or categories into a single string -- common in admin dashboards:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val tagList = stringTemplate(
-        "GROUP_CONCAT({0} SEPARATOR ', ')",
-        productTag.name,
-    )
+```kotlin [Kotlin]
+val tagList = stringTemplate(
+    "GROUP_CONCAT({0} SEPARATOR ', ')",
+    productTag.name,
+)
 
-    select(product.name, tagList)
-        .from(product)
-        .join(productTag).on(productTag.productId.eq(product.id))
-        .groupBy(product.id)
-        .fetch()
-    ```
+select(product.name, tagList)
+    .from(product)
+    .join(productTag).on(productTag.productId.eq(product.id))
+    .groupBy(product.id)
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT p.name, GROUP_CONCAT(pt.name SEPARATOR ', ')
+FROM product p
+JOIN product_tag pt ON pt.product_id = p.id
+GROUP BY p.id
+```
 
-    ```sql
-    SELECT p.name, GROUP_CONCAT(pt.name SEPARATOR ', ')
-    FROM product p
-    JOIN product_tag pt ON pt.product_id = p.id
-    GROUP BY p.id
-    ```
+:::
 
 ### CAST for Aggregation Precision
 
 When `SUM` or `AVG` on an integer column loses decimal precision:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val avgPrice = numberTemplate<Double>(
-        "CAST(AVG({0}) AS DOUBLE)",
-        orderItem.price,
-    )
+```kotlin [Kotlin]
+val avgPrice = numberTemplate<Double>(
+    "CAST(AVG({0}) AS DOUBLE)",
+    orderItem.price,
+)
 
-    select(product.category, avgPrice)
-        .from(orderItem)
-        .join(product).on(orderItem.productId.eq(product.id))
-        .groupBy(product.category)
-        .fetch()
-    ```
+select(product.category, avgPrice)
+    .from(orderItem)
+    .join(product).on(orderItem.productId.eq(product.id))
+    .groupBy(product.category)
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT p.category, CAST(AVG(oi.price) AS DOUBLE)
+FROM order_item oi
+JOIN product p ON oi.product_id = p.id
+GROUP BY p.category
+```
 
-    ```sql
-    SELECT p.category, CAST(AVG(oi.price) AS DOUBLE)
-    FROM order_item oi
-    JOIN product p ON oi.product_id = p.id
-    GROUP BY p.category
-    ```
+:::
 
 ### Date Formatting
 
 Formatting dates for reports or grouping by month:
 
-=== "Kotlin"
+::: code-group
 
-    ```kotlin
-    val yearMonth = stringTemplate(
-        "DATE_FORMAT({0}, '%Y-%m')",
-        order.createdAt,
-    )
+```kotlin [Kotlin]
+val yearMonth = stringTemplate(
+    "DATE_FORMAT({0}, '%Y-%m')",
+    order.createdAt,
+)
 
-    select(yearMonth, order.count())
-        .from(order)
-        .groupBy(yearMonth)
-        .orderBy(yearMonth.asc())
-        .fetch()
-    ```
+select(yearMonth, order.count())
+    .from(order)
+    .groupBy(yearMonth)
+    .orderBy(yearMonth.asc())
+    .fetch()
+```
 
-=== "SQL"
+```sql [SQL]
+SELECT DATE_FORMAT(o.created_at, '%Y-%m'), COUNT(o.id)
+FROM orders o
+GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
+ORDER BY DATE_FORMAT(o.created_at, '%Y-%m') ASC
+```
 
-    ```sql
-    SELECT DATE_FORMAT(o.created_at, '%Y-%m'), COUNT(o.id)
-    FROM orders o
-    GROUP BY DATE_FORMAT(o.created_at, '%Y-%m')
-    ORDER BY DATE_FORMAT(o.created_at, '%Y-%m') ASC
-    ```
+:::
 
 ### Custom Hibernate Functions
 
@@ -235,23 +236,24 @@ into the JPQL query (not bound as parameters).
 inline fun <reified T> constant(value: T): Expression<T>
 ```
 
-=== "Before (vanilla QueryDSL)"
+::: code-group
 
-    ```kotlin
-    Expressions.constant(42)
-    ```
+```kotlin [Before (vanilla QueryDSL)]
+Expressions.constant(42)
+```
 
-=== "After (querydsl-ktx)"
+```kotlin [After (querydsl-ktx)]
+constant(42)
+```
 
-    ```kotlin
-    constant(42)
-    ```
+:::
 
-!!! warning "Constants vs Parameters"
-    Constants are embedded directly in the query string, not as bind parameters.
-    Use them for truly fixed values (like `SELECT 1` in EXISTS subqueries),
-    not for user input. For user-provided values, use the `as*` wrapping functions
-    or pass values directly to extension operators like `eq`.
+::: warning Constants vs Parameters
+Constants are embedded directly in the query string, not as bind parameters.
+Use them for truly fixed values (like `SELECT 1` in EXISTS subqueries),
+not for user input. For user-provided values, use the `as*` wrapping functions
+or pass values directly to extension operators like `eq`.
+:::
 
 ---
 
