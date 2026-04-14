@@ -28,6 +28,18 @@ subprojects {
         }
     }
 
+    val querydslGroupId = findProperty("querydslGroupId") as String?
+    val querydslVersion = findProperty("querydslVersion") as String?
+    if (querydslGroupId != null && querydslVersion != null) {
+        configurations.configureEach {
+            resolutionStrategy.eachDependency {
+                if (requested.group == "com.querydsl") {
+                    useTarget("$querydslGroupId:${requested.name}:$querydslVersion")
+                }
+            }
+        }
+    }
+
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")

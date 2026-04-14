@@ -3,9 +3,13 @@ plugins {
     kotlin("kapt")
 }
 
+val useOpenFeign = findProperty("querydslGroupId") != null
+val jpaClassifier = if (useOpenFeign) null else "jakarta"
+val aptClassifier = if (useOpenFeign) "jpa" else "jakarta"
+
 dependencies {
     compileOnly(libs.querydsl.jpa) {
-        artifact { classifier = "jakarta" }
+        if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
     compileOnly(libs.querydsl.core)
     compileOnly(libs.spring.data.commons)
@@ -15,12 +19,12 @@ dependencies {
 
     // Q-class generation for test entities
     kaptTest(libs.querydsl.apt) {
-        artifact { classifier = "jakarta" }
+        artifact { classifier = aptClassifier }
     }
 
     testImplementation(libs.querydsl.core)
     testImplementation(libs.querydsl.jpa) {
-        artifact { classifier = "jakarta" }
+        if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
     testImplementation(libs.spring.data.commons)
     testImplementation(kotlin("test"))
