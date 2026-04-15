@@ -311,7 +311,7 @@ fun findActiveSales(now: LocalDateTime? = null): List<Product> =
 
 ## Putting It All Together
 
-A complete repository combining all five patterns:
+A complete repository combining all the patterns above:
 
 ```kotlin
 @Repository

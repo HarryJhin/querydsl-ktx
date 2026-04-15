@@ -310,7 +310,7 @@ fun findActiveSales(now: LocalDateTime? = null): List<Product> =
 
 ## 전체 조합 예제
 
-다섯 가지 패턴을 모두 결합한 완성된 리포지토리:
+위 패턴을 모두 결합한 완성된 리포지토리:
 
 ```kotlin
 @Repository

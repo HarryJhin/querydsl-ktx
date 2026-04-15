@@ -177,7 +177,7 @@ entity.age between (20..60)            // BETWEEN 20 AND 60
 now between (sale.startAt to sale.endAt)
 // -> start_at <= now AND end_at >= now
 
-// rangeTo 연산자 (..): Pair 생성 구문 설탕
+// rangeTo 연산자 (..): Pair 생성 syntactic sugar
 entity.date between (entity.startDate..entity.endDate)
 // 동일: entity.date between (entity.startDate to entity.endDate)
 ```
@@ -302,7 +302,7 @@ entity.quantity loe maxQuantity
 orderAmount between (tier.minAmount to tier.maxAmount)
 // -> min_amount <= orderAmount AND max_amount >= orderAmount
 
-// rangeTo 연산자 (..): Pair 생성 구문 설탕
+// rangeTo 연산자 (..): Pair 생성 syntactic sugar
 orderAmount between (tier.minAmount..tier.maxAmount)
 ```
 
