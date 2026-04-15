@@ -51,7 +51,7 @@ class SubQueryExtensionsTest : SubQueryExtensions {
     fun `notExists - with predicates returns NOT EXISTS expression`() {
         val result = orderItem.notExists(orderId.eq(id))
         assertNotNull(result)
-        assertTrue(result.toString().contains("exists"))
+        assertTrue(result.toString().contains("!exists"))
     }
 
     @Test
@@ -59,20 +59,20 @@ class SubQueryExtensionsTest : SubQueryExtensions {
         val active = Expressions.booleanPath(orderItem, "active")
         val result = orderItem.notExists(orderId.eq(id), active.isTrue)
         assertNotNull(result)
-        assertTrue(result.toString().contains("exists"))
+        assertTrue(result.toString().contains("!exists"))
     }
 
     @Test
     fun `notExists - with null predicates filters them out`() {
         val result = orderItem.notExists(orderId.eq(id), null)
         assertNotNull(result)
-        assertTrue(result.toString().contains("exists"))
+        assertTrue(result.toString().contains("!exists"))
     }
 
     @Test
     fun `notExists - with no predicates returns NOT EXISTS expression`() {
         val result = orderItem.notExists()
         assertNotNull(result)
-        assertTrue(result.toString().contains("exists"))
+        assertTrue(result.toString().contains("!exists"))
     }
 }
