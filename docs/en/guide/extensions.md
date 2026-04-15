@@ -324,12 +324,14 @@ Pattern matching and string comparison operators.
 | `notLike` | `StringExpression?.notLike(String?)` | `NOT LIKE ?` |
 | `matches` | `StringExpression?.matches(String?)` | `REGEXP ?` |
 | `contains` | `StringExpression?.contains(Expression<String>?)` | `LIKE '%' \|\| other_col \|\| '%'` |
+| `startsWith` | `StringExpression?.startsWith(Expression<String>?)` | `LIKE other_col \|\| '%'` |
+| `endsWith` | `StringExpression?.endsWith(Expression<String>?)` | `LIKE '%' \|\| other_col` |
 | `nullif` | `StringExpression?.nullif(Expression<String>?)` | `NULLIF(col, other_col)` |
 | `nullif` | `StringExpression?.nullif(String?)` | `NULLIF(col, ?)` |
 | `coalesce` | `StringExpression?.coalesce(Expression<String>?)` | `COALESCE(col, other_col)` |
 | `coalesce` | `StringExpression?.coalesce(String?)` | `COALESCE(col, ?)` |
 
-`contains` also has an `Expression<String>` overload.
+`contains`, `startsWith`, and `endsWith` also have `Expression<String>` overloads.
 
 ### Examples
 

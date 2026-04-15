@@ -88,6 +88,23 @@ interface StringExpressionExtensions {
     }
 
     /**
+     * Null-safe prefix match against another expression.
+     *
+     * Skips the condition when either side is null.
+     *
+     * ```sql
+     * name LIKE CONCAT(prefix_column, '%')
+     * ```
+     *
+     * @param right the expression to match as prefix, or null to skip
+     * @return `this LIKE 'right%'`, or null if either side is null
+     */
+    infix fun StringExpression?.startsWith(right: Expression<String>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.startsWith(right)
+    }
+
+    /**
      * Null-safe case-insensitive prefix match that skips the condition when either side is null.
      *
      * ```sql
@@ -114,6 +131,23 @@ interface StringExpressionExtensions {
      * @return `this LIKE '%right'`, or null if either side is null
      */
     infix fun StringExpression?.endsWith(right: String?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.endsWith(right)
+    }
+
+    /**
+     * Null-safe suffix match against another expression.
+     *
+     * Skips the condition when either side is null.
+     *
+     * ```sql
+     * name LIKE CONCAT('%', suffix_column)
+     * ```
+     *
+     * @param right the expression to match as suffix, or null to skip
+     * @return `this LIKE '%right'`, or null if either side is null
+     */
+    infix fun StringExpression?.endsWith(right: Expression<String>?): BooleanExpression? = when {
         this == null || right == null -> null
         else -> this.endsWith(right)
     }

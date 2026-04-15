@@ -117,6 +117,32 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
         assertNull(result)
     }
 
+    // ── startsWith(Expression) ──
+
+    @Test
+    fun `startsWith expression - both non-null returns expression`() {
+        val result = name startsWith keyword
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `startsWith expression - this null returns null`() {
+        val result = nullExpr startsWith keyword
+        assertNull(result)
+    }
+
+    @Test
+    fun `startsWith expression - right null returns null`() {
+        val result = name startsWith (null as StringExpression?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `startsWith expression - both null returns null`() {
+        val result = nullExpr startsWith (null as StringExpression?)
+        assertNull(result)
+    }
+
     // ── startsWithIgnoreCase ──
 
     @Test
@@ -166,6 +192,32 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     @Test
     fun `endsWith - both null returns null`() {
         val result = nullExpr endsWith (null as String?)
+        assertNull(result)
+    }
+
+    // ── endsWith(Expression) ──
+
+    @Test
+    fun `endsWith expression - both non-null returns expression`() {
+        val result = name endsWith keyword
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `endsWith expression - this null returns null`() {
+        val result = nullExpr endsWith keyword
+        assertNull(result)
+    }
+
+    @Test
+    fun `endsWith expression - right null returns null`() {
+        val result = name endsWith (null as StringExpression?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `endsWith expression - both null returns null`() {
+        val result = nullExpr endsWith (null as StringExpression?)
         assertNull(result)
     }
 
