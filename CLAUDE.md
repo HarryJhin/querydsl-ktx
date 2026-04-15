@@ -124,7 +124,15 @@ npm run docs:preview                                 # 빌드 결과 프리뷰
 - 외부 의존성은 compileOnly
 - apiVersion/languageVersion 1.7 유지 (Kotlin 1.7 호환)
 - **의존성은 gradle/libs.versions.toml에 정의**. build.gradle.kts에 버전 하드코딩 금지
-- **이슈 생성 시 라벨 필수**: enhancement, bug, docs
+- **이슈 생성 시 라벨 필수**: enhancement, bug, documentation
+- **PR 생성 시 라벨 필수** — 커밋 prefix에 맞춰 부여:
+  - `feat:` → enhancement
+  - `fix:` → bug
+  - `refactor:` → refactor
+  - `test:` → test
+  - `docs:` → documentation
+  - `chore:`, `build:`, `ci:` → chore
+- **커밋 메시지**: `<type>: <설명>` (conventional commits). type은 feat, fix, refactor, test, docs, chore, build, ci 중 하나
 - **테스트 @Configuration/@Bean에 open 필수** (kotlin-spring 플러그인 미사용)
 
 ## Documentation Rules

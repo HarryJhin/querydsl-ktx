@@ -4,7 +4,13 @@ changelog:
       labels: [enhancement]
     - title: Bug Fixes
       labels: [bug]
+    - title: Refactoring
+      labels: [refactor]
+    - title: Tests
+      labels: [test]
     - title: Documentation
-      labels: [docs]
+      labels: [documentation]
+    - title: Maintenance
+      labels: [chore, dependencies, github_actions]
     - title: Other Changes
       labels: ["*"]
