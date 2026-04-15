@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.transaction.TestTransaction
 import java.time.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @DataJpaTest
@@ -79,5 +81,16 @@ class BulkDmlTest {
     fun `bulk delete - no match returns zero`() {
         val count = orderRepository.deleteByStatus(OrderStatus.PENDING)
         assertEquals(0L, count)
+    }
+
+    // -- transaction guard --
+
+    @Test
+    fun `modifying without transaction throws IllegalStateException`() {
+        TestTransaction.end()
+
+        assertFailsWith<IllegalStateException> {
+            memberRepository.deactivateByStatus(MemberStatus.NORMAL)
+        }
     }
 }

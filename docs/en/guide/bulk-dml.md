@@ -53,6 +53,7 @@ protected fun <R> modifying(
     clearAutomatically: Boolean = true,
     block: () -> R,
 ): R {
+    check(entityManager.isJoinedToTransaction()) { ... }
     if (flushAutomatically) entityManager.flush()
     return try {
         block()
@@ -64,12 +65,23 @@ protected fun <R> modifying(
 
 The execution order is:
 
-1. **flush**: writes any pending entity changes to the database
-2. **execute**: runs your bulk DML statement
-3. **clear**: evicts all entities from the persistence context (in `finally`)
+1. **transaction check**: throws `IllegalStateException` if no active transaction
+2. **flush**: writes any pending entity changes to the database
+3. **execute**: runs your bulk DML statement
+4. **clear**: evicts all entities from the persistence context (in `finally`)
 
 The `clear` runs in a `finally` block, so the persistence context is cleaned up
 even if the DML statement throws an exception.
+
+::: warning Important notes
+- **Transaction required.** `modifying {}` requires an active transaction.
+  Annotate the calling method or class with `@Transactional`.
+  Without a transaction, an `IllegalStateException` is thrown.
+- **`clear()` detaches all entities.** `entityManager.clear()` evicts every
+  managed entity in the persistence context, not just those affected by the
+  bulk operation. If you hold references to other managed entities in the same
+  transaction, their dirty (unflushed) changes will be lost.
+:::
 
 ---
 

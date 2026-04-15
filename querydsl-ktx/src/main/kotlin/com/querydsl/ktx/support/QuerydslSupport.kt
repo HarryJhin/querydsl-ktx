@@ -448,11 +448,40 @@ abstract class QuerydslSupport<T : Any> {
     // modifying
     // ========================================
 
+    /**
+     * Wraps a bulk DML block with automatic [flush][EntityManager.flush] before
+     * and [clear][EntityManager.clear] after execution.
+     *
+     * An active transaction is **required**. If the calling method is not
+     * annotated with `@Transactional` (or otherwise joined to a transaction),
+     * an [IllegalStateException] is thrown immediately.
+     *
+     * ```kotlin
+     * @Transactional
+     * fun deactivateExpired(cutoffDate: LocalDate): Long =
+     *     modifying {
+     *         update(member)
+     *             .set(member.active, false)
+     *             .where(member.lastLogin lt cutoffDate)
+     *             .execute()
+     *     }
+     * ```
+     *
+     * @param flushAutomatically whether to flush pending changes before the block (default `true`)
+     * @param clearAutomatically whether to clear the persistence context after the block (default `true`)
+     * @param block the bulk DML statements to execute
+     * @return the result of [block]
+     * @throws IllegalStateException if no active transaction is present
+     */
     protected fun <R> modifying(
         flushAutomatically: Boolean = true,
         clearAutomatically: Boolean = true,
         block: () -> R,
     ): R {
+        check(entityManager.isJoinedToTransaction()) {
+            "modifying {} requires an active transaction. " +
+                "Annotate the calling method or class with @Transactional."
+        }
         if (flushAutomatically) entityManager.flush()
         return try {
             block()
