@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.NumberExpression
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class NumberExpressionExtensionsTest : NumberExpressionExtensions {
 
@@ -18,6 +19,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `gt value - both non-null returns GT expression`() {
         val result = price gt 10000
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -44,6 +46,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `gt expression - both non-null returns GT expression`() {
         val result = price gt minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -70,6 +73,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `goe value - both non-null returns GOE expression`() {
         val result = price goe 10000
         assertNotNull(result)
+        assertTrue(result.toString().contains(">="))
     }
 
     @Test
@@ -96,6 +100,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `goe expression - both non-null returns GOE expression`() {
         val result = price goe minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains(">="))
     }
 
     @Test
@@ -122,6 +127,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `lt value - both non-null returns LT expression`() {
         val result = price lt 50000
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test
@@ -148,6 +154,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `lt expression - both non-null returns LT expression`() {
         val result = price lt minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test
@@ -174,6 +181,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `loe value - both non-null returns LOE expression`() {
         val result = price loe 50000
         assertNotNull(result)
+        assertTrue(result.toString().contains("<="))
     }
 
     @Test
@@ -200,6 +208,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `loe expression - both non-null returns LOE expression`() {
         val result = price loe minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains("<="))
     }
 
     @Test
@@ -258,6 +267,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `between ClosedRange - this non-null returns BETWEEN`() {
         val result = price between (10000..50000)
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("between"))
     }
 
     @Test
@@ -272,6 +282,8 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `notBetween - this non-null returns NOT BETWEEN`() {
         val result = price notBetween (10000 to 50000)
         assertNotNull(result)
+        val str = result.toString().lowercase()
+        assertTrue(str.contains("not") || str.contains("!"))
     }
 
     @Test
@@ -286,6 +298,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `nullif expression - both non-null returns NULLIF`() {
         val result = price nullif minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains("nullif("))
     }
 
     @Test
@@ -312,6 +325,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `nullif value - both non-null returns NULLIF`() {
         val result = price nullif 0
         assertNotNull(result)
+        assertTrue(result.toString().contains("nullif("))
     }
 
     @Test
@@ -338,6 +352,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `coalesce expression - both non-null returns COALESCE`() {
         val result = price coalesce minPrice
         assertNotNull(result)
+        assertTrue(result.toString().contains("coalesce("))
     }
 
     @Test
@@ -364,6 +379,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `coalesce value - both non-null returns COALESCE`() {
         val result = price coalesce 0
         assertNotNull(result)
+        assertTrue(result.toString().contains("coalesce("))
     }
 
     @Test
@@ -390,6 +406,7 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
     fun `reverse between - value non-null, both bounds non-null returns AND expression`() {
         val result = 30000 between (price to minPrice)
         assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
     }
 
     @Test

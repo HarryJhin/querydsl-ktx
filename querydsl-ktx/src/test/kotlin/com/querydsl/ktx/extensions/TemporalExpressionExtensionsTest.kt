@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, ComparableExpressionExtensions {
 
@@ -23,6 +24,7 @@ class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, Comparabl
     fun `after value - both non-null returns AFTER expression`() {
         val result = createdAt after sampleDate
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -49,6 +51,7 @@ class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, Comparabl
     fun `after expression - both non-null returns AFTER expression`() {
         val result = createdAt after updatedAt
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -75,6 +78,7 @@ class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, Comparabl
     fun `before value - both non-null returns BEFORE expression`() {
         val result = createdAt before sampleDate
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test
@@ -101,6 +105,7 @@ class TemporalExpressionExtensionsTest : TemporalExpressionExtensions, Comparabl
     fun `before expression - both non-null returns BEFORE expression`() {
         val result = createdAt before updatedAt
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test

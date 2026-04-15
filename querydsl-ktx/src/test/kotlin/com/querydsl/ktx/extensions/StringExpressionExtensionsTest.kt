@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class StringExpressionExtensionsTest : StringExpressionExtensions {
 
@@ -19,6 +20,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `contains string - both non-null returns LIKE expression`() {
         val result = name contains "hong"
         assertNotNull(result)
+        assertTrue(result.toString().contains("contains("))
     }
 
     @Test
@@ -45,6 +47,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `contains expression - both non-null returns LIKE expression`() {
         val result = name contains keyword
         assertNotNull(result)
+        assertTrue(result.toString().contains("contains("))
     }
 
     @Test
@@ -71,6 +74,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `containsIgnoreCase - both non-null returns expression`() {
         val result = name containsIgnoreCase "HONG"
         assertNotNull(result)
+        assertTrue(result.toString().contains("containsIc("))
     }
 
     @Test
@@ -97,6 +101,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `startsWith - both non-null returns expression`() {
         val result = name startsWith "hong"
         assertNotNull(result)
+        assertTrue(result.toString().contains("startsWith("))
     }
 
     @Test
@@ -123,6 +128,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `startsWith expression - both non-null returns expression`() {
         val result = name startsWith keyword
         assertNotNull(result)
+        assertTrue(result.toString().contains("startsWith("))
     }
 
     @Test
@@ -149,6 +155,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `startsWithIgnoreCase - both non-null returns expression`() {
         val result = name startsWithIgnoreCase "HONG"
         assertNotNull(result)
+        assertTrue(result.toString().contains("startsWithIgnoreCase("))
     }
 
     @Test
@@ -175,6 +182,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `endsWith - both non-null returns expression`() {
         val result = name endsWith "@gmail.com"
         assertNotNull(result)
+        assertTrue(result.toString().contains("endsWith("))
     }
 
     @Test
@@ -201,6 +209,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `endsWith expression - both non-null returns expression`() {
         val result = name endsWith keyword
         assertNotNull(result)
+        assertTrue(result.toString().contains("endsWith("))
     }
 
     @Test
@@ -227,6 +236,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `endsWithIgnoreCase - both non-null returns expression`() {
         val result = name endsWithIgnoreCase "@GMAIL.COM"
         assertNotNull(result)
+        assertTrue(result.toString().contains("endsWithIgnoreCase("))
     }
 
     @Test
@@ -253,6 +263,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `equalsIgnoreCase - both non-null returns expression`() {
         val result = name equalsIgnoreCase "admin"
         assertNotNull(result)
+        assertTrue(result.toString().contains("eqIc("))
     }
 
     @Test
@@ -279,6 +290,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `notEqualsIgnoreCase - both non-null returns expression`() {
         val result = name notEqualsIgnoreCase "admin"
         assertNotNull(result)
+        assertTrue(result.toString().contains("!") && result.toString().contains("eqIc("))
     }
 
     @Test
@@ -305,6 +317,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `like - both non-null returns expression`() {
         val result = name like "hong%"
         assertNotNull(result)
+        assertTrue(result.toString().contains("like"))
     }
 
     @Test
@@ -331,6 +344,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `likeIgnoreCase - both non-null returns expression`() {
         val result = name likeIgnoreCase "HONG%"
         assertNotNull(result)
+        assertTrue(result.toString().contains("like"))
     }
 
     @Test
@@ -357,6 +371,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `notLike - both non-null returns expression`() {
         val result = name notLike "test%"
         assertNotNull(result)
+        assertTrue(result.toString().contains("!") && result.toString().contains("like"))
     }
 
     @Test
@@ -383,6 +398,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `matches - both non-null returns expression`() {
         val result = name matches "^[a-z]+$"
         assertNotNull(result)
+        assertTrue(result.toString().contains("matches("))
     }
 
     @Test
@@ -409,6 +425,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `nullif expression - both non-null returns NULLIF`() {
         val result = name nullif keyword
         assertNotNull(result)
+        assertTrue(result.toString().contains("nullif("))
     }
 
     @Test
@@ -435,6 +452,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `nullif value - both non-null returns NULLIF`() {
         val result = name nullif "default"
         assertNotNull(result)
+        assertTrue(result.toString().contains("nullif("))
     }
 
     @Test
@@ -461,6 +479,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `coalesce expression - both non-null returns COALESCE`() {
         val result = name coalesce keyword
         assertNotNull(result)
+        assertTrue(result.toString().contains("coalesce("))
     }
 
     @Test
@@ -487,6 +506,7 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `coalesce value - both non-null returns COALESCE`() {
         val result = name coalesce "unknown"
         assertNotNull(result)
+        assertTrue(result.toString().contains("coalesce("))
     }
 
     @Test
