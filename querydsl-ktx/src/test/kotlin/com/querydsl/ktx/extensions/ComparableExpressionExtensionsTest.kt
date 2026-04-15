@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.Expressions
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
 
@@ -18,6 +19,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `gt value - both non-null returns GT expression`() {
         val result = code gt "A"
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -44,6 +46,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `gt expression - both non-null returns GT expression`() {
         val result = code gt otherCode
         assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
     }
 
     @Test
@@ -70,6 +73,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `goe value - both non-null returns GOE expression`() {
         val result = code goe "A"
         assertNotNull(result)
+        assertTrue(result.toString().contains(">="))
     }
 
     @Test
@@ -96,6 +100,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `goe expression - both non-null returns GOE expression`() {
         val result = code goe otherCode
         assertNotNull(result)
+        assertTrue(result.toString().contains(">="))
     }
 
     @Test
@@ -122,6 +127,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `lt value - both non-null returns LT expression`() {
         val result = code lt "Z"
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test
@@ -148,6 +154,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `lt expression - both non-null returns LT expression`() {
         val result = code lt otherCode
         assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
     }
 
     @Test
@@ -174,6 +181,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `loe value - both non-null returns LOE expression`() {
         val result = code loe "Z"
         assertNotNull(result)
+        assertTrue(result.toString().contains("<="))
     }
 
     @Test
@@ -200,6 +208,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `loe expression - both non-null returns LOE expression`() {
         val result = code loe otherCode
         assertNotNull(result)
+        assertTrue(result.toString().contains("<="))
     }
 
     @Test
@@ -259,6 +268,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `between ClosedRange - this non-null returns BETWEEN`() {
         val result = code between ("A".."Z")
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("between"))
     }
 
     @Test
@@ -273,6 +283,8 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `notBetween - this non-null returns NOT BETWEEN`() {
         val result = code notBetween ("A" to "Z")
         assertNotNull(result)
+        val str = result.toString().lowercase()
+        assertTrue(str.contains("not") || str.contains("!"), "Expected NOT BETWEEN expression but got: $result")
     }
 
     @Test
@@ -287,6 +299,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `nullif expression - both non-null returns NULLIF`() {
         val result = code nullif otherCode
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("nullif"))
     }
 
     @Test
@@ -313,6 +326,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `nullif value - both non-null returns NULLIF`() {
         val result = code nullif "DEFAULT"
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("nullif"))
     }
 
     @Test
@@ -339,6 +353,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `coalesce expression - both non-null returns COALESCE`() {
         val result = code coalesce otherCode
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("coalesce"))
     }
 
     @Test
@@ -365,6 +380,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `coalesce value - both non-null returns COALESCE`() {
         val result = code coalesce "DEFAULT"
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("coalesce"))
     }
 
     @Test
@@ -391,6 +407,7 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
     fun `reverse between - value non-null, both bounds non-null returns AND expression`() {
         val result = "M" between (code to otherCode)
         assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
     }
 
     @Test
