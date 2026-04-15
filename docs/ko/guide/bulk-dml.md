@@ -53,6 +53,7 @@ protected fun <R> modifying(
     clearAutomatically: Boolean = true,
     block: () -> R,
 ): R {
+    check(entityManager.isJoinedToTransaction()) { ... }
     if (flushAutomatically) entityManager.flush()
     return try {
         block()
@@ -64,12 +65,23 @@ protected fun <R> modifying(
 
 실행 순서는 다음과 같습니다:
 
-1. **flush**: 대기 중인 엔티티 변경 사항을 데이터베이스에 기록
-2. **execute**: 벌크 DML 문 실행
-3. **clear**: 영속성 컨텍스트에서 모든 엔티티 제거 (`finally` 블록에서)
+1. **트랜잭션 검사**: 활성 트랜잭션이 없으면 `IllegalStateException` 발생
+2. **flush**: 대기 중인 엔티티 변경 사항을 데이터베이스에 기록
+3. **execute**: 벌크 DML 문 실행
+4. **clear**: 영속성 컨텍스트에서 모든 엔티티 제거 (`finally` 블록에서)
 
 `clear`는 `finally` 블록에서 실행되므로, DML 문에서 예외가 발생하더라도
 영속성 컨텍스트가 정리됩니다.
+
+::: warning 주의사항
+- **트랜잭션 필수.** `modifying {}`은 활성 트랜잭션이 필요합니다.
+  호출하는 메서드 또는 클래스에 `@Transactional`을 선언하세요.
+  트랜잭션이 없으면 `IllegalStateException`이 발생합니다.
+- **`clear()`는 모든 엔티티를 분리합니다.** `entityManager.clear()`는 벌크
+  작업의 대상 엔티티만이 아니라, 영속성 컨텍스트의 모든 관리 엔티티를 분리합니다.
+  같은 트랜잭션에서 다른 관리 엔티티의 참조를 보유하고 있다면, 플러시되지 않은
+  변경 사항이 손실됩니다.
+:::
 
 ---
 

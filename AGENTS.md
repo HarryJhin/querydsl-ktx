@@ -101,6 +101,7 @@ mkdocs build                              # Build docs site
 ## Conventions
 
 - Dependencies: `compileOnly` for all external libraries (user provides versions)
+- Spring Data 내부 API 의존: `Querydsl` (`o.s.d.jpa.repository.support`), `SimpleEntityPathResolver` — Spring Boot 3.0~3.4 호환 검증됨. v2.0.0(Spring Boot 4) 마이그레이션 시 검토 필요
 - Pagination: `slice()` (optimistic hasNext) and `exactSlice()` (exact hasNext) return Slice, `page()` returns Page, `fetch()` returns List
-- Bulk DML: wrap in `modifying { }` for flush + clear
+- Bulk DML: wrap in `modifying { }` for flush + clear (requires active transaction; throws `IllegalStateException` otherwise)
 - Naming: verb form (slice, page, fetch), not gerund (slicing, paging, fetching)
