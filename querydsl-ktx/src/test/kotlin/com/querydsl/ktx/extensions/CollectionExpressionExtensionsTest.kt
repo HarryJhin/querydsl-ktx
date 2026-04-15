@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.StringPath
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class CollectionExpressionExtensionsTest : CollectionExpressionExtensions {
 
@@ -26,6 +27,7 @@ class CollectionExpressionExtensionsTest : CollectionExpressionExtensions {
     fun `contains value - both non-null returns expression`() {
         val result = roles contains "ADMIN"
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("in") || result.toString().contains("member"))
     }
 
     @Test
