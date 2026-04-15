@@ -32,6 +32,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.boot.starter.data.jpa)
     testImplementation(libs.h2)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {
