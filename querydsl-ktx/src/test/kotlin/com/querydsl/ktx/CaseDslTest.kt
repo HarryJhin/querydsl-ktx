@@ -1,5 +1,6 @@
 package com.querydsl.ktx
 
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 import com.querydsl.ktx.extensions.SimpleExpressionExtensions
@@ -11,6 +12,7 @@ class CaseDslTest : SimpleExpressionExtensions {
 
     private val status: StringExpression = Expressions.stringPath("status")
     private val name: StringExpression = Expressions.stringPath("name")
+    private val active: BooleanExpression = Expressions.booleanPath("active")
 
     // ── Searched CASE ──
 
@@ -80,6 +82,33 @@ class CaseDslTest : SimpleExpressionExtensions {
             `when`("VIP") then 1
             `when`("NORMAL") then 2
             otherwise(0)
+        }
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `searched case - no otherwise called returns null`() {
+        val result = case<String> {
+            `when`(active) then "yes"
+            // no otherwise
+        }
+        assertNull(result)
+    }
+
+    @Test
+    fun `searched case - otherwise with expression`() {
+        val result = case<String> {
+            `when`(active) then "active"
+            otherwise(Expressions.constant("default"))
+        }
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `simple case - otherwise with expression`() {
+        val result = case<String, String>(status) {
+            `when`("VIP") then "premium"
+            otherwise(Expressions.constant("standard"))
         }
         assertNotNull(result)
     }

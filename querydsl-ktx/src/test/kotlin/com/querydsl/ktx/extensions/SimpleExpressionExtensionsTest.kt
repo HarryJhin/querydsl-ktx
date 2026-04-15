@@ -4,8 +4,10 @@ import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.SimpleExpression
 import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
 
@@ -248,5 +250,34 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
         val result = status.inChunked(list, chunkSize = 5)
         assertNotNull(result)
         assert(!result.toString().contains("||")) { "Expected single IN without OR, got: $result" }
+    }
+
+    @Test
+    fun `inChunked - chunkSize zero throws IllegalArgumentException`() {
+        assertFailsWith<IllegalArgumentException> {
+            status.inChunked(listOf("A", "B"), chunkSize = 0)
+        }
+    }
+
+    @Test
+    fun `inChunked - negative chunkSize throws IllegalArgumentException`() {
+        assertFailsWith<IllegalArgumentException> {
+            status.inChunked(listOf("A", "B"), chunkSize = -1)
+        }
+    }
+
+    @Test
+    fun `inChunked - single element returns simple IN`() {
+        val result = status.inChunked(listOf("A"))
+        assertNotNull(result)
+        // single element fits within default chunk size, so no OR
+        assertTrue(!result.toString().contains("||"))
+    }
+
+    @Test
+    fun `inChunked - chunkSize 1 creates OR per element`() {
+        val result = status.inChunked(listOf("A", "B", "C"), chunkSize = 1)
+        assertNotNull(result)
+        assertTrue(result.toString().contains(" || "))
     }
 }
