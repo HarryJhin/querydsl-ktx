@@ -156,13 +156,17 @@ interface SimpleExpressionExtensions {
      * @param right the collection of values to match against, or null to skip
      * @param chunkSize maximum number of items per IN clause (default 1000)
      * @return chunked IN expression, or null if either side is null
+     * @throws IllegalArgumentException if [chunkSize] is not positive
      * @see inChunked
      */
-    fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression? = when {
-        this == null || right == null -> null
-        right.size <= chunkSize -> this.`in`(right)
-        else -> right.chunked(chunkSize)
-            .map { chunk -> this.`in`(chunk) }
-            .reduce { acc, expr -> acc.or(expr) }
+    fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression? {
+        require(chunkSize > 0) { "chunkSize must be positive, but was $chunkSize" }
+        return when {
+            this == null || right == null -> null
+            right.size <= chunkSize -> this.`in`(right)
+            else -> right.chunked(chunkSize)
+                .map { chunk -> this.`in`(chunk) }
+                .reduce { acc, expr -> acc.or(expr) }
+        }
     }
 }
