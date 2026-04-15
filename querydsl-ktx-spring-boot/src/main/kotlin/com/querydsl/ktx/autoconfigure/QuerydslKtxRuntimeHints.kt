@@ -24,11 +24,13 @@ class QuerydslKtxRuntimeHints : RuntimeHintsRegistrar {
                 com.querydsl.ktx.support.QuerydslSupport::class.java,
                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
                 MemberCategory.INVOKE_PUBLIC_METHODS,
+                MemberCategory.INVOKE_DECLARED_METHODS,
             )
             .registerType(
                 com.querydsl.ktx.support.QuerydslRepository::class.java,
                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
                 MemberCategory.INVOKE_PUBLIC_METHODS,
+                MemberCategory.INVOKE_DECLARED_METHODS,
             )
     }
 }

@@ -49,6 +49,16 @@ class QuerydslKtxAutoConfigurationTest {
             }
     }
 
+    @Test
+    fun `does not register when multiple EntityManager beans exist`() {
+        contextRunner
+            .withBean("em1", EntityManager::class.java, { Mockito.mock(EntityManager::class.java) })
+            .withBean("em2", EntityManager::class.java, { Mockito.mock(EntityManager::class.java) })
+            .run { context ->
+                assertTrue(!context.containsBean("jpaQueryFactory"))
+            }
+    }
+
     @Configuration(proxyBeanMethods = false)
     internal class CustomJpaQueryFactoryConfig {
         @Bean
