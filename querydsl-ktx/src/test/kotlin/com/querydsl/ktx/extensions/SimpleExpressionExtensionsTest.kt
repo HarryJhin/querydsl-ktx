@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
 
@@ -19,6 +20,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `eq value - both non-null returns EQ expression`() {
         val result = status eq "ACTIVE"
         assertNotNull(result)
+        assertTrue(result.toString().contains("="))
     }
 
     @Test
@@ -45,6 +47,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `eq expression - both non-null returns EQ expression`() {
         val result = status eq defaultStatus
         assertNotNull(result)
+        assertTrue(result.toString().contains("="))
     }
 
     @Test
@@ -71,6 +74,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `ne value - both non-null returns NE expression`() {
         val result = status ne "DELETED"
         assertNotNull(result)
+        assertTrue(result.toString().contains("!="))
     }
 
     @Test
@@ -97,6 +101,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `ne expression - both non-null returns NE expression`() {
         val result = status ne defaultStatus
         assertNotNull(result)
+        assertTrue(result.toString().contains("!="))
     }
 
     @Test
@@ -123,6 +128,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `in - both non-null returns IN expression`() {
         val result = status `in` listOf("ACTIVE", "PENDING")
         assertNotNull(result)
+        assertTrue(result.toString().contains(" in "))
     }
 
     @Test
@@ -155,6 +161,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `notIn - both non-null returns NOT IN expression`() {
         val result = status notIn listOf("DELETED", "BLOCKED")
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("not in"))
     }
 
     @Test
@@ -187,6 +194,7 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     fun `inChunked - both non-null with small list returns IN expression`() {
         val result = status inChunked listOf("A", "B", "C")
         assertNotNull(result)
+        assertTrue(result.toString().contains(" in "))
     }
 
     @Test

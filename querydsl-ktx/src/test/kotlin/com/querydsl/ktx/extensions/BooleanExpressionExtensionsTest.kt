@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.Expressions
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
 
@@ -77,6 +78,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `andAnyOf - this non-null, predicates non-null returns AND(OR) expression`() {
         val result = active andAnyOf listOf(visible, deleted)
         assertNotNull(result)
+        assertTrue(result.toString().contains("||"))
     }
 
     @Test
@@ -111,6 +113,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `orAllOf - this non-null, predicates non-null returns OR(AND) expression`() {
         val result = active orAllOf listOf(visible, deleted)
         assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
     }
 
     @Test
@@ -145,6 +148,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `eq - both non-null returns EQ expression`() {
         val result = active eq true
         assertNotNull(result)
+        assertTrue(result.toString().contains("="))
     }
 
     @Test
@@ -171,6 +175,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `nullif Expression - both non-null returns NULLIF expression`() {
         val result = active nullif visible
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("nullif"))
     }
 
     @Test
@@ -197,6 +202,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `nullif Boolean - both non-null returns NULLIF expression`() {
         val result = active nullif true
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("nullif"))
     }
 
     @Test
@@ -223,6 +229,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `coalesce Expression - both non-null returns COALESCE expression`() {
         val result = active coalesce visible
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("coalesce"))
     }
 
     @Test
@@ -249,6 +256,7 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
     fun `coalesce Boolean - both non-null returns COALESCE expression`() {
         val result = active coalesce true
         assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("coalesce"))
     }
 
     @Test
