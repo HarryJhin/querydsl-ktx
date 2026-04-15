@@ -30,10 +30,10 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 ├── CaseDsl.kt           ← CASE/WHEN Kotlin DSL (searched & simple)
 ├── extensions/          ← 8 interfaces (no state, no dependencies)
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
-│   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn
+│   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn, inChunked
 │   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo
 │   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo
-│   ├── StringExpressionExtensions.kt     — contains, startsWith, like, matches, nullif, coalesce
+│   ├── StringExpressionExtensions.kt     — contains, startsWith, endsWith, like, matches, nullif, coalesce
 │   ├── TemporalExpressionExtensions.kt   — after, before
 │   ├── CollectionExpressionExtensions.kt — contains
 │   └── SubQueryExtensions.kt            — exists, notExists

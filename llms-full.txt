@@ -88,6 +88,7 @@ fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1
 ```
 
 Null behavior: either side null returns null (condition skipped).
+`inChunked` throws `IllegalArgumentException` if `chunkSize` is not positive.
 
 ### ComparableExpressionExtensions
 
@@ -134,8 +135,10 @@ infix fun StringExpression?.contains(right: String?): BooleanExpression?
 infix fun StringExpression?.contains(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.containsIgnoreCase(right: String?): BooleanExpression?
 infix fun StringExpression?.startsWith(right: String?): BooleanExpression?
+infix fun StringExpression?.startsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.startsWithIgnoreCase(right: String?): BooleanExpression?
 infix fun StringExpression?.endsWith(right: String?): BooleanExpression?
+infix fun StringExpression?.endsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.endsWithIgnoreCase(right: String?): BooleanExpression?
 infix fun StringExpression?.equalsIgnoreCase(right: String?): BooleanExpression?
 infix fun StringExpression?.notEqualsIgnoreCase(right: String?): BooleanExpression?
