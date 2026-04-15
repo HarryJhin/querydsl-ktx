@@ -8,3 +8,14 @@ out/
 node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+
+# Secrets & credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+secring.gpg
+signing.properties
+local.properties
