@@ -48,7 +48,7 @@ null 파라미터는 자동으로 건너뜁니다. `Pair`를 사용한 `between`
 
 ```kotlin
 // 1. 의존성 추가
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:1.0.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:1.1.0")
 ```
 
 ```kotlin
