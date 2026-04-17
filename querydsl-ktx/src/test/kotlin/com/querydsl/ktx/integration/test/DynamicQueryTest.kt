@@ -237,4 +237,33 @@ class DynamicQueryTest {
         val result = memberRepository.findByCondition()
         assertEquals(5, result.size)
     }
+
+    // -- notBetween (partial range) --
+
+    @Test
+    fun `notBetween pair - both bounds excludes range`() {
+        val result = memberRepository.findByAgeNotBetween(minAge = 25, maxAge = 30)
+        assertEquals(2, result.size) // Charlie(35), Diana(20)
+        assertTrue(result.none { it.age in 25..30 })
+    }
+
+    @Test
+    fun `notBetween pair - lower bound only uses less-than`() {
+        val result = memberRepository.findByAgeNotBetween(minAge = 25)
+        assertEquals(1, result.size) // Diana(20)
+        assertTrue(result.all { it.age < 25 })
+    }
+
+    @Test
+    fun `notBetween pair - upper bound only uses greater-than`() {
+        val result = memberRepository.findByAgeNotBetween(maxAge = 30)
+        assertEquals(1, result.size) // Charlie(35)
+        assertTrue(result.all { it.age > 30 })
+    }
+
+    @Test
+    fun `notBetween pair - both null skips filter`() {
+        val result = memberRepository.findByAgeNotBetween(minAge = null, maxAge = null)
+        assertEquals(5, result.size)
+    }
 }

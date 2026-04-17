@@ -58,6 +58,9 @@ class MemberRepository : QuerydslRepository<Member>() {
     fun findByAgeBetweenClosedRange(range: ClosedRange<Int>): List<Member> =
         selectFrom(member).where(member.age between range).fetch()
 
+    fun findByAgeNotBetween(minAge: Int? = null, maxAge: Int? = null): List<Member> =
+        selectFrom(member).where(member.age notBetween (minAge to maxAge)).fetch()
+
     private val memberSort = sortSpec {
         "name" by member.name
         "age" by member.age

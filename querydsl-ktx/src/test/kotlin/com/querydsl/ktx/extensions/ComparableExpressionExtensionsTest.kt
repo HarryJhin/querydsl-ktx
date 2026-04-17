@@ -293,6 +293,26 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
         assertNull(result)
     }
 
+    @Test
+    fun `notBetween - only from returns less-than`() {
+        val result = code notBetween ("A" to null)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
+    }
+
+    @Test
+    fun `notBetween - only to returns greater-than`() {
+        val result = code notBetween (null to "Z")
+        assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
+    }
+
+    @Test
+    fun `notBetween - both bounds null returns null`() {
+        val result = code notBetween (null to null)
+        assertNull(result)
+    }
+
     // ── nullif(Expression) ──
 
     @Test

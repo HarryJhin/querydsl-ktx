@@ -145,7 +145,7 @@ Oracle은 단일 IN 절에 1000개 항목 제한이 있습니다.
 | `loe` | `ComparableExpression<T>?.loe(T?)` | `col <= ?` |
 | `between` | `ComparableExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `ComparableExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
-| `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T?, T?>)` | `col NOT BETWEEN ? AND ?` |
 | `between` (역방향) | `T?.between(Pair<ComparableExpression<T>?, ComparableExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
@@ -282,7 +282,7 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 | `loe` | `NumberExpression<T>?.loe(T?)` | `col <= ?` |
 | `between` | `NumberExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `NumberExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
-| `notBetween` | `NumberExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `notBetween` | `NumberExpression<T>?.notBetween(Pair<T?, T?>)` | `col NOT BETWEEN ? AND ?` |
 | `between` (역방향) | `T?.between(Pair<NumberExpression<T>?, NumberExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
