@@ -84,8 +84,20 @@ The starter auto-registers a `JPAQueryFactory` bean with these conditions:
 | Condition | Purpose |
 |-----------|---------|
 | `@ConditionalOnClass(JPAQueryFactory)` | Only activates when QueryDSL is on the classpath |
+| `@ConditionalOnSingleCandidate(EntityManagerFactory)` | Activates when exactly one `EntityManagerFactory` is present, or one is marked `@Primary` |
 | `@ConditionalOnMissingBean` | Respects any custom `JPAQueryFactory` you define |
-| `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | Ensures `EntityManager` is ready first |
+| `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | Runs after Spring Boot JPA auto-configuration completes |
+
+Bean creation:
+
+```kotlin
+@Bean
+@ConditionalOnMissingBean
+fun jpaQueryFactory(entityManagerFactory: EntityManagerFactory): JPAQueryFactory =
+    JPAQueryFactory(SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory))
+```
+
+`SharedEntityManagerCreator` produces a transactional `EntityManager` proxy managed by Spring. This is the same pattern Spring Data JPA uses internally.
 
 ::: tip Custom JPAQueryFactory
 If you register your own `JPAQueryFactory` bean (e.g., with custom `JPQLTemplates`),
@@ -99,6 +111,51 @@ class QuerydslConfig {
         JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
 }
 ```
+:::
+
+## Multi-datasource Setup
+
+With multiple `EntityManagerFactory` beans, the one marked `@Primary` is selected automatically.
+
+```kotlin
+@Configuration
+class DataSourceConfig {
+
+    @Bean
+    @Primary
+    fun primaryEntityManagerFactory(
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("primaryDataSource") dataSource: DataSource,
+    ): LocalContainerEntityManagerFactoryBean =
+        builder.dataSource(dataSource).packages("com.example.primary").build()
+
+    @Bean
+    fun secondaryEntityManagerFactory(
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("secondaryDataSource") dataSource: DataSource,
+    ): LocalContainerEntityManagerFactoryBean =
+        builder.dataSource(dataSource).packages("com.example.secondary").build()
+}
+```
+
+With this setup, the auto-registered `JPAQueryFactory` uses the **primary** datasource.
+
+To query the secondary datasource, register a separate `JPAQueryFactory`:
+
+```kotlin
+@Configuration
+class SecondaryQuerydslConfig {
+
+    @Bean
+    fun secondaryJpaQueryFactory(
+        @Qualifier("secondaryEntityManagerFactory") emf: EntityManagerFactory,
+    ): JPAQueryFactory =
+        JPAQueryFactory(SharedEntityManagerCreator.createSharedEntityManager(emf))
+}
+```
+
+::: warning No @Primary Marker
+If multiple `EntityManagerFactory` beans exist without `@Primary`, the auto-configuration stays inactive. You must register `JPAQueryFactory` manually.
 :::
 
 ## Verify the Setup

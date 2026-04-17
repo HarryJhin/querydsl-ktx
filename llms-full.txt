@@ -452,9 +452,14 @@ modifying {
 
 The starter auto-registers a `JPAQueryFactory` bean:
 - `@ConditionalOnClass(JPAQueryFactory)` -- only when QueryDSL is on classpath
+- `@ConditionalOnSingleCandidate(EntityManagerFactory)` -- activates with one EMF or a `@Primary` one (multi-datasource compatible)
 - `@ConditionalOnMissingBean` -- respects your custom bean
 - Runs after `HibernateJpaAutoConfiguration`
 - `@ImportRuntimeHints(QuerydslKtxRuntimeHints::class)` -- registers reflection hints for GraalVM native image support
+
+The bean is created with `SharedEntityManagerCreator.createSharedEntityManager(emf)`, producing a transactional `EntityManager` proxy (same pattern as Spring Data JPA).
+
+Multi-datasource: the `@Primary EntityManagerFactory` is selected automatically. For non-primary data sources, register a separate `JPAQueryFactory` bean with the matching `EntityManagerFactory` qualifier.
 
 ## Modules
 

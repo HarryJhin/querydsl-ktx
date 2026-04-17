@@ -90,6 +90,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 - **Reified 표현식 템플릿** -- `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`.
 - **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기.
 - **Bulk DML** -- `modifying { }` 자동 flush/clear.
+- **멀티 데이터소스 지원** -- 여러 데이터소스가 있을 때 auto-config가 `@Primary EntityManagerFactory`를 자동 선택합니다. primary가 아닌 팩토리는 `JPAQueryFactory`를 직접 등록하세요.
 - **GraalVM 네이티브 이미지** -- `@ImportRuntimeHints`를 통해 `RuntimeHints`가 자동 등록되어 네이티브 이미지를 바로 지원합니다.
 
 ## 문서
