@@ -53,16 +53,17 @@ class SortSpec {
      * @param sort the sort specification from the client
      * @return ordered list of [OrderSpecifier]s; empty if no properties matched
      */
-    @Suppress("UNCHECKED_CAST")
     fun resolve(sort: Sort): List<OrderSpecifier<*>> {
         if (sort.isUnsorted) return emptyList()
 
         return sort.mapNotNull { order ->
-            val expression = mappings[order.property]
-                as? Expression<Comparable<Any>>
-                ?: return@mapNotNull null
+            val expression = mappings[order.property] ?: return@mapNotNull null
             val direction = if (order.isAscending) Order.ASC else Order.DESC
-            OrderSpecifier(direction, expression)
+            // OrderSpecifier<T : Comparable<?>> requires a concrete type argument,
+            // which Kotlin cannot express for a star-projected bound. The cast is a
+            // runtime-safe erasure: T is never reflected over by OrderSpecifier.
+            @Suppress("UNCHECKED_CAST")
+            OrderSpecifier(direction, expression as Expression<Comparable<Any>>)
         }
     }
 }
