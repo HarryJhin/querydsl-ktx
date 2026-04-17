@@ -8,6 +8,7 @@ val jpaClassifier = extra["jpaClassifier"] as String?
 dependencies {
     implementation(projects.querydslKtx)
     compileOnly(libs.spring.boot.autoconfigure)
+    compileOnly(libs.spring.orm)
     compileOnly(libs.querydsl.jpa) {
         if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
@@ -23,6 +24,9 @@ dependencies {
         if (jpaClassifier != null) artifact { classifier = jpaClassifier }
     }
     testImplementation(libs.jakarta.persistence.api)
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.starter.data.jpa)
+    testImplementation(libs.h2)
     testImplementation(kotlin("test"))
 }
 
