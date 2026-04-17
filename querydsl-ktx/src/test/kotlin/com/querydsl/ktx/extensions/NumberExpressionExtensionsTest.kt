@@ -292,6 +292,26 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         assertNull(result)
     }
 
+    @Test
+    fun `notBetween - only from returns less-than`() {
+        val result = price notBetween (10000 to null)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("<"))
+    }
+
+    @Test
+    fun `notBetween - only to returns greater-than`() {
+        val result = price notBetween (null to 50000)
+        assertNotNull(result)
+        assertTrue(result.toString().contains(">"))
+    }
+
+    @Test
+    fun `notBetween - both bounds null returns null`() {
+        val result = price notBetween (null to null)
+        assertNull(result)
+    }
+
     // ── nullif(Expression) ──
 
     @Test

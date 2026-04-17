@@ -103,7 +103,7 @@ infix fun <T : Comparable<T>> ComparableExpression<T>?.loe(right: T?): BooleanEx
 infix fun <T : Comparable<T>> ComparableExpression<T>?.loe(right: Expression<T>?): BooleanExpression?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.between(range: Pair<T?, T?>): BooleanExpression?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.between(range: ClosedRange<T>): BooleanExpression?
-infix fun <T : Comparable<T>> ComparableExpression<T>?.notBetween(range: Pair<T, T>): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.notBetween(range: Pair<T?, T?>): BooleanExpression?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: Expression<T>?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.nullif(other: T?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(expr: Expression<T>?): ComparableExpression<T>?

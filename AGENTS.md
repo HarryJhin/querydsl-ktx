@@ -64,6 +64,7 @@ All extension functions follow this contract:
 |--------------|-----------|----------|-----------|
 | `and` / `or` | returns arg | returns this | null |
 | `between(Pair)` | null | one-sided comparison (goe/loe) | null |
+| `notBetween(Pair)` | null | one-sided comparison (lt/gt) | null |
 | reverse `between(Pair)` | null | one-sided comparison (loe/goe) | null |
 | `case {}` | n/a | null predicate skips branch | all null → null |
 | All others | null | null | null |

@@ -145,7 +145,7 @@ Comparison and range operators for `Comparable` types (dates, strings, enums, et
 | `loe` | `ComparableExpression<T>?.loe(T?)` | `col <= ?` |
 | `between` | `ComparableExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `ComparableExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
-| `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `notBetween` | `ComparableExpression<T>?.notBetween(Pair<T?, T?>)` | `col NOT BETWEEN ? AND ?` |
 | `between` (reverse) | `T?.between(Pair<ComparableExpression<T>?, ComparableExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
@@ -268,7 +268,7 @@ operators specifically typed for `NumberExpression`.
 | `loe` | `NumberExpression<T>?.loe(T?)` | `col <= ?` |
 | `between` | `NumberExpression<T>?.between(Pair<T?, T?>)` | `col BETWEEN ? AND ?` |
 | `between` | `NumberExpression<T>?.between(ClosedRange<T>)` | `col BETWEEN ? AND ?` |
-| `notBetween` | `NumberExpression<T>?.notBetween(Pair<T, T>)` | `col NOT BETWEEN ? AND ?` |
+| `notBetween` | `NumberExpression<T>?.notBetween(Pair<T?, T?>)` | `col NOT BETWEEN ? AND ?` |
 | `between` (reverse) | `T?.between(Pair<NumberExpression<T>?, NumberExpression<T>?>)` | `lower <= ? AND upper >= ?` |
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |

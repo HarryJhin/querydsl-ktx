@@ -223,19 +223,36 @@ interface NumberExpressionExtensions {
         this?.between(range.start, range.endInclusive)
 
     /**
-     * Null-safe NOT BETWEEN that skips the condition when this is null.
+     * Null-safe NOT BETWEEN with partial range support.
+     *
+     * Mirrors [between] semantics: both bounds yields NOT BETWEEN,
+     * only lower yields `<`, only upper yields `>`, neither skips.
      *
      * ```sql
      * -- from = 10000, to = 50000
      * price NOT BETWEEN 10000 AND 50000
+     *
+     * -- from = 10000, to = null
+     * price < 10000
+     *
+     * -- from = null, to = 50000
+     * price > 50000
      * ```
      *
-     * @param range a `from to to` pair with both bounds required
-     * @return `this NOT BETWEEN from AND to`, or null if this is null
+     * @param range a `from to to` pair where either bound can be null
+     * @return NOT BETWEEN clause, one-sided comparison, or null if this is null or both bounds are null
      */
-    infix fun <T> NumberExpression<T>?.notBetween(range: Pair<T, T>): BooleanExpression?
-        where T : Number, T : Comparable<*> =
-        this?.notBetween(range.first, range.second)
+    infix fun <T> NumberExpression<T>?.notBetween(range: Pair<T?, T?>): BooleanExpression?
+        where T : Number, T : Comparable<*> {
+        val (from, to) = range
+        return when {
+            this == null -> null
+            from != null && to != null -> this.notBetween(from, to)
+            from != null -> this.lt(from)
+            to != null -> this.gt(to)
+            else -> null
+        }
+    }
 
     /**
      * Null-safe NULLIF that returns SQL NULL when this equals [other].
