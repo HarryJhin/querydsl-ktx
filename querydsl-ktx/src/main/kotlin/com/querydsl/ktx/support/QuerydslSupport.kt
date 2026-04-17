@@ -223,8 +223,16 @@ abstract class QuerydslSupport<T : Any> {
     /**
      * Performs pagination with an auto-generated count query.
      *
-     * **Warning: Do not use with fetch joins!**
-     * When fetch joins are present, use the overload that accepts a separate count query:
+     * The auto count rewrites the cloned query's SELECT into `COUNT(*)`, which is
+     * only accurate for plain row-returning queries. Use the overload accepting a
+     * custom count query when the main query contains any of the following, as
+     * `COUNT(*)` will silently return a wrong total:
+     *
+     * - Fetch joins — collection joins multiply row counts
+     * - `DISTINCT` — counted rows ignore distinct semantics
+     * - `GROUP BY` / `HAVING` — count reflects groups, not filtered aggregates
+     * - DTO projections that collapse rows
+     *
      * ```kotlin
      * query.page(pageable) {
      *     jpaQueryFactory.select(entity.count()).from(entity).where(condition).fetchOne() ?: 0L
@@ -245,6 +253,10 @@ abstract class QuerydslSupport<T : Any> {
 
     /**
      * Performs pagination with [SortSpec]-based sorting and an auto-generated count query.
+     *
+     * The same `COUNT(*)`-rewrite caveats as [page] apply: fetch joins, `DISTINCT`,
+     * `GROUP BY` / `HAVING`, and row-collapsing projections will produce an incorrect
+     * total. Use the overload accepting a custom count query in those cases.
      *
      * ```kotlin
      * selectFrom(qMember)
