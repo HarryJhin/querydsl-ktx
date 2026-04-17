@@ -2,7 +2,7 @@
 kotlin = "1.9.25"
 querydsl = "5.1.0"
 spring-boot = "3.0.0"
-spring-framework = "6.0.2"  # must match spring-boot version (Boot 3.0.x → Framework 6.0.x)
+spring-framework = "7.0.7"  # must match spring-boot version (Boot 3.0.x → Framework 6.0.x)
 spring-data = "3.0.0"
 jakarta-persistence = "3.1.0"
 jakarta-annotation = "2.1.1"
