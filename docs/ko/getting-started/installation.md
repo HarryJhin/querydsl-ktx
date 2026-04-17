@@ -84,8 +84,20 @@ implementation("io.github.harryjhin:querydsl-ktx:{{ version }}")
 | 조건 | 목적 |
 |-----------|---------|
 | `@ConditionalOnClass(JPAQueryFactory)` | 클래스패스에 QueryDSL이 있을 때만 활성화 |
+| `@ConditionalOnSingleCandidate(EntityManagerFactory)` | 단일 `EntityManagerFactory` 또는 `@Primary`가 지정된 팩토리가 있을 때만 활성화 |
 | `@ConditionalOnMissingBean` | 직접 정의한 `JPAQueryFactory`가 있으면 자동 설정을 적용하지 않음 |
-| `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | `EntityManager`가 먼저 준비되도록 보장 |
+| `@AutoConfiguration(after = HibernateJpaAutoConfiguration)` | JPA 자동 설정 이후에 적용되도록 보장 |
+
+빈 생성 방식:
+
+```kotlin
+@Bean
+@ConditionalOnMissingBean
+fun jpaQueryFactory(entityManagerFactory: EntityManagerFactory): JPAQueryFactory =
+    JPAQueryFactory(SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory))
+```
+
+`SharedEntityManagerCreator`는 Spring이 관리하는 트랜잭션 `EntityManager` 프록시를 생성합니다. Spring Data JPA 내부 구현과 동일한 패턴입니다.
 
 ::: tip 커스텀 JPAQueryFactory
 직접 `JPAQueryFactory` 빈을 등록하면(예: 커스텀 `JPQLTemplates` 사용),
@@ -99,6 +111,51 @@ class QuerydslConfig {
         JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager)
 }
 ```
+:::
+
+## 멀티 데이터소스 설정
+
+여러 `EntityManagerFactory` 빈이 있는 환경에서는 `@Primary`가 지정된 팩토리가 자동으로 선택됩니다.
+
+```kotlin
+@Configuration
+class DataSourceConfig {
+
+    @Bean
+    @Primary
+    fun primaryEntityManagerFactory(
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("primaryDataSource") dataSource: DataSource,
+    ): LocalContainerEntityManagerFactoryBean =
+        builder.dataSource(dataSource).packages("com.example.primary").build()
+
+    @Bean
+    fun secondaryEntityManagerFactory(
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("secondaryDataSource") dataSource: DataSource,
+    ): LocalContainerEntityManagerFactoryBean =
+        builder.dataSource(dataSource).packages("com.example.secondary").build()
+}
+```
+
+위 설정에서 자동 등록되는 `JPAQueryFactory`는 **primary** 데이터소스를 사용합니다.
+
+secondary 데이터소스용 `JPAQueryFactory`가 필요하면 직접 등록하세요:
+
+```kotlin
+@Configuration
+class SecondaryQuerydslConfig {
+
+    @Bean
+    fun secondaryJpaQueryFactory(
+        @Qualifier("secondaryEntityManagerFactory") emf: EntityManagerFactory,
+    ): JPAQueryFactory =
+        JPAQueryFactory(SharedEntityManagerCreator.createSharedEntityManager(emf))
+}
+```
+
+::: warning @Primary 미지정 시
+여러 `EntityManagerFactory` 빈이 있는데 `@Primary`가 없으면 자동 설정이 비활성화됩니다. `JPAQueryFactory`를 직접 등록해야 합니다.
 :::
 
 ## 설정 확인

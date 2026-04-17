@@ -10,7 +10,7 @@ in QueryDSL dynamic queries. Implementing an interface makes its infix functions
 ### Modules
 
 - `querydsl-ktx` — Core: 8 extension interfaces + top-level utilities (Expressions, CaseDsl) + QuerydslSupport/QuerydslRepository base classes
-- `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration + GraalVM RuntimeHints for native image support
+- `querydsl-ktx-spring-boot` — AutoConfiguration: JPAQueryFactory auto-registration keyed on `EntityManagerFactory` (single or `@Primary`, multi-datasource supported) via `SharedEntityManagerCreator` + GraalVM RuntimeHints for native image support
 - `querydsl-ktx-spring-boot-starter` — Starter: aggregates the above modules
 
 ### Tech Stack
