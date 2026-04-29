@@ -2,6 +2,7 @@ package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.ExpressionException
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
@@ -561,7 +562,8 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
 
     @Test
     fun `escape after null pattern like - propagates null`() {
-        val result = name like (null as String?) escape '\\'
+        val pattern: String? = null
+        val result = name like pattern escape '\\'
         assertNull(result)
     }
 
@@ -583,7 +585,9 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     @Test
     fun `escape on AND expression - throws ExpressionException`() {
         // AND result has Ops.AND, not Ops.LIKE
-        val andResult = (name like "a") and (name like "b")
+        val a: BooleanExpression? = name like "a"
+        val b: BooleanExpression? = name like "b"
+        val andResult = a and b
         assertFailsWith<ExpressionException> {
             andResult escape '\\'
         }
