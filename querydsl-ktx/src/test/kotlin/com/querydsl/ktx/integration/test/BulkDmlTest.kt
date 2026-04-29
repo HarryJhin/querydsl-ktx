@@ -1,5 +1,6 @@
 package com.querydsl.ktx.integration.test
 
+import com.querydsl.core.QueryException
 import com.querydsl.ktx.integration.TestConfig
 import com.querydsl.ktx.integration.domain.Member
 import com.querydsl.ktx.integration.domain.MemberStatus
@@ -86,10 +87,10 @@ class BulkDmlTest {
     // -- transaction guard --
 
     @Test
-    fun `modifying without transaction throws IllegalStateException`() {
+    fun `modifying without transaction throws QueryException`() {
         TestTransaction.end()
 
-        assertFailsWith<IllegalStateException> {
+        assertFailsWith<QueryException> {
             memberRepository.deactivateByStatus(MemberStatus.NORMAL)
         }
     }

@@ -302,4 +302,23 @@ class DynamicQueryTest {
         assertEquals(2, result.size)
         assertTrue(result.all { it.status == MemberStatus.VIP })
     }
+
+    // -- like with escape --
+
+    @Test
+    fun `like with escape - matches literal % character`() {
+        em.persist(Member(name = "10% Discount", age = 0, status = MemberStatus.NORMAL))
+        em.flush()
+        em.clear()
+
+        val result = memberRepository.findByNameLikeWithEscape("10\\%%", '\\')
+        assertEquals(1, result.size)
+        assertEquals("10% Discount", result[0].name)
+    }
+
+    @Test
+    fun `like with escape - null pattern skips filter`() {
+        val result = memberRepository.findByNameLikeWithEscape(null, '\\')
+        assertEquals(5, result.size)
+    }
 }

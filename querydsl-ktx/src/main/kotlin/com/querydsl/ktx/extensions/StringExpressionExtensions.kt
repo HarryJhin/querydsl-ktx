@@ -1,7 +1,12 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.ExpressionException
+import com.querydsl.core.types.Operation
+import com.querydsl.core.types.Operator
+import com.querydsl.core.types.Ops
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 
 /**
@@ -256,6 +261,76 @@ interface StringExpressionExtensions {
     infix fun StringExpression?.matches(regex: String?): BooleanExpression? = when {
         this == null || regex == null -> null
         else -> this.matches(regex)
+    }
+
+    /**
+     * Null-safe SQL `ESCAPE` clause that mirrors `LIKE pattern ESCAPE 'char'`.
+     *
+     * Apply this immediately after [like], [notLike], or [likeIgnoreCase] to
+     * mark `%` and `_` as literal characters via [escapeChar]. The receiver
+     * must be a like-family `BooleanExpression`; otherwise an
+     * [ExpressionException] is thrown.
+     *
+     * ```kotlin
+     * name like "10\\%off" escape '\\'                // LIKE '10\%off' ESCAPE '\'
+     * name notLike "10\\%off" escape '\\'             // NOT LIKE '10\%off' ESCAPE '\'
+     * name likeIgnoreCase "10\\%OFF" escape '\\'      // LIKE_IC '10\%OFF' ESCAPE '\'
+     * ```
+     *
+     * Null-safety: if the receiver is null (e.g., `like` skipped because the
+     * pattern was null), `escape` propagates null and the whole condition is
+     * skipped.
+     *
+     * @param escapeChar the escape character marking the next `%` or `_` literal
+     * @return a new [BooleanExpression] with the `ESCAPE` clause applied, or null
+     *         if the receiver is null
+     * @throws ExpressionException if the receiver is not a like / notLike /
+     *         likeIgnoreCase result
+     */
+    infix fun BooleanExpression?.escape(escapeChar: Char): BooleanExpression? {
+        if (this == null) return null
+        val op = this as? Operation<*>
+            ?: throw ExpressionException(
+                "escape() can only follow like / notLike / likeIgnoreCase, but got: $this"
+            )
+        return when (op.operator) {
+            Ops.LIKE -> rebuildLikeEscape(Ops.LIKE_ESCAPE, op, escapeChar)
+            Ops.LIKE_IC -> rebuildLikeEscape(Ops.LIKE_ESCAPE_IC, op, escapeChar)
+            Ops.NOT -> rebuildNotLikeEscape(op, escapeChar)
+            else -> throw ExpressionException(
+                "escape() requires a like / notLike / likeIgnoreCase result, " +
+                    "but operator is ${op.operator}"
+            )
+        }
+    }
+
+    private fun rebuildLikeEscape(
+        target: Operator,
+        op: Operation<*>,
+        escapeChar: Char,
+    ): BooleanExpression =
+        Expressions.booleanOperation(
+            target,
+            op.args[0],
+            op.args[1],
+            Expressions.constant(escapeChar),
+        )
+
+    private fun rebuildNotLikeEscape(op: Operation<*>, escapeChar: Char): BooleanExpression {
+        val inner = op.args[0] as? Operation<*>
+            ?: throw ExpressionException(
+                "escape() requires NOT to wrap a like / likeIgnoreCase expression, " +
+                    "but got: ${op.args[0]}"
+            )
+        val rebuilt = when (inner.operator) {
+            Ops.LIKE -> rebuildLikeEscape(Ops.LIKE_ESCAPE, inner, escapeChar)
+            Ops.LIKE_IC -> rebuildLikeEscape(Ops.LIKE_ESCAPE_IC, inner, escapeChar)
+            else -> throw ExpressionException(
+                "escape() requires NOT to wrap a like / likeIgnoreCase, " +
+                    "but inner operator is ${inner.operator}"
+            )
+        }
+        return rebuilt.not()
     }
 
     /**

@@ -409,6 +409,21 @@ LOWER(email) = LOWER(?)
 
 :::
 
+::: tip Escape character for literal % and _
+For patterns containing literal `%` or `_` characters, chain `escape '\'`
+right after `like`, `notLike`, or `likeIgnoreCase`. This mirrors SQL's
+`LIKE pattern ESCAPE 'char'` syntax.
+
+```kotlin
+name like "10\\%off" escape '\\'              // LIKE '10\%off' ESCAPE '\'
+name notLike "10\\%off" escape '\\'           // NOT LIKE '10\%off' ESCAPE '\'
+name likeIgnoreCase "10\\%OFF" escape '\\'    // LIKE '10\%OFF' ESCAPE '\' (case-insensitive)
+```
+
+`escape` is `BooleanExpression?.escape(Char)`. Calling it on any expression
+that is not a like-family result throws `ExpressionException`.
+:::
+
 ---
 
 ## TemporalExpressionExtensions

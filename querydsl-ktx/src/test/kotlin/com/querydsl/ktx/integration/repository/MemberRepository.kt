@@ -141,4 +141,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 
     fun findExactSliceDirect(pageable: Pageable): Slice<Member> =
         selectFrom(member).exactSlice(pageable)
+
+    fun findByNameLikeWithEscape(pattern: String?, escapeChar: Char = '\\'): List<Member> =
+        selectFrom(member).where(member.name like pattern escape escapeChar).fetch()
 }

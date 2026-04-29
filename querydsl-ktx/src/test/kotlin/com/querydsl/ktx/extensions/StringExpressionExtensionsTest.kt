@@ -1,9 +1,11 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.ExpressionException
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -525,5 +527,65 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `coalesce value - both null returns null`() {
         val result = nullExpr coalesce (null as String?)
         assertNull(result)
+    }
+
+    // ── escape ──
+
+    @Test
+    fun `escape after like - returns LIKE_ESCAPE expression`() {
+        val result = name like "10\\%off" escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after notLike - returns NOT(LIKE_ESCAPE) expression`() {
+        val result = name notLike "10\\%off" escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after likeIgnoreCase - returns LIKE_ESCAPE_IC expression`() {
+        val result = name likeIgnoreCase "10\\%OFF" escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after like with Expression pattern - returns LIKE_ESCAPE expression`() {
+        val result = name like keyword escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after null pattern like - propagates null`() {
+        val result = name like (null as String?) escape '\\'
+        assertNull(result)
+    }
+
+    @Test
+    fun `escape after null receiver like - propagates null`() {
+        val result = nullExpr like "10\\%off" escape '\\'
+        assertNull(result)
+    }
+
+    @Test
+    fun `escape on non-LIKE expression - throws ExpressionException`() {
+        // eq result has Ops.EQ, not Ops.LIKE
+        val eqResult = name.eq("x")
+        assertFailsWith<ExpressionException> {
+            eqResult escape '\\'
+        }
+    }
+
+    @Test
+    fun `escape on AND expression - throws ExpressionException`() {
+        // AND result has Ops.AND, not Ops.LIKE
+        val andResult = (name like "a") and (name like "b")
+        assertFailsWith<ExpressionException> {
+            andResult escape '\\'
+        }
     }
 }
