@@ -66,6 +66,25 @@ interface BooleanExpressionExtensions {
         this and predicates.reduceOrNull { acc, expr -> acc or expr }
 
     /**
+     * Vararg overload of [andAnyOf] that lets you skip the surrounding `listOf(...)`.
+     *
+     * Cannot be `infix` because Kotlin disallows vararg on infix functions,
+     * so call it with dot notation. Behavior matches the [List] overload.
+     *
+     * ```kotlin
+     * // dot-notation call
+     * predicate.andAnyOf(roleAdmin, roleManager)
+     * // equivalent to:
+     * predicate andAnyOf listOf(roleAdmin, roleManager)
+     * ```
+     *
+     * @param predicates conditions to be OR-combined
+     * @return `this AND (p1 OR p2 OR ...)`, or null if both sides resolve to null
+     */
+    fun BooleanExpression?.andAnyOf(vararg predicates: BooleanExpression?): BooleanExpression? =
+        this andAnyOf predicates.asList()
+
+    /**
      * Combines two conditions with OR, skipping any null side.
      *
      * Use this to build dynamic WHERE clauses where any matching condition suffices.
@@ -105,6 +124,25 @@ interface BooleanExpressionExtensions {
      */
     infix fun BooleanExpression?.orAllOf(predicates: List<BooleanExpression?>): BooleanExpression? =
         this or predicates.reduceOrNull { acc, expr -> acc and expr }
+
+    /**
+     * Vararg overload of [orAllOf] that lets you skip the surrounding `listOf(...)`.
+     *
+     * Cannot be `infix` because Kotlin disallows vararg on infix functions,
+     * so call it with dot notation. Behavior matches the [List] overload.
+     *
+     * ```kotlin
+     * // dot-notation call
+     * predicate.orAllOf(active, ageGoe20)
+     * // equivalent to:
+     * predicate orAllOf listOf(active, ageGoe20)
+     * ```
+     *
+     * @param predicates conditions to be AND-combined
+     * @return `this OR (p1 AND p2 AND ...)`, or null if both sides resolve to null
+     */
+    fun BooleanExpression?.orAllOf(vararg predicates: BooleanExpression?): BooleanExpression? =
+        this orAllOf predicates.asList()
 
     /**
      * Null-safe equality check for boolean expressions.

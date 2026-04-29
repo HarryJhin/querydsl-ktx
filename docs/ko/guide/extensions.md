@@ -74,6 +74,12 @@ active = true AND (role = ? OR department = ?)
 
 :::
 
+::: tip vararg 오버로드
+`andAnyOf`와 `orAllOf`는 vararg `BooleanExpression?`도 받습니다.
+Kotlin은 infix 함수에 vararg를 허용하지 않으므로 점 표기법으로 호출합니다:
+`predicate.andAnyOf(p1, p2, p3)`.
+:::
+
 ---
 
 ## SimpleExpressionExtensions

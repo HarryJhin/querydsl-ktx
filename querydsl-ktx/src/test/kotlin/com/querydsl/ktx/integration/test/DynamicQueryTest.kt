@@ -266,4 +266,40 @@ class DynamicQueryTest {
         val result = memberRepository.findByAgeNotBetween(minAge = null, maxAge = null)
         assertEquals(5, result.size)
     }
+
+    // -- andAnyOf vararg --
+
+    @Test
+    fun `andAnyOf vararg - VIP in any of given departments`() {
+        val result = memberRepository.findVipInAnyOf("Engineering", "Marketing")
+        // Alice (VIP, Engineering), Charlie (VIP, Marketing)
+        assertEquals(2, result.size)
+        assertTrue(result.all { it.status == MemberStatus.VIP })
+    }
+
+    @Test
+    fun `andAnyOf vararg - empty vararg keeps base predicate only`() {
+        val result = memberRepository.findVipInAnyOf()
+        // VIP regardless of department: Alice, Charlie
+        assertEquals(2, result.size)
+        assertTrue(result.all { it.status == MemberStatus.VIP })
+    }
+
+    // -- orAllOf vararg --
+
+    @Test
+    fun `orAllOf vararg - VIP OR (minAge AND department)`() {
+        val result = memberRepository.findActiveOrAllOf(minAge = 30, departmentName = "Marketing")
+        // VIP (Alice, Charlie) OR (age >= 30 AND dept = Marketing -> Charlie)
+        // Union: Alice, Charlie
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `orAllOf vararg - all predicates null returns VIP only`() {
+        val result = memberRepository.findActiveOrAllOf(minAge = null, departmentName = null)
+        // null args -> all predicates null -> orAllOf reduces to base (VIP only)
+        assertEquals(2, result.size)
+        assertTrue(result.all { it.status == MemberStatus.VIP })
+    }
 }

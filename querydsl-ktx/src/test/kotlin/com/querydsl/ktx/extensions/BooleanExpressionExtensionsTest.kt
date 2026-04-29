@@ -142,6 +142,92 @@ class BooleanExpressionExtensionsTest : BooleanExpressionExtensions {
         assert(result === active)
     }
 
+    // ── andAnyOf vararg ──
+
+    @Test
+    fun `andAnyOf vararg - this non-null, predicates non-null returns AND(OR) expression`() {
+        val result = active.andAnyOf(visible, deleted)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("||"))
+    }
+
+    @Test
+    fun `andAnyOf vararg - this null, predicates non-null returns OR of predicates`() {
+        val result = nullExpr.andAnyOf(visible, deleted)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("||"))
+    }
+
+    @Test
+    fun `andAnyOf vararg - this non-null, predicates all null returns this`() {
+        val result = active.andAnyOf(null, null)
+        assertNotNull(result)
+        assert(result === active)
+    }
+
+    @Test
+    fun `andAnyOf vararg - both null returns null`() {
+        val result = nullExpr.andAnyOf(null, null)
+        assertNull(result)
+    }
+
+    @Test
+    fun `andAnyOf vararg - empty vararg returns this`() {
+        val result = active.andAnyOf()
+        assertNotNull(result)
+        assert(result === active)
+    }
+
+    @Test
+    fun `andAnyOf vararg - single predicate returns AND expression`() {
+        val result = active.andAnyOf(visible)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
+    }
+
+    // ── orAllOf vararg ──
+
+    @Test
+    fun `orAllOf vararg - this non-null, predicates non-null returns OR(AND) expression`() {
+        val result = active.orAllOf(visible, deleted)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
+    }
+
+    @Test
+    fun `orAllOf vararg - this null, predicates non-null returns AND of predicates`() {
+        val result = nullExpr.orAllOf(visible, deleted)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("&&"))
+    }
+
+    @Test
+    fun `orAllOf vararg - this non-null, predicates all null returns this`() {
+        val result = active.orAllOf(null, null)
+        assertNotNull(result)
+        assert(result === active)
+    }
+
+    @Test
+    fun `orAllOf vararg - both null returns null`() {
+        val result = nullExpr.orAllOf(null, null)
+        assertNull(result)
+    }
+
+    @Test
+    fun `orAllOf vararg - empty vararg returns this`() {
+        val result = active.orAllOf()
+        assertNotNull(result)
+        assert(result === active)
+    }
+
+    @Test
+    fun `orAllOf vararg - single predicate returns OR expression`() {
+        val result = active.orAllOf(visible)
+        assertNotNull(result)
+        assertTrue(result.toString().contains("||"))
+    }
+
     // ── eq ──
 
     @Test
