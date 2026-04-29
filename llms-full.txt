@@ -137,6 +137,12 @@ infix fun StringExpression?.containsIgnoreCase(right: String?): BooleanExpressio
 infix fun StringExpression?.startsWith(right: String?): BooleanExpression?
 infix fun StringExpression?.startsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.startsWithIgnoreCase(right: String?): BooleanExpression?
+fun StringExpression?.escapedLike(pattern: String?, escape: Char): BooleanExpression?
+fun StringExpression?.escapedLike(pattern: Expression<String>?, escape: Char): BooleanExpression?
+fun StringExpression?.escapedLikeIgnoreCase(pattern: String?, escape: Char): BooleanExpression?
+fun StringExpression?.escapedLikeIgnoreCase(pattern: Expression<String>?, escape: Char): BooleanExpression?
+fun StringExpression?.escapedNotLike(pattern: String?, escape: Char): BooleanExpression?
+fun StringExpression?.escapedNotLike(pattern: Expression<String>?, escape: Char): BooleanExpression?
 infix fun StringExpression?.endsWith(right: String?): BooleanExpression?
 infix fun StringExpression?.endsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.endsWithIgnoreCase(right: String?): BooleanExpression?

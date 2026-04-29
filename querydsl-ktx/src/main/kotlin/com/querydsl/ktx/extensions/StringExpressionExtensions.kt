@@ -244,6 +244,132 @@ interface StringExpressionExtensions {
     }
 
     /**
+     * Null-safe LIKE pattern match with an explicit escape character.
+     *
+     * Use this when the pattern contains literal `%` or `_` characters that
+     * should not be interpreted as wildcards. The [escape] character marks
+     * the next character as a literal.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * -- this = entity.code, pattern = '10\%off', escape = '\'
+     * code LIKE '10\%off' ESCAPE '\'
+     * ```
+     *
+     * @param pattern the LIKE pattern, or null to skip
+     * @param escape the escape character for literal `%` and `_`
+     * @return `this LIKE pattern ESCAPE escape`, or null if either side is null
+     */
+    fun StringExpression?.escapedLike(pattern: String?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.like(pattern, escape)
+    }
+
+    /**
+     * Null-safe LIKE against another expression with an explicit escape character.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * code LIKE pattern_column ESCAPE '\'
+     * ```
+     *
+     * @param pattern the pattern expression, or null to skip
+     * @param escape the escape character
+     * @return `this LIKE pattern ESCAPE escape`, or null if either side is null
+     */
+    fun StringExpression?.escapedLike(pattern: Expression<String>?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.like(pattern, escape)
+    }
+
+    /**
+     * Null-safe case-insensitive LIKE with an explicit escape character.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * LOWER(code) LIKE LOWER('10\%off') ESCAPE '\'
+     * ```
+     *
+     * @param pattern the LIKE pattern, or null to skip
+     * @param escape the escape character
+     * @return `this LIKE pattern ESCAPE escape` (case-insensitive), or null if either side is null
+     */
+    fun StringExpression?.escapedLikeIgnoreCase(pattern: String?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.likeIgnoreCase(pattern, escape)
+    }
+
+    /**
+     * Null-safe case-insensitive LIKE against another expression with an
+     * explicit escape character.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * LOWER(code) LIKE LOWER(pattern_column) ESCAPE '\'
+     * ```
+     *
+     * @param pattern the pattern expression, or null to skip
+     * @param escape the escape character
+     * @return `this LIKE pattern ESCAPE escape` (case-insensitive), or null if either side is null
+     */
+    fun StringExpression?.escapedLikeIgnoreCase(pattern: Expression<String>?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.likeIgnoreCase(pattern, escape)
+    }
+
+    /**
+     * Null-safe NOT LIKE with an explicit escape character.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * code NOT LIKE '10\%off' ESCAPE '\'
+     * ```
+     *
+     * @param pattern the LIKE pattern to negate, or null to skip
+     * @param escape the escape character
+     * @return `this NOT LIKE pattern ESCAPE escape`, or null if either side is null
+     */
+    fun StringExpression?.escapedNotLike(pattern: String?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.notLike(pattern, escape)
+    }
+
+    /**
+     * Null-safe NOT LIKE against another expression with an explicit escape character.
+     *
+     * Cannot be `infix` because Kotlin disallows multiple parameters on
+     * infix functions, so call with dot notation. Skips the condition when
+     * either side is null.
+     *
+     * ```sql
+     * code NOT LIKE pattern_column ESCAPE '\'
+     * ```
+     *
+     * @param pattern the pattern expression, or null to skip
+     * @param escape the escape character
+     * @return `this NOT LIKE pattern ESCAPE escape`, or null if either side is null
+     */
+    fun StringExpression?.escapedNotLike(pattern: Expression<String>?, escape: Char): BooleanExpression? = when {
+        this == null || pattern == null -> null
+        else -> this.notLike(pattern, escape)
+    }
+
+    /**
      * Null-safe regex match that skips the condition when either side is null.
      *
      * ```sql

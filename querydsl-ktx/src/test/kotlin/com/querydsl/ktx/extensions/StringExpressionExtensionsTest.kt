@@ -526,4 +526,163 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
         val result = nullExpr coalesce (null as String?)
         assertNull(result)
     }
+
+    // ── like(String, Char) escape ──
+
+    @Test
+    fun `like string with escape - both non-null returns LIKE expression`() {
+        val result = name.escapedLike("10\\%off", '\\')
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("like"))
+    }
+
+    @Test
+    fun `like string with escape - this null returns null`() {
+        val result = nullExpr.escapedLike("10\\%off", '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `like string with escape - pattern null returns null`() {
+        val result = name.escapedLike(null as String?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `like string with escape - both null returns null`() {
+        val result = nullExpr.escapedLike(null as String?, '\\')
+        assertNull(result)
+    }
+
+    // ── like(Expression, Char) escape ──
+
+    @Test
+    fun `like expression with escape - both non-null returns LIKE expression`() {
+        val result = name.escapedLike(keyword, '\\')
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("like"))
+    }
+
+    @Test
+    fun `like expression with escape - this null returns null`() {
+        val result = nullExpr.escapedLike(keyword, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `like expression with escape - pattern null returns null`() {
+        val result = name.escapedLike(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `like expression with escape - both null returns null`() {
+        val result = nullExpr.escapedLike(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
+
+    // ── likeIgnoreCase(String, Char) escape ──
+
+    @Test
+    fun `likeIgnoreCase string with escape - both non-null returns expression`() {
+        val result = name.escapedLikeIgnoreCase("10\\%OFF", '\\')
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase string with escape - this null returns null`() {
+        val result = nullExpr.escapedLikeIgnoreCase("10\\%OFF", '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase string with escape - pattern null returns null`() {
+        val result = name.escapedLikeIgnoreCase(null as String?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase string with escape - both null returns null`() {
+        val result = nullExpr.escapedLikeIgnoreCase(null as String?, '\\')
+        assertNull(result)
+    }
+
+    // ── likeIgnoreCase(Expression, Char) escape ──
+
+    @Test
+    fun `likeIgnoreCase expression with escape - both non-null returns expression`() {
+        val result = name.escapedLikeIgnoreCase(keyword, '\\')
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase expression with escape - this null returns null`() {
+        val result = nullExpr.escapedLikeIgnoreCase(keyword, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase expression with escape - pattern null returns null`() {
+        val result = name.escapedLikeIgnoreCase(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `likeIgnoreCase expression with escape - both null returns null`() {
+        val result = nullExpr.escapedLikeIgnoreCase(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
+
+    // ── notLike(String, Char) escape ──
+
+    @Test
+    fun `notLike string with escape - both non-null returns expression`() {
+        val result = name.escapedNotLike("10\\%off", '\\')
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("like"))
+    }
+
+    @Test
+    fun `notLike string with escape - this null returns null`() {
+        val result = nullExpr.escapedNotLike("10\\%off", '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `notLike string with escape - pattern null returns null`() {
+        val result = name.escapedNotLike(null as String?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `notLike string with escape - both null returns null`() {
+        val result = nullExpr.escapedNotLike(null as String?, '\\')
+        assertNull(result)
+    }
+
+    // ── notLike(Expression, Char) escape ──
+
+    @Test
+    fun `notLike expression with escape - both non-null returns expression`() {
+        val result = name.escapedNotLike(keyword, '\\')
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `notLike expression with escape - this null returns null`() {
+        val result = nullExpr.escapedNotLike(keyword, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `notLike expression with escape - pattern null returns null`() {
+        val result = name.escapedNotLike(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
+
+    @Test
+    fun `notLike expression with escape - both null returns null`() {
+        val result = nullExpr.escapedNotLike(null as Expression<String>?, '\\')
+        assertNull(result)
+    }
 }

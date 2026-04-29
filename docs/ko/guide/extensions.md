@@ -380,6 +380,17 @@ LOWER(email) = LOWER(?)
 
 :::
 
+::: tip 리터럴 % / _ 매칭을 위한 escape 문자
+패턴에 와일드카드가 아닌 리터럴 `%` 혹은 `_`가 들어갈 때는 `escapedLike`,
+`escapedNotLike`, `escapedLikeIgnoreCase`를 사용합니다. 별도 이름을 둔 이유는
+QueryDSL이 제공하는 `like(String, char)` member function과 dispatch가 충돌하면
+null 패턴에서 NPE가 발생하기 때문입니다.
+
+```kotlin
+name.escapedLike("10\\%off", '\\')   // "10%off"를 리터럴로 매칭
+```
+:::
+
 ---
 
 ## TemporalExpressionExtensions

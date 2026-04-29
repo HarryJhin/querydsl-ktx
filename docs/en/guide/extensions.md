@@ -366,6 +366,17 @@ LOWER(email) = LOWER(?)
 
 :::
 
+::: tip Escape character for literal % and _
+Use `escapedLike`, `escapedNotLike`, and `escapedLikeIgnoreCase` when the
+pattern contains literal `%` or `_` characters that should not be wildcards.
+A separate name avoids dispatching to QueryDSL's own `like(String, char)`
+member function, which would NPE on a null pattern.
+
+```kotlin
+name.escapedLike("10\\%off", '\\')   // matches "10%off" literally
+```
+:::
+
 ---
 
 ## TemporalExpressionExtensions

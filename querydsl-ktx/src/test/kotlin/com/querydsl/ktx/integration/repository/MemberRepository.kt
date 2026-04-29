@@ -43,6 +43,9 @@ class MemberRepository : QuerydslRepository<Member>() {
     fun findByNameLike(pattern: String? = null): List<Member> =
         selectFrom(member).where(member.name like pattern).fetch()
 
+    fun findByNameLikeWithEscape(pattern: String?, escape: Char = '\\'): List<Member> =
+        selectFrom(member).where(member.name.escapedLike(pattern, escape)).fetch()
+
     fun findByNameContainsIgnoreCase(keyword: String? = null): List<Member> =
         selectFrom(member).where(member.name containsIgnoreCase keyword).fetch()
 
