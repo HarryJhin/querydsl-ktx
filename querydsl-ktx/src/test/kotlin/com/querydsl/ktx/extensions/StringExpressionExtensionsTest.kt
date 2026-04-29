@@ -562,8 +562,12 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
 
     @Test
     fun `escape after null pattern like - propagates null`() {
+        // Force the extension dispatch by widening the receiver to nullable.
+        // Without this, CI Kotlin compiler tries the Java member like(String)
+        // which is not infix and rejects the call.
+        val nullable: StringExpression? = name
         val pattern: String? = null
-        val result = name like pattern escape '\\'
+        val result = nullable like pattern escape '\\'
         assertNull(result)
     }
 
@@ -584,10 +588,10 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
 
     @Test
     fun `escape on AND expression - throws ExpressionException`() {
-        // AND result has Ops.AND, not Ops.LIKE
-        val a: BooleanExpression? = name like "a"
-        val b: BooleanExpression? = name like "b"
-        val andResult = a and b
+        // Build a non-LIKE BooleanExpression via QueryDSL member methods to
+        // sidestep dispatch ambiguity between the extension `and` and the
+        // Java member `and(Predicate)` on a nullable receiver.
+        val andResult: BooleanExpression = name.eq("a").and(name.eq("b"))
         assertFailsWith<ExpressionException> {
             andResult escape '\\'
         }
