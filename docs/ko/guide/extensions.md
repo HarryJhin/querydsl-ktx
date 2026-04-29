@@ -277,6 +277,22 @@ entity.total divide quantity      // total / quantity
 ```
 :::
 
+::: tip Kotlin 연산자 오버로드
+Kotlin 산술 연산자 (`+`, `-`, `*`, `/`, `%`, 단항 `-`)도 표현식 빌딩 (정렬,
+프로젝션, computed column) 용도로 제공됩니다. 위의 null-skip infix 형태와 달리
+**non-null 계약**입니다 (양쪽 모두 필수).
+
+```kotlin
+entity.price + 1000               // price + 1000
+entity.price * taxRate            // price * tax_rate (다른 컬럼)
+-entity.price                     // -price
+(entity.price + entity.tax) * 2   // 괄호로 결합 가능
+```
+
+양쪽이 모두 보장될 때 `+` / `-` / `*` / `/` / `%`를 사용하고, 어느 한쪽이
+null일 수 있어 표현식 자체를 건너뛰고 싶다면 `add` / `subtract` 등을 사용하세요.
+:::
+
 ### 별도 인터페이스인 이유
 
 QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 **확장하지 않습니다**.
@@ -299,6 +315,13 @@ QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 | `rangeTo` | `NumberExpression<T>..NumberExpression<T>` | _(between용 Pair 생성)_ |
+| `add` | `NumberExpression<T>?.add(T?)` / `add(Expression<T>?)` | `col + ?` |
+| `subtract` | `NumberExpression<T>?.subtract(T?)` / `subtract(Expression<T>?)` | `col - ?` |
+| `multiply` | `NumberExpression<T>?.multiply(T?)` / `multiply(Expression<T>?)` | `col * ?` |
+| `divide` | `NumberExpression<T>?.divide(T?)` / `divide(Expression<T>?)` | `col / ?` |
+| `mod` | `NumberExpression<T>?.mod(T?)` / `mod(Expression<T>?)` | `col % ?` |
+| `+` / `-` / `*` / `/` / `%` | `operator NumberExpression<T>.plus/minus/times/div/rem(T \| Expression<T>)` | `col + ?` _(non-null 계약)_ |
+| 단항 `-` | `operator NumberExpression<T>.unaryMinus()` | `-col` |
 
 ### 예제
 

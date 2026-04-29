@@ -534,4 +534,139 @@ interface NumberExpressionExtensions {
     operator fun <T> NumberExpression<T>.rangeTo(
         other: NumberExpression<T>,
     ): Pair<NumberExpression<T>, NumberExpression<T>> where T : Number, T : Comparable<*> = this to other
+
+    /**
+     * Kotlin `+` operator for numeric expression building.
+     *
+     * Non-null contract: both sides must be present. For null-skip semantics
+     * in dynamic WHERE building use [add] instead.
+     *
+     * ```sql
+     * price + 1000
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.plus(right: T): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.ADD, this, Expressions.constant(right))
+
+    /**
+     * Kotlin `+` operator against another expression.
+     *
+     * ```sql
+     * price + tax
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.plus(right: Expression<T>): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.ADD, this, right)
+
+    /**
+     * Kotlin `-` operator for numeric expression building.
+     *
+     * Non-null contract: both sides must be present. For null-skip semantics
+     * use [subtract] instead.
+     *
+     * ```sql
+     * price - 100
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.minus(right: T): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.SUB, this, Expressions.constant(right))
+
+    /**
+     * Kotlin `-` operator against another expression.
+     *
+     * ```sql
+     * price - discount
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.minus(right: Expression<T>): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.SUB, this, right)
+
+    /**
+     * Kotlin `*` operator for numeric expression building.
+     *
+     * Non-null contract: both sides must be present. For null-skip semantics
+     * use [multiply] instead.
+     *
+     * ```sql
+     * price * 2
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.times(right: T): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.MULT, this, Expressions.constant(right))
+
+    /**
+     * Kotlin `*` operator against another expression.
+     *
+     * ```sql
+     * price * tax_rate
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.times(right: Expression<T>): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.MULT, this, right)
+
+    /**
+     * Kotlin `/` operator for numeric expression building.
+     *
+     * Non-null contract: both sides must be present. For null-skip semantics
+     * use [divide] instead.
+     *
+     * ```sql
+     * total / 2
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.div(right: T): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.DIV, this, Expressions.constant(right))
+
+    /**
+     * Kotlin `/` operator against another expression.
+     *
+     * ```sql
+     * total / quantity
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.div(right: Expression<T>): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.DIV, this, right)
+
+    /**
+     * Kotlin `%` operator for numeric expression building.
+     *
+     * Non-null contract: both sides must be present. For null-skip semantics
+     * use [mod] instead.
+     *
+     * ```sql
+     * id % 10
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.rem(right: T): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.MOD, this, Expressions.constant(right))
+
+    /**
+     * Kotlin `%` operator against another expression.
+     *
+     * ```sql
+     * id % shard_count
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.rem(right: Expression<T>): NumberExpression<T>
+        where T : Number, T : Comparable<*> =
+        Expressions.numberOperation(this.type, Ops.MOD, this, right)
+
+    /**
+     * Kotlin unary `-` operator for numeric expression building.
+     *
+     * ```sql
+     * -price
+     * ```
+     */
+    operator fun <T> NumberExpression<T>.unaryMinus(): NumberExpression<T>
+        where T : Number, T : Comparable<*> = this.negate()
 }

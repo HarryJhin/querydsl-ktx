@@ -32,7 +32,7 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
 │   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn, inChunked
 │   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo
-│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo
+│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo, arithmetic infix (add/subtract/multiply/divide/mod), Kotlin operators (+, -, *, /, %, unary -)
 │   ├── StringExpressionExtensions.kt     — contains, startsWith, endsWith, like, matches, nullif, coalesce
 │   ├── TemporalExpressionExtensions.kt   — after, before
 │   ├── CollectionExpressionExtensions.kt — contains

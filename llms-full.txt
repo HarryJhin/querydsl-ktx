@@ -118,7 +118,7 @@ Reverse `between`: value on the left, expression pair on the right — `now betw
 
 ### NumberExpressionExtensions
 
-Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, reverse `between`, and `rangeTo`. Also provides null-safe arithmetic operators `add`, `subtract`, `multiply`, `divide`, `mod` (each with value and `Expression<T>` overloads).
+Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, reverse `between`, and `rangeTo`. Also provides null-safe arithmetic infix operators `add`, `subtract`, `multiply`, `divide`, `mod` (each with value and `Expression<T>` overloads), plus Kotlin operator overloads `+`, `-`, `*`, `/`, `%`, unary `-` with a non-null contract.
 
 ```kotlin
 infix fun <T> NumberExpression<T>?.add(right: T?): NumberExpression<T>?
@@ -131,6 +131,22 @@ infix fun <T> NumberExpression<T>?.divide(right: T?): NumberExpression<T>?
 infix fun <T> NumberExpression<T>?.divide(right: Expression<T>?): NumberExpression<T>?
 infix fun <T> NumberExpression<T>?.mod(right: T?): NumberExpression<T>?
 infix fun <T> NumberExpression<T>?.mod(right: Expression<T>?): NumberExpression<T>?
+    where T : Number, T : Comparable<*>
+```
+
+```kotlin
+// Kotlin operator overloads (non-null contract; for expression building)
+operator fun <T> NumberExpression<T>.plus(right: T): NumberExpression<T>
+operator fun <T> NumberExpression<T>.plus(right: Expression<T>): NumberExpression<T>
+operator fun <T> NumberExpression<T>.minus(right: T): NumberExpression<T>
+operator fun <T> NumberExpression<T>.minus(right: Expression<T>): NumberExpression<T>
+operator fun <T> NumberExpression<T>.times(right: T): NumberExpression<T>
+operator fun <T> NumberExpression<T>.times(right: Expression<T>): NumberExpression<T>
+operator fun <T> NumberExpression<T>.div(right: T): NumberExpression<T>
+operator fun <T> NumberExpression<T>.div(right: Expression<T>): NumberExpression<T>
+operator fun <T> NumberExpression<T>.rem(right: T): NumberExpression<T>
+operator fun <T> NumberExpression<T>.rem(right: Expression<T>): NumberExpression<T>
+operator fun <T> NumberExpression<T>.unaryMinus(): NumberExpression<T>
     where T : Number, T : Comparable<*>
 ```
 
