@@ -1,7 +1,9 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.Ops
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.NumberExpression
 
 /**
@@ -252,6 +254,171 @@ interface NumberExpressionExtensions {
             to != null -> this.gt(to)
             else -> null
         }
+    }
+
+    /**
+     * Null-safe addition that skips the operation when either side is null.
+     *
+     * ```sql
+     * -- this = entity.price, right = 1000
+     * price + 1000
+     * ```
+     *
+     * @param right the value to add, or null to skip
+     * @return `this + right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.add(right: T?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.ADD, this, Expressions.constant(right))
+    }
+
+    /**
+     * Null-safe addition against another expression.
+     *
+     * ```sql
+     * price + tax
+     * ```
+     *
+     * @param right the expression to add, or null to skip
+     * @return `this + right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.add(right: Expression<T>?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.ADD, this, right)
+    }
+
+    /**
+     * Null-safe subtraction that skips the operation when either side is null.
+     *
+     * ```sql
+     * -- this = entity.price, right = discount
+     * price - discount
+     * ```
+     *
+     * @param right the value to subtract, or null to skip
+     * @return `this - right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.subtract(right: T?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.SUB, this, Expressions.constant(right))
+    }
+
+    /**
+     * Null-safe subtraction against another expression.
+     *
+     * ```sql
+     * price - discount
+     * ```
+     *
+     * @param right the expression to subtract, or null to skip
+     * @return `this - right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.subtract(right: Expression<T>?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.SUB, this, right)
+    }
+
+    /**
+     * Null-safe multiplication that skips the operation when either side is null.
+     *
+     * ```sql
+     * -- this = entity.price, right = taxRate
+     * price * 1.1
+     * ```
+     *
+     * @param right the value to multiply by, or null to skip
+     * @return `this * right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.multiply(right: T?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.MULT, this, Expressions.constant(right))
+    }
+
+    /**
+     * Null-safe multiplication against another expression.
+     *
+     * ```sql
+     * price * tax_rate
+     * ```
+     *
+     * @param right the expression to multiply by, or null to skip
+     * @return `this * right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.multiply(right: Expression<T>?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.MULT, this, right)
+    }
+
+    /**
+     * Null-safe division that skips the operation when either side is null.
+     *
+     * ```sql
+     * -- this = entity.total, right = quantity
+     * total / quantity
+     * ```
+     *
+     * @param right the value to divide by, or null to skip
+     * @return `this / right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.divide(right: T?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.DIV, this, Expressions.constant(right))
+    }
+
+    /**
+     * Null-safe division against another expression.
+     *
+     * ```sql
+     * total / quantity
+     * ```
+     *
+     * @param right the expression to divide by, or null to skip
+     * @return `this / right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.divide(right: Expression<T>?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.DIV, this, right)
+    }
+
+    /**
+     * Null-safe modulo that skips the operation when either side is null.
+     *
+     * ```sql
+     * -- this = entity.id, right = 10
+     * id % 10
+     * ```
+     *
+     * @param right the divisor, or null to skip
+     * @return `this % right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.mod(right: T?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.MOD, this, Expressions.constant(right))
+    }
+
+    /**
+     * Null-safe modulo against another expression.
+     *
+     * ```sql
+     * id % shard_count
+     * ```
+     *
+     * @param right the divisor expression, or null to skip
+     * @return `this % right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.mod(right: Expression<T>?): NumberExpression<T>?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> Expressions.numberOperation(this.type, Ops.MOD, this, right)
     }
 
     /**
