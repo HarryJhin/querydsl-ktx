@@ -118,7 +118,21 @@ Reverse `between`: value on the left, expression pair on the right — `now betw
 
 ### NumberExpressionExtensions
 
-Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, reverse `between`, and `rangeTo`.
+Same API as ComparableExpressionExtensions but for `NumberExpression<T>` (which does not extend `ComparableExpression` in QueryDSL's type hierarchy). Includes `gt`, `goe`, `lt`, `loe`, `between(Pair)`, `between(ClosedRange)`, `notBetween`, `nullif`, `coalesce`, reverse `between`, and `rangeTo`. Also provides null-safe arithmetic operators `add`, `subtract`, `multiply`, `divide`, `mod` (each with value and `Expression<T>` overloads).
+
+```kotlin
+infix fun <T> NumberExpression<T>?.add(right: T?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.add(right: Expression<T>?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.subtract(right: T?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.subtract(right: Expression<T>?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.multiply(right: T?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.multiply(right: Expression<T>?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.divide(right: T?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.divide(right: Expression<T>?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.mod(right: T?): NumberExpression<T>?
+infix fun <T> NumberExpression<T>?.mod(right: Expression<T>?): NumberExpression<T>?
+    where T : Number, T : Comparable<*>
+```
 
 ```kotlin
 // Reverse between (value on the left, expression bounds on the right)

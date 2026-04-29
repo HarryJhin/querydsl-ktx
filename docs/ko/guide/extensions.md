@@ -265,6 +265,18 @@ now between (event.startAt to event.endAt)
 
 `ComparableExpressionExtensions`와 동일한 API이지만 `NumberExpression`용입니다.
 
+::: tip 산술 연산자
+`add`, `subtract`, `multiply`, `divide`, `mod`도 동일한 null-safety 계약으로
+사용할 수 있습니다. 어느 한쪽이 null이면 null을 반환하여 산술 표현식 자체가
+건너뜁니다. 각 연산자는 값 오버로드와 `Expression<T>` 오버로드를 모두 제공합니다.
+
+```kotlin
+entity.price add 1000             // price + 1000
+entity.price multiply taxRate     // price * tax_rate (다른 컬럼)
+entity.total divide quantity      // total / quantity
+```
+:::
+
 ### 별도 인터페이스인 이유
 
 QueryDSL의 타입 계층에서 `NumberExpression`은 `ComparableExpression`을 **확장하지 않습니다**.

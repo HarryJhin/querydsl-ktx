@@ -460,4 +460,254 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         val result = 30000 between (price..minPrice)
         assertNotNull(result)
     }
+
+    // ── add ──
+
+    @Test
+    fun `add value - both non-null returns ADD expression`() {
+        val result = price add 1000
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `add value - this null returns null`() {
+        val result = nullExpr add 1000
+        assertNull(result)
+    }
+
+    @Test
+    fun `add value - right null returns null`() {
+        val result = price add (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `add value - both null returns null`() {
+        val result = nullExpr add (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `add expression - both non-null returns ADD expression`() {
+        val result = price add minPrice
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `add expression - this null returns null`() {
+        val result = nullExpr add minPrice
+        assertNull(result)
+    }
+
+    @Test
+    fun `add expression - right null returns null`() {
+        val result = price add (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `add expression - both null returns null`() {
+        val result = nullExpr add (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    // ── subtract ──
+
+    @Test
+    fun `subtract value - both non-null returns SUB expression`() {
+        val result = price subtract 100
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `subtract value - this null returns null`() {
+        val result = nullExpr subtract 100
+        assertNull(result)
+    }
+
+    @Test
+    fun `subtract value - right null returns null`() {
+        val result = price subtract (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `subtract value - both null returns null`() {
+        val result = nullExpr subtract (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `subtract expression - both non-null returns SUB expression`() {
+        val result = price subtract minPrice
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `subtract expression - this null returns null`() {
+        val result = nullExpr subtract minPrice
+        assertNull(result)
+    }
+
+    @Test
+    fun `subtract expression - right null returns null`() {
+        val result = price subtract (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `subtract expression - both null returns null`() {
+        val result = nullExpr subtract (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    // ── multiply ──
+
+    @Test
+    fun `multiply value - both non-null returns MUL expression`() {
+        val result = price multiply 2
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `multiply value - this null returns null`() {
+        val result = nullExpr multiply 2
+        assertNull(result)
+    }
+
+    @Test
+    fun `multiply value - right null returns null`() {
+        val result = price multiply (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `multiply value - both null returns null`() {
+        val result = nullExpr multiply (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `multiply expression - both non-null returns MUL expression`() {
+        val result = price multiply minPrice
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `multiply expression - this null returns null`() {
+        val result = nullExpr multiply minPrice
+        assertNull(result)
+    }
+
+    @Test
+    fun `multiply expression - right null returns null`() {
+        val result = price multiply (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `multiply expression - both null returns null`() {
+        val result = nullExpr multiply (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    // ── divide ──
+
+    @Test
+    fun `divide value - both non-null returns DIV expression`() {
+        val result = price divide 2
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `divide value - this null returns null`() {
+        val result = nullExpr divide 2
+        assertNull(result)
+    }
+
+    @Test
+    fun `divide value - right null returns null`() {
+        val result = price divide (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `divide value - both null returns null`() {
+        val result = nullExpr divide (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `divide expression - both non-null returns DIV expression`() {
+        val result = price divide minPrice
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `divide expression - this null returns null`() {
+        val result = nullExpr divide minPrice
+        assertNull(result)
+    }
+
+    @Test
+    fun `divide expression - right null returns null`() {
+        val result = price divide (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `divide expression - both null returns null`() {
+        val result = nullExpr divide (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    // ── mod ──
+
+    @Test
+    fun `mod value - both non-null returns MOD expression`() {
+        val result = price mod 10
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `mod value - this null returns null`() {
+        val result = nullExpr mod 10
+        assertNull(result)
+    }
+
+    @Test
+    fun `mod value - right null returns null`() {
+        val result = price mod (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `mod value - both null returns null`() {
+        val result = nullExpr mod (null as Int?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `mod expression - both non-null returns MOD expression`() {
+        val result = price mod minPrice
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `mod expression - this null returns null`() {
+        val result = nullExpr mod minPrice
+        assertNull(result)
+    }
+
+    @Test
+    fun `mod expression - right null returns null`() {
+        val result = price mod (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
+
+    @Test
+    fun `mod expression - both null returns null`() {
+        val result = nullExpr mod (null as NumberExpression<Int>?)
+        assertNull(result)
+    }
 }

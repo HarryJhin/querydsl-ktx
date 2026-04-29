@@ -251,6 +251,18 @@ The reverse between is also null-safe: if the value is null, the entire expressi
 
 Same API as `ComparableExpressionExtensions`, but for `NumberExpression`.
 
+::: tip Arithmetic operators
+`add`, `subtract`, `multiply`, `divide`, `mod` are also available with the same
+null-safety contract: either side null returns null (the whole arithmetic
+expression is skipped). Each has a value overload and an `Expression<T>` overload.
+
+```kotlin
+entity.price add 1000             // price + 1000
+entity.price multiply taxRate     // price * tax_rate (column ref)
+entity.total divide quantity      // total / quantity
+```
+:::
+
 ### Why a separate interface?
 
 In QueryDSL's type hierarchy, `NumberExpression` does **not** extend `ComparableExpression`.
