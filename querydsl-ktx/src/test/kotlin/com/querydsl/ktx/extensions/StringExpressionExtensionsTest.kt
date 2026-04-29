@@ -531,49 +531,47 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     }
 
     // ── escape ──
+    //
+    // We build the LIKE-family BooleanExpression via QueryDSL member methods
+    // (`name.like(...)`) instead of our infix extension, because Kotlin's
+    // smart-cast on locals routes `someLocal like ...` to the Java member
+    // `like(String)` rather than our nullable-receiver extension. The infix
+    // extensions themselves are covered by the like / notLike / likeIgnoreCase
+    // unit tests above. Null-pattern propagation is covered by the
+    // `like with escape - null pattern skips filter` integration test.
 
     @Test
     fun `escape after like - returns LIKE_ESCAPE expression`() {
-        val result = name like "10\\%off" escape '\\'
+        val result = name.like("10\\%off") escape '\\'
         assertNotNull(result)
         assertTrue(result.toString().lowercase().contains("escape"))
     }
 
     @Test
     fun `escape after notLike - returns NOT(LIKE_ESCAPE) expression`() {
-        val result = name notLike "10\\%off" escape '\\'
+        val result = name.notLike("10\\%off") escape '\\'
         assertNotNull(result)
         assertTrue(result.toString().lowercase().contains("escape"))
     }
 
     @Test
     fun `escape after likeIgnoreCase - returns LIKE_ESCAPE_IC expression`() {
-        val result = name likeIgnoreCase "10\\%OFF" escape '\\'
+        val result = name.likeIgnoreCase("10\\%OFF") escape '\\'
         assertNotNull(result)
         assertTrue(result.toString().lowercase().contains("escape"))
     }
 
     @Test
     fun `escape after like with Expression pattern - returns LIKE_ESCAPE expression`() {
-        val result = name like keyword escape '\\'
+        val result = name.like(keyword) escape '\\'
         assertNotNull(result)
         assertTrue(result.toString().lowercase().contains("escape"))
     }
 
     @Test
-    fun `escape after null pattern like - propagates null`() {
-        // Force the extension dispatch by widening the receiver to nullable.
-        // Without this, CI Kotlin compiler tries the Java member like(String)
-        // which is not infix and rejects the call.
-        val nullable: StringExpression? = name
-        val pattern: String? = null
-        val result = nullable like pattern escape '\\'
-        assertNull(result)
-    }
-
-    @Test
-    fun `escape after null receiver like - propagates null`() {
-        val result = nullExpr like "10\\%off" escape '\\'
+    fun `escape on null receiver - propagates null`() {
+        val nullPredicate: BooleanExpression? = null
+        val result = nullPredicate escape '\\'
         assertNull(result)
     }
 
