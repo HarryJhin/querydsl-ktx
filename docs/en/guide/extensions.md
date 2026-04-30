@@ -92,10 +92,13 @@ Equality and membership operators for any expression type.
 |----------|-----------|-----|
 | `eq` | `SimpleExpression<T>?.eq(T?)` | `status = ?` |
 | `eq` | `SimpleExpression<T>?.eq(Expression<in T>?)` | `status = default_status` |
+| `eq` | `SimpleExpression<T>?.eq(SubQueryExpression<T>?)` | `price = (SELECT ...)` |
 | `ne` | `SimpleExpression<T>?.ne(T?)` | `status != ?` |
 | `ne` | `SimpleExpression<T>?.ne(Expression<in T>?)` | `status != default_status` |
 | `in` | `SimpleExpression<T>?.in(Collection<T>?)` | `status IN (?, ?)` |
+| `in` | `SimpleExpression<T>?.in(SubQueryExpression<T>?)` | `id IN (SELECT ...)` |
 | `notIn` | `SimpleExpression<T>?.notIn(Collection<T>?)` | `status NOT IN (?, ?)` |
+| `notIn` | `SimpleExpression<T>?.notIn(SubQueryExpression<T>?)` | `id NOT IN (SELECT ...)` |
 | `inChunked` | `SimpleExpression<T>?.inChunked(Collection<T>?)` | `col IN (?) OR col IN (?)` |
 
 ### Examples
@@ -133,6 +136,29 @@ status NOT IN ('C')
 Oracle has a hard limit of 1000 items in a single IN clause.
 `inChunked` automatically splits large collections into multiple IN clauses
 joined with OR. The default chunk size is 1000, but you can customize it.
+:::
+
+::: tip Subquery comparisons
+`eq`, `in`, and `notIn` also accept a `SubQueryExpression<T>?` for null-safe
+comparison against subqueries built with `JPAExpressions`.
+
+```kotlin
+import com.querydsl.jpa.JPAExpressions
+
+// price equals the max price across all products
+val maxPriceSubQuery = JPAExpressions.select(product.price.max()).from(product)
+selectFrom(product).where(product.price eq maxPriceSubQuery).fetch()
+
+// category in subquery result
+val cheapCategoriesSubQuery = JPAExpressions
+    .selectDistinct(product.category)
+    .from(product)
+    .where(product.price.lt(10000))
+selectFrom(product).where(product.category `in` cheapCategoriesSubQuery).fetch()
+```
+
+When the subquery argument is null, the predicate is skipped (returns null) so
+optional subquery filters can be plugged in without conditional builder code.
 :::
 
 ---

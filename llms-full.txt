@@ -81,16 +81,19 @@ Null behavior for `and`/`or`: null side is ignored, non-null side is preserved. 
 ```kotlin
 infix fun <T> SimpleExpression<T>?.eq(right: T?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.eq(right: Expression<in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eq(right: SubQueryExpression<T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.ne(right: T?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.ne(right: Expression<in T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.`in`(right: Collection<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.`in`(right: SubQueryExpression<T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.notIn(right: Collection<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.notIn(right: SubQueryExpression<T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?): BooleanExpression?
 fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression?
 ```
 
 Null behavior: either side null returns null (condition skipped).
-`inChunked` throws `IllegalArgumentException` if `chunkSize` is not positive.
+`inChunked` throws `ExpressionException` if `chunkSize` is not positive.
 
 ### ComparableExpressionExtensions
 
