@@ -710,4 +710,95 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         val result = nullExpr mod (null as NumberExpression<Int>?)
         assertNull(result)
     }
+
+    // ── Kotlin operator overloads (#105) ──
+
+    @Test
+    fun `plus operator - value`() {
+        val result = price + 1000
+        assertNotNull(result)
+        assertTrue(result.toString().contains("+"))
+    }
+
+    @Test
+    fun `plus operator - expression`() {
+        val result = price + minPrice
+        assertNotNull(result)
+        assertTrue(result.toString().contains("+"))
+    }
+
+    @Test
+    fun `minus operator - value`() {
+        val result = price - 100
+        assertNotNull(result)
+        assertTrue(result.toString().contains("-"))
+    }
+
+    @Test
+    fun `minus operator - expression`() {
+        val result = price - minPrice
+        assertNotNull(result)
+        assertTrue(result.toString().contains("-"))
+    }
+
+    @Test
+    fun `times operator - value`() {
+        val result = price * 2
+        assertNotNull(result)
+        assertTrue(result.toString().contains("*"))
+    }
+
+    @Test
+    fun `times operator - expression`() {
+        val result = price * minPrice
+        assertNotNull(result)
+        assertTrue(result.toString().contains("*"))
+    }
+
+    @Test
+    fun `div operator - value`() {
+        val result = price / 2
+        assertNotNull(result)
+        assertTrue(result.toString().contains("/"))
+    }
+
+    @Test
+    fun `div operator - expression`() {
+        val result = price / minPrice
+        assertNotNull(result)
+        assertTrue(result.toString().contains("/"))
+    }
+
+    @Test
+    fun `rem operator - value`() {
+        val result = price % 10
+        assertNotNull(result)
+        assertTrue(result.toString().contains("%"))
+    }
+
+    @Test
+    fun `rem operator - expression`() {
+        val result = price % minPrice
+        assertNotNull(result)
+        assertTrue(result.toString().contains("%"))
+    }
+
+    @Test
+    fun `unaryMinus operator`() {
+        val result = -price
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `arithmetic operators compose with parentheses`() {
+        val result = (price + minPrice) * 2
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `rangeTo still creates Pair when arithmetic operators in scope`() {
+        // Ensures `..` still resolves to rangeTo (Pair builder), not interpreted otherwise.
+        val result = 30000 between (price..minPrice)
+        assertNotNull(result)
+    }
 }

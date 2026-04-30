@@ -263,6 +263,24 @@ entity.total divide quantity      // total / quantity
 ```
 :::
 
+::: tip Kotlin operator overloads
+Kotlin arithmetic operators (`+`, `-`, `*`, `/`, `%`, unary `-`) are also available
+for expression building (sort, projection, computed columns). These have a
+**non-null contract** (both sides required), distinct from the null-skip infix
+forms above.
+
+```kotlin
+entity.price + 1000               // price + 1000
+entity.price * taxRate            // price * tax_rate (column ref)
+-entity.price                     // -price
+(entity.price + entity.tax) * 2   // composes with parentheses
+```
+
+Use `+` / `-` / `*` / `/` / `%` when building expressions where both operands
+are guaranteed present. Use `add` / `subtract` / etc. when either side may be
+null and you want the whole expression skipped.
+:::
+
 ### Why a separate interface?
 
 In QueryDSL's type hierarchy, `NumberExpression` does **not** extend `ComparableExpression`.
@@ -285,6 +303,13 @@ operators specifically typed for `NumberExpression`.
 | `nullif` | `NumberExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `NumberExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 | `rangeTo` | `NumberExpression<T>..NumberExpression<T>` | _(creates Pair for between)_ |
+| `add` | `NumberExpression<T>?.add(T?)` / `add(Expression<T>?)` | `col + ?` |
+| `subtract` | `NumberExpression<T>?.subtract(T?)` / `subtract(Expression<T>?)` | `col - ?` |
+| `multiply` | `NumberExpression<T>?.multiply(T?)` / `multiply(Expression<T>?)` | `col * ?` |
+| `divide` | `NumberExpression<T>?.divide(T?)` / `divide(Expression<T>?)` | `col / ?` |
+| `mod` | `NumberExpression<T>?.mod(T?)` / `mod(Expression<T>?)` | `col % ?` |
+| `+` / `-` / `*` / `/` / `%` | `operator NumberExpression<T>.plus/minus/times/div/rem(T \| Expression<T>)` | `col + ?` _(non-null contract)_ |
+| unary `-` | `operator NumberExpression<T>.unaryMinus()` | `-col` |
 
 ### Examples
 
