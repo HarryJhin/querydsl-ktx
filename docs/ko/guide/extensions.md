@@ -421,6 +421,21 @@ LOWER(email) = LOWER(?)
 
 :::
 
+::: tip 리터럴 % / _ 매칭을 위한 escape 문자
+패턴에 와일드카드가 아닌 리터럴 `%`나 `_`가 들어갈 때는 `like`, `notLike`,
+`likeIgnoreCase` 다음에 `escape '\'`를 체이닝합니다. SQL의
+`LIKE pattern ESCAPE 'char'` 구문을 그대로 미러링합니다.
+
+```kotlin
+name like "10\\%off" escape '\\'              // LIKE '10\%off' ESCAPE '\'
+name notLike "10\\%off" escape '\\'           // NOT LIKE '10\%off' ESCAPE '\'
+name likeIgnoreCase "10\\%OFF" escape '\\'    // LIKE '10\%OFF' ESCAPE '\' (대소문자 무시)
+```
+
+`escape`는 `BooleanExpression?.escape(Char)` 형태입니다. like 계열 결과가
+아닌 표현식에 호출하면 `ExpressionException`을 던집니다.
+:::
+
 ---
 
 ## TemporalExpressionExtensions

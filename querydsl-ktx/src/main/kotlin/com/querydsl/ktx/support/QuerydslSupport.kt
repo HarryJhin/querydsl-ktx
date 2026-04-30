@@ -1,5 +1,6 @@
 package com.querydsl.ktx.support
 
+import com.querydsl.core.QueryException
 import com.querydsl.core.Tuple
 import com.querydsl.core.types.EntityPath
 import com.querydsl.core.types.Expression
@@ -466,7 +467,7 @@ abstract class QuerydslSupport<T : Any> {
      *
      * An active transaction is **required**. If the calling method is not
      * annotated with `@Transactional` (or otherwise joined to a transaction),
-     * an [IllegalStateException] is thrown immediately.
+     * a [QueryException] is thrown immediately.
      *
      * ```kotlin
      * @Transactional
@@ -483,16 +484,18 @@ abstract class QuerydslSupport<T : Any> {
      * @param clearAutomatically whether to clear the persistence context after the block (default `true`)
      * @param block the bulk DML statements to execute
      * @return the result of [block]
-     * @throws IllegalStateException if no active transaction is present
+     * @throws QueryException if no active transaction is present
      */
     protected fun <R> modifying(
         flushAutomatically: Boolean = true,
         clearAutomatically: Boolean = true,
         block: () -> R,
     ): R {
-        check(entityManager.isJoinedToTransaction()) {
-            "modifying {} requires an active transaction. " +
-                "Annotate the calling method or class with @Transactional."
+        if (!entityManager.isJoinedToTransaction()) {
+            throw QueryException(
+                "modifying {} requires an active transaction. " +
+                    "Annotate the calling method or class with @Transactional.",
+            )
         }
         if (flushAutomatically) entityManager.flush()
         return try {

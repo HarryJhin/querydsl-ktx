@@ -1,5 +1,6 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.types.ExpressionException
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.SimpleExpression
 import com.querydsl.core.types.dsl.StringExpression
@@ -260,15 +261,15 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
     }
 
     @Test
-    fun `inChunked - chunkSize zero throws IllegalArgumentException`() {
-        assertFailsWith<IllegalArgumentException> {
+    fun `inChunked - chunkSize zero throws ExpressionException`() {
+        assertFailsWith<ExpressionException> {
             status.inChunked(listOf("A", "B"), chunkSize = 0)
         }
     }
 
     @Test
-    fun `inChunked - negative chunkSize throws IllegalArgumentException`() {
-        assertFailsWith<IllegalArgumentException> {
+    fun `inChunked - negative chunkSize throws ExpressionException`() {
+        assertFailsWith<ExpressionException> {
             status.inChunked(listOf("A", "B"), chunkSize = -1)
         }
     }

@@ -169,6 +169,7 @@ infix fun StringExpression?.containsIgnoreCase(right: String?): BooleanExpressio
 infix fun StringExpression?.startsWith(right: String?): BooleanExpression?
 infix fun StringExpression?.startsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.startsWithIgnoreCase(right: String?): BooleanExpression?
+infix fun BooleanExpression?.escape(escapeChar: Char): BooleanExpression?  // SQL ESCAPE clause for like/notLike/likeIgnoreCase
 infix fun StringExpression?.endsWith(right: String?): BooleanExpression?
 infix fun StringExpression?.endsWith(right: Expression<String>?): BooleanExpression?
 infix fun StringExpression?.endsWithIgnoreCase(right: String?): BooleanExpression?

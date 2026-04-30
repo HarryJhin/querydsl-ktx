@@ -1,6 +1,7 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.ExpressionException
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.SimpleExpression
 
@@ -156,11 +157,13 @@ interface SimpleExpressionExtensions {
      * @param right the collection of values to match against, or null to skip
      * @param chunkSize maximum number of items per IN clause (default 1000)
      * @return chunked IN expression, or null if either side is null
-     * @throws IllegalArgumentException if [chunkSize] is not positive
+     * @throws ExpressionException if [chunkSize] is not positive
      * @see inChunked
      */
     fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression? {
-        require(chunkSize > 0) { "chunkSize must be positive, but was $chunkSize" }
+        if (chunkSize <= 0) {
+            throw ExpressionException("chunkSize must be positive, but was $chunkSize")
+        }
         return when {
             this == null || right == null -> null
             right.size <= chunkSize -> this.`in`(right)

@@ -1,9 +1,12 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.ExpressionException
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.StringExpression
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -525,5 +528,70 @@ class StringExpressionExtensionsTest : StringExpressionExtensions {
     fun `coalesce value - both null returns null`() {
         val result = nullExpr coalesce (null as String?)
         assertNull(result)
+    }
+
+    // ── escape ──
+    //
+    // We build the LIKE-family BooleanExpression via QueryDSL member methods
+    // (`name.like(...)`) instead of our infix extension, because Kotlin's
+    // smart-cast on locals routes `someLocal like ...` to the Java member
+    // `like(String)` rather than our nullable-receiver extension. The infix
+    // extensions themselves are covered by the like / notLike / likeIgnoreCase
+    // unit tests above. Null-pattern propagation is covered by the
+    // `like with escape - null pattern skips filter` integration test.
+
+    @Test
+    fun `escape after like - returns LIKE_ESCAPE expression`() {
+        val result = name.like("10\\%off") escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after notLike - returns NOT(LIKE_ESCAPE) expression`() {
+        val result = name.notLike("10\\%off") escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after likeIgnoreCase - returns LIKE_ESCAPE_IC expression`() {
+        val result = name.likeIgnoreCase("10\\%OFF") escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape after like with Expression pattern - returns LIKE_ESCAPE expression`() {
+        val result = name.like(keyword) escape '\\'
+        assertNotNull(result)
+        assertTrue(result.toString().lowercase().contains("escape"))
+    }
+
+    @Test
+    fun `escape on null receiver - propagates null`() {
+        val nullPredicate: BooleanExpression? = null
+        val result = nullPredicate escape '\\'
+        assertNull(result)
+    }
+
+    @Test
+    fun `escape on non-LIKE expression - throws ExpressionException`() {
+        // eq result has Ops.EQ, not Ops.LIKE
+        val eqResult = name.eq("x")
+        assertFailsWith<ExpressionException> {
+            eqResult escape '\\'
+        }
+    }
+
+    @Test
+    fun `escape on AND expression - throws ExpressionException`() {
+        // Build a non-LIKE BooleanExpression via QueryDSL member methods to
+        // sidestep dispatch ambiguity between the extension `and` and the
+        // Java member `and(Predicate)` on a nullable receiver.
+        val andResult: BooleanExpression = name.eq("a").and(name.eq("b"))
+        assertFailsWith<ExpressionException> {
+            andResult escape '\\'
+        }
     }
 }
