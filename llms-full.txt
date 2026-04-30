@@ -90,10 +90,17 @@ infix fun <T> SimpleExpression<T>?.notIn(right: Collection<T>?): BooleanExpressi
 infix fun <T> SimpleExpression<T>?.notIn(right: SubQueryExpression<T>?): BooleanExpression?
 infix fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?): BooleanExpression?
 fun <T> SimpleExpression<T>?.inChunked(right: Collection<T>?, chunkSize: Int = 1000): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eqAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eqAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eqAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.eqAny(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.neAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> SimpleExpression<T>?.neAny(right: CollectionExpression<*, in T>?): BooleanExpression?
 ```
 
 Null behavior: either side null returns null (condition skipped).
 `inChunked` throws `ExpressionException` if `chunkSize` is not positive.
+`neAll` / `neAny` SubQueryExpression variants are not provided by QueryDSL 5.1.0 and are therefore not wrapped.
 
 ### ComparableExpressionExtensions
 
@@ -115,6 +122,22 @@ infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(expr: Expression
 infix fun <T : Comparable<T>> ComparableExpression<T>?.coalesce(arg: T?): ComparableExpression<T>?
 infix fun <T : Comparable<T>> T?.between(range: Pair<ComparableExpression<T>?, ComparableExpression<T>?>): BooleanExpression?
 operator fun <T : Comparable<T>> ComparableExpression<T>.rangeTo(other: ComparableExpression<T>): Pair<ComparableExpression<T>, ComparableExpression<T>>
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAny(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAny(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAny(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAny(right: SubQueryExpression<T>?): BooleanExpression?
 ```
 
 Null behavior for `between(Pair)`: both bounds present = BETWEEN, only from = `>=`, only to = `<=`, both null = null. This is the **one-sided survival** pattern.
@@ -152,6 +175,21 @@ operator fun <T> NumberExpression<T>.div(right: Expression<T>): NumberExpression
 operator fun <T> NumberExpression<T>.rem(right: T): NumberExpression<T>
 operator fun <T> NumberExpression<T>.rem(right: Expression<T>): NumberExpression<T>
 operator fun <T> NumberExpression<T>.unaryMinus(): NumberExpression<T>
+    where T : Number, T : Comparable<*>
+```
+
+```kotlin
+// ALL/Any variants (NumberExpression — asymmetric: only gtAll/gtAny have SubQuery overloads in QueryDSL 5.1.0)
+infix fun <T> NumberExpression<T>?.gtAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.gtAll(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.gtAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.gtAny(right: SubQueryExpression<T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.goeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.goeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.ltAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.ltAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.loeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+infix fun <T> NumberExpression<T>?.loeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
     where T : Number, T : Comparable<*>
 ```
 

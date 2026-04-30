@@ -1,5 +1,6 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.types.CollectionExpression
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.ExpressionException
 import com.querydsl.core.types.SubQueryExpression
@@ -226,5 +227,103 @@ interface SimpleExpressionExtensions {
     infix fun <T> SimpleExpression<T>?.notIn(right: SubQueryExpression<T>?): BooleanExpression? = when {
         this == null || right == null -> null
         else -> this.notIn(right)
+    }
+
+    /**
+     * Null-safe `= ALL` check against a collection expression.
+     *
+     * ```sql
+     * status = ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this = ALL right`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.eqAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.eqAll(right)
+    }
+
+    /**
+     * Null-safe `= ALL` check against a subquery.
+     *
+     * ```sql
+     * status = ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this = ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.eqAll(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.eqAll(right)
+    }
+
+    /**
+     * Null-safe `= ANY` check against a collection expression.
+     *
+     * ```sql
+     * status = ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this = ANY right`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.eqAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.eqAny(right)
+    }
+
+    /**
+     * Null-safe `= ANY` check against a subquery.
+     *
+     * ```sql
+     * status = ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this = ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.eqAny(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.eqAny(right)
+    }
+
+    /**
+     * Null-safe `<> ALL` check against a collection expression.
+     *
+     * ```sql
+     * status <> ALL (?, ?, ?)
+     * ```
+     *
+     * QueryDSL 5.1.0 does not provide a `neAll(SubQueryExpression)` member,
+     * so only the collection variant is wrapped here.
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <> ALL right`, or null if either side is null
+     * @see eqAll
+     */
+    infix fun <T> SimpleExpression<T>?.neAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.neAll(right)
+    }
+
+    /**
+     * Null-safe `<> ANY` check against a collection expression.
+     *
+     * ```sql
+     * status <> ANY (?, ?, ?)
+     * ```
+     *
+     * QueryDSL 5.1.0 does not provide a `neAny(SubQueryExpression)` member,
+     * so only the collection variant is wrapped here.
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <> ANY right`, or null if either side is null
+     * @see eqAny
+     */
+    infix fun <T> SimpleExpression<T>?.neAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.neAny(right)
     }
 }

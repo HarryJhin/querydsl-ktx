@@ -1,6 +1,7 @@
 package com.querydsl.ktx.extensions
 
 import com.querydsl.core.DefaultQueryMetadata
+import com.querydsl.core.types.CollectionExpression
 import com.querydsl.core.types.ExpressionException
 import com.querydsl.core.types.SubQueryExpression
 import com.querydsl.core.types.Visitor
@@ -372,4 +373,50 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
         val result = nullExpr notIn nullSubQuery
         assertNull(result)
     }
+
+    // ── ALL/Any variants (#90) ──
+
+    private val collectionExpr: CollectionExpression<List<String>, String> = object : CollectionExpression<List<String>, String> {
+        @Suppress("UNCHECKED_CAST")
+        override fun getType(): Class<out List<String>> = List::class.java as Class<out List<String>>
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getParameter(index: Int): Class<*> = String::class.java
+    }
+    private val nullCollectionExpr: CollectionExpression<List<String>, String>? = null
+
+    // eqAll(Collection)
+    @Test fun `eqAll collection - both non-null`() = assertNotNull(status eqAll collectionExpr)
+    @Test fun `eqAll collection - this null`() = assertNull(nullExpr eqAll collectionExpr)
+    @Test fun `eqAll collection - right null`() = assertNull(status eqAll nullCollectionExpr)
+    @Test fun `eqAll collection - both null`() = assertNull(nullExpr eqAll nullCollectionExpr)
+
+    // eqAll(SubQuery)
+    @Test fun `eqAll subquery - both non-null`() = assertNotNull(status eqAll subQuery)
+    @Test fun `eqAll subquery - this null`() = assertNull(nullExpr eqAll subQuery)
+    @Test fun `eqAll subquery - right null`() = assertNull(status eqAll nullSubQuery)
+    @Test fun `eqAll subquery - both null`() = assertNull(nullExpr eqAll nullSubQuery)
+
+    // eqAny(Collection)
+    @Test fun `eqAny collection - both non-null`() = assertNotNull(status eqAny collectionExpr)
+    @Test fun `eqAny collection - this null`() = assertNull(nullExpr eqAny collectionExpr)
+    @Test fun `eqAny collection - right null`() = assertNull(status eqAny nullCollectionExpr)
+    @Test fun `eqAny collection - both null`() = assertNull(nullExpr eqAny nullCollectionExpr)
+
+    // eqAny(SubQuery)
+    @Test fun `eqAny subquery - both non-null`() = assertNotNull(status eqAny subQuery)
+    @Test fun `eqAny subquery - this null`() = assertNull(nullExpr eqAny subQuery)
+    @Test fun `eqAny subquery - right null`() = assertNull(status eqAny nullSubQuery)
+    @Test fun `eqAny subquery - both null`() = assertNull(nullExpr eqAny nullSubQuery)
+
+    // neAll(Collection)
+    @Test fun `neAll collection - both non-null`() = assertNotNull(status neAll collectionExpr)
+    @Test fun `neAll collection - this null`() = assertNull(nullExpr neAll collectionExpr)
+    @Test fun `neAll collection - right null`() = assertNull(status neAll nullCollectionExpr)
+    @Test fun `neAll collection - both null`() = assertNull(nullExpr neAll nullCollectionExpr)
+
+    // neAny(Collection)
+    @Test fun `neAny collection - both non-null`() = assertNotNull(status neAny collectionExpr)
+    @Test fun `neAny collection - this null`() = assertNull(nullExpr neAny collectionExpr)
+    @Test fun `neAny collection - right null`() = assertNull(status neAny nullCollectionExpr)
+    @Test fun `neAny collection - both null`() = assertNull(nullExpr neAny nullCollectionExpr)
 }

@@ -30,9 +30,9 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 ├── CaseDsl.kt           ← CASE/WHEN Kotlin DSL (searched & simple)
 ├── extensions/          ← 8 interfaces (no state, no dependencies)
 │   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
-│   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn, inChunked (with SubQueryExpression overloads for eq/in/notIn)
-│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo
-│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo, arithmetic infix (add/subtract/multiply/divide/mod), Kotlin operators (+, -, *, /, %, unary -)
+│   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn, inChunked (with SubQueryExpression overloads for eq/in/notIn), eqAll/eqAny/neAll/neAny (Collection + SubQuery for eq*; QueryDSL 5.1.0 has no SubQuery for ne*)
+│   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo, gt/goe/lt/loe All/Any (Collection + SubQuery)
+│   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo, arithmetic infix (add/subtract/multiply/divide/mod), Kotlin operators (+, -, *, /, %, unary -), gt/goe/lt/loe All/Any (Collection; SubQuery only for gtAll/gtAny per QueryDSL 5.1.0)
 │   ├── StringExpressionExtensions.kt     — contains, startsWith, endsWith, like, matches, nullif, coalesce
 │   ├── TemporalExpressionExtensions.kt   — after, before
 │   ├── CollectionExpressionExtensions.kt — contains

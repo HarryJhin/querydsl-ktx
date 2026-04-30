@@ -100,6 +100,10 @@ Equality and membership operators for any expression type.
 | `notIn` | `SimpleExpression<T>?.notIn(Collection<T>?)` | `status NOT IN (?, ?)` |
 | `notIn` | `SimpleExpression<T>?.notIn(SubQueryExpression<T>?)` | `id NOT IN (SELECT ...)` |
 | `inChunked` | `SimpleExpression<T>?.inChunked(Collection<T>?)` | `col IN (?) OR col IN (?)` |
+| `eqAll` | `SimpleExpression<T>?.eqAll(CollectionExpression<*, in T>?)` / `eqAll(SubQueryExpression<T>?)` | `col = ALL (...)` |
+| `eqAny` | `SimpleExpression<T>?.eqAny(CollectionExpression<*, in T>?)` / `eqAny(SubQueryExpression<T>?)` | `col = ANY (...)` |
+| `neAll` | `SimpleExpression<T>?.neAll(CollectionExpression<*, in T>?)` | `col <> ALL (...)` |
+| `neAny` | `SimpleExpression<T>?.neAny(CollectionExpression<*, in T>?)` | `col <> ANY (...)` |
 
 ### Examples
 
@@ -182,6 +186,14 @@ Comparison and range operators for `Comparable` types (dates, strings, enums, et
 | `nullif` | `ComparableExpression<T>?.nullif(T?)` | `NULLIF(col, ?)` |
 | `coalesce` | `ComparableExpression<T>?.coalesce(T?)` | `COALESCE(col, ?)` |
 | `rangeTo` | `ComparableExpression<T>..ComparableExpression<T>` | _(creates Pair for between)_ |
+| `gtAll` | `ComparableExpression<T>?.gtAll(CollectionExpression<*, in T>?)` / `gtAll(SubQueryExpression<T>?)` | `col > ALL (...)` |
+| `gtAny` | `ComparableExpression<T>?.gtAny(CollectionExpression<*, in T>?)` / `gtAny(SubQueryExpression<T>?)` | `col > ANY (...)` |
+| `goeAll` | `ComparableExpression<T>?.goeAll(CollectionExpression<*, in T>?)` / `goeAll(SubQueryExpression<T>?)` | `col >= ALL (...)` |
+| `goeAny` | `ComparableExpression<T>?.goeAny(CollectionExpression<*, in T>?)` / `goeAny(SubQueryExpression<T>?)` | `col >= ANY (...)` |
+| `ltAll` | `ComparableExpression<T>?.ltAll(CollectionExpression<*, in T>?)` / `ltAll(SubQueryExpression<T>?)` | `col < ALL (...)` |
+| `ltAny` | `ComparableExpression<T>?.ltAny(CollectionExpression<*, in T>?)` / `ltAny(SubQueryExpression<T>?)` | `col < ANY (...)` |
+| `loeAll` | `ComparableExpression<T>?.loeAll(CollectionExpression<*, in T>?)` / `loeAll(SubQueryExpression<T>?)` | `col <= ALL (...)` |
+| `loeAny` | `ComparableExpression<T>?.loeAny(CollectionExpression<*, in T>?)` / `loeAny(SubQueryExpression<T>?)` | `col <= ANY (...)` |
 
 All comparison functions also have `Expression<T>` overloads for comparing against other columns.
 
@@ -342,6 +354,14 @@ operators specifically typed for `NumberExpression`.
 | `mod` | `NumberExpression<T>?.mod(T?)` / `mod(Expression<T>?)` | `col % ?` |
 | `+` / `-` / `*` / `/` / `%` | `operator NumberExpression<T>.plus/minus/times/div/rem(T \| Expression<T>)` | `col + ?` _(non-null contract)_ |
 | unary `-` | `operator NumberExpression<T>.unaryMinus()` | `-col` |
+| `gtAll` | `NumberExpression<T>?.gtAll(CollectionExpression<*, in T>?)` / `gtAll(SubQueryExpression<T>?)` | `col > ALL (...)` |
+| `gtAny` | `NumberExpression<T>?.gtAny(CollectionExpression<*, in T>?)` / `gtAny(SubQueryExpression<T>?)` | `col > ANY (...)` |
+| `goeAll` | `NumberExpression<T>?.goeAll(CollectionExpression<*, in T>?)` | `col >= ALL (...)` |
+| `goeAny` | `NumberExpression<T>?.goeAny(CollectionExpression<*, in T>?)` | `col >= ANY (...)` |
+| `ltAll` | `NumberExpression<T>?.ltAll(CollectionExpression<*, in T>?)` | `col < ALL (...)` |
+| `ltAny` | `NumberExpression<T>?.ltAny(CollectionExpression<*, in T>?)` | `col < ANY (...)` |
+| `loeAll` | `NumberExpression<T>?.loeAll(CollectionExpression<*, in T>?)` | `col <= ALL (...)` |
+| `loeAny` | `NumberExpression<T>?.loeAny(CollectionExpression<*, in T>?)` | `col <= ANY (...)` |
 
 ### Examples
 
@@ -368,6 +388,38 @@ score BETWEEN 0 AND 100
 quantity <= ?
 ```
 
+:::
+
+::: tip ALL/Any comparisons
+QueryDSL provides `<op>All` / `<op>Any` members for comparing against a collection
+or subquery. querydsl-ktx wraps them with the same null-skip semantics:
+
+```kotlin
+import com.querydsl.jpa.JPAExpressions
+
+// price greater than ALL prices in the Stationery category
+val stationeryPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.category.eq("Stationery"))
+selectFrom(product).where(product.price gtAll stationeryPrices).fetch()
+
+// price equal to ANY price in cheap categories
+val cheapPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.price.lt(10000))
+selectFrom(product).where(product.price eqAny cheapPrices).fetch()
+```
+
+QueryDSL 5.1.0 has asymmetric coverage. The wrappers mirror this exactly:
+
+| Function | CollectionExpression | SubQueryExpression |
+|---|---|---|
+| `eqAll` / `eqAny` (Simple, Comparable, Number) | ✓ | ✓ |
+| `neAll` / `neAny` (Simple) | ✓ | ✗ (member not provided) |
+| `gtAll` / `gtAny` (Comparable, Number) | ✓ | ✓ |
+| `goeAll` / `ltAll` / `loeAll` and `*Any` (Comparable) | ✓ | ✓ |
+| `goeAll` / `ltAll` / `loeAll` and `*Any` (Number) | ✓ | ✗ (member not provided on `NumberExpression`) |
+
+For Number columns that need the missing SubQuery variants, cast the path to a
+`ComparableExpression` view if the underlying type is `Comparable<T>`.
 :::
 
 ---

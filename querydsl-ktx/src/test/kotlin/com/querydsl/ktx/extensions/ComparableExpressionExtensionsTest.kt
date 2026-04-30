@@ -1,5 +1,9 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.DefaultQueryMetadata
+import com.querydsl.core.types.CollectionExpression
+import com.querydsl.core.types.SubQueryExpression
+import com.querydsl.core.types.Visitor
 import com.querydsl.core.types.dsl.ComparableExpression
 import com.querydsl.core.types.dsl.Expressions
 import kotlin.test.Test
@@ -461,4 +465,116 @@ class ComparableExpressionExtensionsTest : ComparableExpressionExtensions {
         val result = "M" between (code..otherCode)
         assertNotNull(result)
     }
+
+    // ── ALL/Any variants (#90) ──
+
+    private val collectionExpr: CollectionExpression<List<String>, String> = object : CollectionExpression<List<String>, String> {
+        @Suppress("UNCHECKED_CAST")
+        override fun getType(): Class<out List<String>> = List::class.java as Class<out List<String>>
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getParameter(index: Int): Class<*> = String::class.java
+    }
+    private val nullCollectionExpr: CollectionExpression<List<String>, String>? = null
+    private val subQuery: SubQueryExpression<String> = object : SubQueryExpression<String> {
+        override fun getMetadata() = DefaultQueryMetadata()
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getType(): Class<out String> = String::class.java
+    }
+    private val nullSubQuery: SubQueryExpression<String>? = null
+
+    // gtAll(Collection)
+    @Test fun `gtAll collection - both non-null`() = assertNotNull(code gtAll collectionExpr)
+    @Test fun `gtAll collection - this null`() = assertNull(nullExpr gtAll collectionExpr)
+    @Test fun `gtAll collection - right null`() = assertNull(code gtAll nullCollectionExpr)
+    @Test fun `gtAll collection - both null`() = assertNull(nullExpr gtAll nullCollectionExpr)
+
+    // gtAll(SubQuery)
+    @Test fun `gtAll subquery - both non-null`() = assertNotNull(code gtAll subQuery)
+    @Test fun `gtAll subquery - this null`() = assertNull(nullExpr gtAll subQuery)
+    @Test fun `gtAll subquery - right null`() = assertNull(code gtAll nullSubQuery)
+    @Test fun `gtAll subquery - both null`() = assertNull(nullExpr gtAll nullSubQuery)
+
+    // gtAny(Collection)
+    @Test fun `gtAny collection - both non-null`() = assertNotNull(code gtAny collectionExpr)
+    @Test fun `gtAny collection - this null`() = assertNull(nullExpr gtAny collectionExpr)
+    @Test fun `gtAny collection - right null`() = assertNull(code gtAny nullCollectionExpr)
+    @Test fun `gtAny collection - both null`() = assertNull(nullExpr gtAny nullCollectionExpr)
+
+    // gtAny(SubQuery)
+    @Test fun `gtAny subquery - both non-null`() = assertNotNull(code gtAny subQuery)
+    @Test fun `gtAny subquery - this null`() = assertNull(nullExpr gtAny subQuery)
+    @Test fun `gtAny subquery - right null`() = assertNull(code gtAny nullSubQuery)
+    @Test fun `gtAny subquery - both null`() = assertNull(nullExpr gtAny nullSubQuery)
+
+    // goeAll(Collection)
+    @Test fun `goeAll collection - both non-null`() = assertNotNull(code goeAll collectionExpr)
+    @Test fun `goeAll collection - this null`() = assertNull(nullExpr goeAll collectionExpr)
+    @Test fun `goeAll collection - right null`() = assertNull(code goeAll nullCollectionExpr)
+    @Test fun `goeAll collection - both null`() = assertNull(nullExpr goeAll nullCollectionExpr)
+
+    // goeAll(SubQuery)
+    @Test fun `goeAll subquery - both non-null`() = assertNotNull(code goeAll subQuery)
+    @Test fun `goeAll subquery - this null`() = assertNull(nullExpr goeAll subQuery)
+    @Test fun `goeAll subquery - right null`() = assertNull(code goeAll nullSubQuery)
+    @Test fun `goeAll subquery - both null`() = assertNull(nullExpr goeAll nullSubQuery)
+
+    // goeAny(Collection)
+    @Test fun `goeAny collection - both non-null`() = assertNotNull(code goeAny collectionExpr)
+    @Test fun `goeAny collection - this null`() = assertNull(nullExpr goeAny collectionExpr)
+    @Test fun `goeAny collection - right null`() = assertNull(code goeAny nullCollectionExpr)
+    @Test fun `goeAny collection - both null`() = assertNull(nullExpr goeAny nullCollectionExpr)
+
+    // goeAny(SubQuery)
+    @Test fun `goeAny subquery - both non-null`() = assertNotNull(code goeAny subQuery)
+    @Test fun `goeAny subquery - this null`() = assertNull(nullExpr goeAny subQuery)
+    @Test fun `goeAny subquery - right null`() = assertNull(code goeAny nullSubQuery)
+    @Test fun `goeAny subquery - both null`() = assertNull(nullExpr goeAny nullSubQuery)
+
+    // ltAll(Collection)
+    @Test fun `ltAll collection - both non-null`() = assertNotNull(code ltAll collectionExpr)
+    @Test fun `ltAll collection - this null`() = assertNull(nullExpr ltAll collectionExpr)
+    @Test fun `ltAll collection - right null`() = assertNull(code ltAll nullCollectionExpr)
+    @Test fun `ltAll collection - both null`() = assertNull(nullExpr ltAll nullCollectionExpr)
+
+    // ltAll(SubQuery)
+    @Test fun `ltAll subquery - both non-null`() = assertNotNull(code ltAll subQuery)
+    @Test fun `ltAll subquery - this null`() = assertNull(nullExpr ltAll subQuery)
+    @Test fun `ltAll subquery - right null`() = assertNull(code ltAll nullSubQuery)
+    @Test fun `ltAll subquery - both null`() = assertNull(nullExpr ltAll nullSubQuery)
+
+    // ltAny(Collection)
+    @Test fun `ltAny collection - both non-null`() = assertNotNull(code ltAny collectionExpr)
+    @Test fun `ltAny collection - this null`() = assertNull(nullExpr ltAny collectionExpr)
+    @Test fun `ltAny collection - right null`() = assertNull(code ltAny nullCollectionExpr)
+    @Test fun `ltAny collection - both null`() = assertNull(nullExpr ltAny nullCollectionExpr)
+
+    // ltAny(SubQuery)
+    @Test fun `ltAny subquery - both non-null`() = assertNotNull(code ltAny subQuery)
+    @Test fun `ltAny subquery - this null`() = assertNull(nullExpr ltAny subQuery)
+    @Test fun `ltAny subquery - right null`() = assertNull(code ltAny nullSubQuery)
+    @Test fun `ltAny subquery - both null`() = assertNull(nullExpr ltAny nullSubQuery)
+
+    // loeAll(Collection)
+    @Test fun `loeAll collection - both non-null`() = assertNotNull(code loeAll collectionExpr)
+    @Test fun `loeAll collection - this null`() = assertNull(nullExpr loeAll collectionExpr)
+    @Test fun `loeAll collection - right null`() = assertNull(code loeAll nullCollectionExpr)
+    @Test fun `loeAll collection - both null`() = assertNull(nullExpr loeAll nullCollectionExpr)
+
+    // loeAll(SubQuery)
+    @Test fun `loeAll subquery - both non-null`() = assertNotNull(code loeAll subQuery)
+    @Test fun `loeAll subquery - this null`() = assertNull(nullExpr loeAll subQuery)
+    @Test fun `loeAll subquery - right null`() = assertNull(code loeAll nullSubQuery)
+    @Test fun `loeAll subquery - both null`() = assertNull(nullExpr loeAll nullSubQuery)
+
+    // loeAny(Collection)
+    @Test fun `loeAny collection - both non-null`() = assertNotNull(code loeAny collectionExpr)
+    @Test fun `loeAny collection - this null`() = assertNull(nullExpr loeAny collectionExpr)
+    @Test fun `loeAny collection - right null`() = assertNull(code loeAny nullCollectionExpr)
+    @Test fun `loeAny collection - both null`() = assertNull(nullExpr loeAny nullCollectionExpr)
+
+    // loeAny(SubQuery)
+    @Test fun `loeAny subquery - both non-null`() = assertNotNull(code loeAny subQuery)
+    @Test fun `loeAny subquery - this null`() = assertNull(nullExpr loeAny subQuery)
+    @Test fun `loeAny subquery - right null`() = assertNull(code loeAny nullSubQuery)
+    @Test fun `loeAny subquery - both null`() = assertNull(nullExpr loeAny nullSubQuery)
 }
