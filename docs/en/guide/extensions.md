@@ -74,7 +74,7 @@ active = true AND (role = ? OR department = ?)
 
 :::
 
-::: tip Vararg overload
+::: tip Vararg overload <Badge type="tip" text="v1.2.0+" />
 `andAnyOf` and `orAllOf` also accept a vararg of `BooleanExpression?`.
 Call with dot notation since Kotlin disallows vararg on infix functions:
 `predicate.andAnyOf(p1, p2, p3)`.
@@ -142,7 +142,7 @@ Oracle has a hard limit of 1000 items in a single IN clause.
 joined with OR. The default chunk size is 1000, but you can customize it.
 :::
 
-::: tip Subquery comparisons
+::: tip Subquery comparisons <Badge type="tip" text="v1.2.0+" />
 `eq`, `in`, and `notIn` also accept a `SubQueryExpression<T>?` for null-safe
 comparison against subqueries built with `JPAExpressions`.
 
@@ -295,7 +295,7 @@ The reverse between is also null-safe: if the value is null, the entire expressi
 
 Same API as `ComparableExpressionExtensions`, but for `NumberExpression`.
 
-::: tip Arithmetic operators
+::: tip Arithmetic operators <Badge type="tip" text="v1.2.0+" />
 `add`, `subtract`, `multiply`, `divide`, `mod` are also available with the same
 null-safety contract: either side null returns null (the whole arithmetic
 expression is skipped). Each has a value overload and an `Expression<T>` overload.
@@ -307,7 +307,7 @@ entity.total divide quantity      // total / quantity
 ```
 :::
 
-::: tip Kotlin operator overloads
+::: tip Kotlin operator overloads <Badge type="tip" text="v1.2.0+" />
 Kotlin arithmetic operators (`+`, `-`, `*`, `/`, `%`, unary `-`) are also available
 for expression building (sort, projection, computed columns). These have a
 **non-null contract** (both sides required), distinct from the null-skip infix
@@ -390,7 +390,7 @@ quantity <= ?
 
 :::
 
-::: tip ALL/Any comparisons
+::: tip ALL/Any comparisons <Badge type="tip" text="v1.2.0+" />
 QueryDSL provides `<op>All` / `<op>Any` members for comparing against a collection
 or subquery. querydsl-ktx wraps them with the same null-skip semantics:
 
@@ -487,7 +487,7 @@ LOWER(email) = LOWER(?)
 
 :::
 
-::: tip Escape character for literal % and _
+::: tip Escape character for literal % and _ <Badge type="tip" text="v1.2.0+" />
 For patterns containing literal `%` or `_` characters, chain `escape '\'`
 right after `like`, `notLike`, or `likeIgnoreCase`. This mirrors SQL's
 `LIKE pattern ESCAPE 'char'` syntax.

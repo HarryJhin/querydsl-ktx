@@ -1,5 +1,5 @@
 ---
-description: 왜 querydsl-ktx인가 — 대안 비교, scoping 결정 이유, null-safe 동적 쿼리를 위한 의사결정 가이드.
+description: 왜 querydsl-ktx인가. 대안 비교, scoping 결정 이유, null-safe 동적 쿼리를 위한 의사결정 가이드.
 ---
 
 # 왜 querydsl-ktx인가?

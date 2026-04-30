@@ -1,5 +1,5 @@
 ---
-description: Why querydsl-ktx — alternatives comparison, scoping rationale, and decision guide for null-safe dynamic queries in QueryDSL.
+description: Why querydsl-ktx. Alternatives comparison, scoping rationale, and decision guide for null-safe dynamic queries in QueryDSL.
 ---
 
 # Why querydsl-ktx?
@@ -84,17 +84,17 @@ present → `>=`, only `maxAge` → `<=`, both null → skip.
 
 | Situation | Recommended approach |
 |-----------|----------------------|
-| Existing QueryDSL project with mostly static queries | Stay on `BooleanBuilder` — migration cost not worth it |
+| Existing QueryDSL project with mostly static queries | Stay on `BooleanBuilder`. Migration cost not worth it |
 | New project, lots of dynamic filters | querydsl-ktx |
 | JPA-only project that already uses Spring Data heavily | `Specification`, unless you need joins or projections that hurt with Specification |
 | Team prefers top-level extensions and accepts namespace cost | Top-level extensions (open-source ones exist) |
-| One-off helper for a single entity | Hand-rolled helpers — but consider whether you'll need them elsewhere |
+| One-off helper for a single entity | Hand-rolled helpers, but consider whether you'll need them elsewhere |
 
 ## What querydsl-ktx Does NOT Do
 
-- It does not replace QueryDSL — you still write `selectFrom(...)`, `orderBy`, `groupBy`, `having`, `join`.
-- It does not add new SQL features — every operator wraps an existing QueryDSL member.
-- It does not silently swallow exceptions — `null` propagation is the contract, but illegal uses (e.g. `escape` on a non-LIKE expression) throw `ExpressionException`.
+- It does not replace QueryDSL. You still write `selectFrom(...)`, `orderBy`, `groupBy`, `having`, `join`.
+- It does not add new SQL features. Every operator wraps an existing QueryDSL member.
+- It does not silently swallow exceptions. `null` propagation is the contract, but illegal uses (e.g. `escape` on a non-LIKE expression) throw `ExpressionException`.
 
 The library exists to remove the **null-checking boilerplate** that QueryDSL
 itself does not address, while staying compatible with everything QueryDSL

@@ -358,12 +358,12 @@ For comparing against multiple subquery rows or collection elements, use
 ::: code-group
 
 ```kotlin [Kotlin]
-// Greater than ALL prices in a category — strictly more expensive than every item
+// Greater than ALL prices in a category: strictly more expensive than every item
 val categoryPrices = JPAExpressions.select(product.price).from(product)
     .where(product.category.eq(targetCategory))
 selectFrom(product).where(product.price gtAll categoryPrices).fetch()
 
-// Equal to ANY of the cheap-category prices — match any cheap item's price
+// Equal to ANY of the cheap-category prices: match any cheap item's price
 val cheapPrices = JPAExpressions.select(product.price).from(product)
     .where(product.price.lt(threshold))
 selectFrom(product).where(product.price eqAny cheapPrices).fetch()

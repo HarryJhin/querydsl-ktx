@@ -74,7 +74,7 @@ active = true AND (role = ? OR department = ?)
 
 :::
 
-::: tip vararg 오버로드
+::: tip vararg 오버로드 <Badge type="tip" text="v1.2.0+" />
 `andAnyOf`와 `orAllOf`는 vararg `BooleanExpression?`도 받습니다.
 Kotlin은 infix 함수에 vararg를 허용하지 않으므로 점 표기법으로 호출합니다:
 `predicate.andAnyOf(p1, p2, p3)`.
@@ -142,7 +142,7 @@ Oracle은 단일 IN 절에 1000개 항목 제한이 있습니다.
 기본 청크 사이즈는 1000이며, 커스텀 사이즈 지정이 가능합니다.
 :::
 
-::: tip 서브쿼리 비교
+::: tip 서브쿼리 비교 <Badge type="tip" text="v1.2.0+" />
 `eq`, `in`, `notIn`은 `SubQueryExpression<T>?` 오버로드도 제공합니다. `JPAExpressions`로
 만든 서브쿼리와 null-safe하게 비교할 수 있습니다.
 
@@ -309,7 +309,7 @@ now between (event.startAt to event.endAt)
 
 `ComparableExpressionExtensions`와 동일한 API이지만 `NumberExpression`용입니다.
 
-::: tip 산술 연산자
+::: tip 산술 연산자 <Badge type="tip" text="v1.2.0+" />
 `add`, `subtract`, `multiply`, `divide`, `mod`도 동일한 null-safety 계약으로
 사용할 수 있습니다. 어느 한쪽이 null이면 null을 반환하여 산술 표현식 자체가
 건너뜁니다. 각 연산자는 값 오버로드와 `Expression<T>` 오버로드를 모두 제공합니다.
@@ -321,7 +321,7 @@ entity.total divide quantity      // total / quantity
 ```
 :::
 
-::: tip Kotlin 연산자 오버로드
+::: tip Kotlin 연산자 오버로드 <Badge type="tip" text="v1.2.0+" />
 Kotlin 산술 연산자 (`+`, `-`, `*`, `/`, `%`, 단항 `-`)도 표현식 빌딩 (정렬,
 프로젝션, computed column) 용도로 제공됩니다. 위의 null-skip infix 형태와 달리
 **non-null 계약**입니다 (양쪽 모두 필수).
@@ -402,7 +402,7 @@ quantity <= ?
 
 :::
 
-::: tip ALL/Any 비교
+::: tip ALL/Any 비교 <Badge type="tip" text="v1.2.0+" />
 QueryDSL은 컬렉션 또는 서브쿼리와 비교하기 위한 `<op>All` / `<op>Any` 멤버를
 제공합니다. querydsl-ktx는 동일한 null-skip 시맨틱으로 래핑합니다.
 
@@ -499,7 +499,7 @@ LOWER(email) = LOWER(?)
 
 :::
 
-::: tip 리터럴 % / _ 매칭을 위한 escape 문자
+::: tip 리터럴 % / _ 매칭을 위한 escape 문자 <Badge type="tip" text="v1.2.0+" />
 패턴에 와일드카드가 아닌 리터럴 `%`나 `_`가 들어갈 때는 `like`, `notLike`,
 `likeIgnoreCase` 다음에 `escape '\'`를 체이닝합니다. SQL의
 `LIKE pattern ESCAPE 'char'` 구문을 그대로 미러링합니다.

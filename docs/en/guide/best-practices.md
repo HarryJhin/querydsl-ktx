@@ -314,7 +314,7 @@ fun findActiveSales(now: LocalDateTime? = null): List<Product> =
 Sorting by a derived numeric value used to require a verbose
 `NumberExpression.add(...)` or a Querydsl `template`. With the Kotlin operator
 overloads on `NumberExpression`, expression building reads like ordinary
-arithmetic — no intermediate variables, no template placeholders.
+arithmetic. No intermediate variables, no template placeholders.
 
 ```kotlin
 // Sort products by gross price (price + tax) descending
@@ -328,7 +328,7 @@ selectFrom(product)
     .fetch()
 ```
 
-The arithmetic operators have a non-null contract — both operands must be
+The arithmetic operators have a non-null contract: both operands must be
 non-null. Use them inside `orderBy`, `select` projections, and other places
 where the expression itself must always exist.
 

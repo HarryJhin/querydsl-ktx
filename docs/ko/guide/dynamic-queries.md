@@ -357,12 +357,12 @@ SELECT * FROM product
 ::: code-group
 
 ```kotlin [Kotlin]
-// 카테고리의 모든 가격보다 큰 — 해당 카테고리의 모든 상품보다 비싼 상품
+// 카테고리의 모든 가격보다 큼: 해당 카테고리의 모든 상품보다 비싼 상품
 val categoryPrices = JPAExpressions.select(product.price).from(product)
     .where(product.category.eq(targetCategory))
 selectFrom(product).where(product.price gtAll categoryPrices).fetch()
 
-// cheap 카테고리의 어떤 가격과도 일치 — 어떤 cheap 상품의 가격과 같은 상품
+// cheap 카테고리의 어떤 가격과도 일치: 어떤 cheap 상품의 가격과 같은 상품
 val cheapPrices = JPAExpressions.select(product.price).from(product)
     .where(product.price.lt(threshold))
 selectFrom(product).where(product.price eqAny cheapPrices).fetch()
