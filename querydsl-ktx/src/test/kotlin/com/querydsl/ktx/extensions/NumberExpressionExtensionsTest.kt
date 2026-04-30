@@ -1,5 +1,9 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.DefaultQueryMetadata
+import com.querydsl.core.types.CollectionExpression
+import com.querydsl.core.types.SubQueryExpression
+import com.querydsl.core.types.Visitor
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.NumberExpression
 import kotlin.test.Test
@@ -801,4 +805,80 @@ class NumberExpressionExtensionsTest : NumberExpressionExtensions {
         val result = 30000 between (price..minPrice)
         assertNotNull(result)
     }
+
+    // ── ALL/Any variants (#90) ──
+
+    private val collectionExpr: CollectionExpression<List<Int>, Int> = object : CollectionExpression<List<Int>, Int> {
+        @Suppress("UNCHECKED_CAST")
+        override fun getType(): Class<out List<Int>> = List::class.java as Class<out List<Int>>
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getParameter(index: Int): Class<*> = Int::class.javaObjectType
+    }
+    private val nullCollectionExpr: CollectionExpression<List<Int>, Int>? = null
+    private val subQuery: SubQueryExpression<Int> = object : SubQueryExpression<Int> {
+        override fun getMetadata() = DefaultQueryMetadata()
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getType(): Class<out Int> = Int::class.javaObjectType
+    }
+    private val nullSubQuery: SubQueryExpression<Int>? = null
+
+    // gtAll(Collection)
+    @Test fun `gtAll collection - both non-null`() = assertNotNull(price gtAll collectionExpr)
+    @Test fun `gtAll collection - this null`() = assertNull(nullExpr gtAll collectionExpr)
+    @Test fun `gtAll collection - right null`() = assertNull(price gtAll nullCollectionExpr)
+    @Test fun `gtAll collection - both null`() = assertNull(nullExpr gtAll nullCollectionExpr)
+
+    // gtAll(SubQuery)
+    @Test fun `gtAll subquery - both non-null`() = assertNotNull(price gtAll subQuery)
+    @Test fun `gtAll subquery - this null`() = assertNull(nullExpr gtAll subQuery)
+    @Test fun `gtAll subquery - right null`() = assertNull(price gtAll nullSubQuery)
+    @Test fun `gtAll subquery - both null`() = assertNull(nullExpr gtAll nullSubQuery)
+
+    // gtAny(Collection)
+    @Test fun `gtAny collection - both non-null`() = assertNotNull(price gtAny collectionExpr)
+    @Test fun `gtAny collection - this null`() = assertNull(nullExpr gtAny collectionExpr)
+    @Test fun `gtAny collection - right null`() = assertNull(price gtAny nullCollectionExpr)
+    @Test fun `gtAny collection - both null`() = assertNull(nullExpr gtAny nullCollectionExpr)
+
+    // gtAny(SubQuery)
+    @Test fun `gtAny subquery - both non-null`() = assertNotNull(price gtAny subQuery)
+    @Test fun `gtAny subquery - this null`() = assertNull(nullExpr gtAny subQuery)
+    @Test fun `gtAny subquery - right null`() = assertNull(price gtAny nullSubQuery)
+    @Test fun `gtAny subquery - both null`() = assertNull(nullExpr gtAny nullSubQuery)
+
+    // goeAll(Collection) — SubQuery 변형은 QueryDSL 5.1.0 멤버 부재로 미러링 안 함
+    @Test fun `goeAll collection - both non-null`() = assertNotNull(price goeAll collectionExpr)
+    @Test fun `goeAll collection - this null`() = assertNull(nullExpr goeAll collectionExpr)
+    @Test fun `goeAll collection - right null`() = assertNull(price goeAll nullCollectionExpr)
+    @Test fun `goeAll collection - both null`() = assertNull(nullExpr goeAll nullCollectionExpr)
+
+    // goeAny(Collection)
+    @Test fun `goeAny collection - both non-null`() = assertNotNull(price goeAny collectionExpr)
+    @Test fun `goeAny collection - this null`() = assertNull(nullExpr goeAny collectionExpr)
+    @Test fun `goeAny collection - right null`() = assertNull(price goeAny nullCollectionExpr)
+    @Test fun `goeAny collection - both null`() = assertNull(nullExpr goeAny nullCollectionExpr)
+
+    // ltAll(Collection)
+    @Test fun `ltAll collection - both non-null`() = assertNotNull(price ltAll collectionExpr)
+    @Test fun `ltAll collection - this null`() = assertNull(nullExpr ltAll collectionExpr)
+    @Test fun `ltAll collection - right null`() = assertNull(price ltAll nullCollectionExpr)
+    @Test fun `ltAll collection - both null`() = assertNull(nullExpr ltAll nullCollectionExpr)
+
+    // ltAny(Collection)
+    @Test fun `ltAny collection - both non-null`() = assertNotNull(price ltAny collectionExpr)
+    @Test fun `ltAny collection - this null`() = assertNull(nullExpr ltAny collectionExpr)
+    @Test fun `ltAny collection - right null`() = assertNull(price ltAny nullCollectionExpr)
+    @Test fun `ltAny collection - both null`() = assertNull(nullExpr ltAny nullCollectionExpr)
+
+    // loeAll(Collection)
+    @Test fun `loeAll collection - both non-null`() = assertNotNull(price loeAll collectionExpr)
+    @Test fun `loeAll collection - this null`() = assertNull(nullExpr loeAll collectionExpr)
+    @Test fun `loeAll collection - right null`() = assertNull(price loeAll nullCollectionExpr)
+    @Test fun `loeAll collection - both null`() = assertNull(nullExpr loeAll nullCollectionExpr)
+
+    // loeAny(Collection)
+    @Test fun `loeAny collection - both non-null`() = assertNotNull(price loeAny collectionExpr)
+    @Test fun `loeAny collection - this null`() = assertNull(nullExpr loeAny collectionExpr)
+    @Test fun `loeAny collection - right null`() = assertNull(price loeAny nullCollectionExpr)
+    @Test fun `loeAny collection - both null`() = assertNull(nullExpr loeAny nullCollectionExpr)
 }

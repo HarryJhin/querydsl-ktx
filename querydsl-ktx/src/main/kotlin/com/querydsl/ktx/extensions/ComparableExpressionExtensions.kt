@@ -1,6 +1,8 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.types.CollectionExpression
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.SubQueryExpression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.ComparableExpression
 
@@ -352,4 +354,244 @@ interface ComparableExpressionExtensions {
     operator fun <T : Comparable<T>> ComparableExpression<T>.rangeTo(
         other: ComparableExpression<T>,
     ): Pair<ComparableExpression<T>, ComparableExpression<T>> = this to other
+
+    /**
+     * Null-safe `> ALL` check against a collection expression.
+     *
+     * ```sql
+     * col > ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this > ALL right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.gtAll(right)
+    }
+
+    /**
+     * Null-safe `> ALL` check against a subquery.
+     *
+     * ```sql
+     * col > ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this > ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAll(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.gtAll(right)
+    }
+
+    /**
+     * Null-safe `> ANY` check against a collection expression.
+     *
+     * ```sql
+     * col > ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this > ANY right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.gtAny(right)
+    }
+
+    /**
+     * Null-safe `> ANY` check against a subquery.
+     *
+     * ```sql
+     * col > ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this > ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.gtAny(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.gtAny(right)
+    }
+
+    /**
+     * Null-safe `>= ALL` check against a collection expression.
+     *
+     * ```sql
+     * col >= ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this >= ALL right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.goeAll(right)
+    }
+
+    /**
+     * Null-safe `>= ALL` check against a subquery.
+     *
+     * ```sql
+     * col >= ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this >= ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAll(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.goeAll(right)
+    }
+
+    /**
+     * Null-safe `>= ANY` check against a collection expression.
+     *
+     * ```sql
+     * col >= ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this >= ANY right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.goeAny(right)
+    }
+
+    /**
+     * Null-safe `>= ANY` check against a subquery.
+     *
+     * ```sql
+     * col >= ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this >= ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.goeAny(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.goeAny(right)
+    }
+
+    /**
+     * Null-safe `< ALL` check against a collection expression.
+     *
+     * ```sql
+     * col < ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this < ALL right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.ltAll(right)
+    }
+
+    /**
+     * Null-safe `< ALL` check against a subquery.
+     *
+     * ```sql
+     * col < ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this < ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAll(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.ltAll(right)
+    }
+
+    /**
+     * Null-safe `< ANY` check against a collection expression.
+     *
+     * ```sql
+     * col < ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this < ANY right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.ltAny(right)
+    }
+
+    /**
+     * Null-safe `< ANY` check against a subquery.
+     *
+     * ```sql
+     * col < ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this < ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.ltAny(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.ltAny(right)
+    }
+
+    /**
+     * Null-safe `<= ALL` check against a collection expression.
+     *
+     * ```sql
+     * col <= ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <= ALL right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAll(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.loeAll(right)
+    }
+
+    /**
+     * Null-safe `<= ALL` check against a subquery.
+     *
+     * ```sql
+     * col <= ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this <= ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAll(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.loeAll(right)
+    }
+
+    /**
+     * Null-safe `<= ANY` check against a collection expression.
+     *
+     * ```sql
+     * col <= ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <= ANY right`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAny(right: CollectionExpression<*, in T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.loeAny(right)
+    }
+
+    /**
+     * Null-safe `<= ANY` check against a subquery.
+     *
+     * ```sql
+     * col <= ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this <= ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T : Comparable<T>> ComparableExpression<T>?.loeAny(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.loeAny(right)
+    }
 }

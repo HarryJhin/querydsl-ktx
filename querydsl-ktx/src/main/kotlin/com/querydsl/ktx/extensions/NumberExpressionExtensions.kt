@@ -1,7 +1,9 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.types.CollectionExpression
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Ops
+import com.querydsl.core.types.SubQueryExpression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.NumberExpression
@@ -669,4 +671,188 @@ interface NumberExpressionExtensions {
      */
     operator fun <T> NumberExpression<T>.unaryMinus(): NumberExpression<T>
         where T : Number, T : Comparable<*> = this.negate()
+
+    /**
+     * Null-safe `> ALL` check against a collection expression.
+     *
+     * ```sql
+     * price > ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this > ALL right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.gtAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.gtAll(right)
+    }
+
+    /**
+     * Null-safe `> ALL` check against a subquery.
+     *
+     * ```sql
+     * price > ALL (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this > ALL (subquery)`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.gtAll(right: SubQueryExpression<T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.gtAll(right)
+    }
+
+    /**
+     * Null-safe `> ANY` check against a collection expression.
+     *
+     * ```sql
+     * price > ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this > ANY right`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.gtAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.gtAny(right)
+    }
+
+    /**
+     * Null-safe `> ANY` check against a subquery.
+     *
+     * ```sql
+     * price > ANY (SELECT ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this > ANY (subquery)`, or null if either side is null
+     */
+    infix fun <T> NumberExpression<T>?.gtAny(right: SubQueryExpression<T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.gtAny(right)
+    }
+
+    /**
+     * Null-safe `>= ALL` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `goeAll(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price >= ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this >= ALL right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.goeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.goeAll(right)
+    }
+
+    /**
+     * Null-safe `>= ANY` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `goeAny(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price >= ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this >= ANY right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.goeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.goeAny(right)
+    }
+
+    /**
+     * Null-safe `< ALL` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `ltAll(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price < ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this < ALL right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.ltAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.ltAll(right)
+    }
+
+    /**
+     * Null-safe `< ANY` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `ltAny(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price < ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this < ANY right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.ltAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.ltAny(right)
+    }
+
+    /**
+     * Null-safe `<= ALL` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `loeAll(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price <= ALL (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <= ALL right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.loeAll(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.loeAll(right)
+    }
+
+    /**
+     * Null-safe `<= ANY` check against a collection expression.
+     *
+     * QueryDSL 5.1.0 does not provide a `loeAny(SubQueryExpression)` member on
+     * `NumberExpression`, so only the collection variant is wrapped here.
+     *
+     * ```sql
+     * price <= ANY (?, ?, ?)
+     * ```
+     *
+     * @param right the collection expression to compare against, or null to skip
+     * @return `this <= ANY right`, or null if either side is null
+     * @see com.querydsl.core.types.dsl.ComparableExpression For SubQuery variants on non-numeric Comparable types.
+     */
+    infix fun <T> NumberExpression<T>?.loeAny(right: CollectionExpression<*, in T>?): BooleanExpression?
+        where T : Number, T : Comparable<*> = when {
+        this == null || right == null -> null
+        else -> this.loeAny(right)
+    }
 }

@@ -35,4 +35,24 @@ class ProductRepository : QuerydslRepository<Product>() {
         selectFrom(product)
             .where(product.category notIn categorySubQuery)
             .fetch()
+
+    fun findGtAllSubQuery(priceSubQuery: SubQueryExpression<Int>?): List<Product> =
+        selectFrom(product)
+            .where(product.price gtAll priceSubQuery)
+            .fetch()
+
+    fun findGtAnySubQuery(priceSubQuery: SubQueryExpression<Int>?): List<Product> =
+        selectFrom(product)
+            .where(product.price gtAny priceSubQuery)
+            .fetch()
+
+    fun findEqAnySubQuery(priceSubQuery: SubQueryExpression<Int>?): List<Product> =
+        selectFrom(product)
+            .where(product.price eqAny priceSubQuery)
+            .fetch()
+
+    fun findLoeAllCategory(categorySubQuery: SubQueryExpression<String>?): List<Product> =
+        selectFrom(product)
+            .where(product.category loeAll categorySubQuery)
+            .fetch()
 }

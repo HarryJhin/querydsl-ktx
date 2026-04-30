@@ -87,6 +87,7 @@ Extensions are scoped through **interface implementation** -- no global namespac
 - **Pagination without fetchResults()** -- `fetchResults()` is deprecated since QueryDSL 5.0. `page()` auto-generates count queries for simple cases and accepts a lambda for complex ones. `slice()` and `exactSlice()` avoid count queries entirely.
 - **Type-safe dynamic sorting** -- `SortSpec` provides a whitelist mapping for `Sort` property names. No more `?sort=password,asc` security holes or broken join-column sorting.
 - **8 extension interfaces** -- null-safe infix operators for Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery expressions.
+- **Subquery / collection comparisons** -- `eqAll`, `gtAny`, `loeAll` and other ALL/ANY variants with consistent null-skip semantics for both `CollectionExpression` and `SubQueryExpression` arguments.
 - **Reified expression templates** -- `numberTemplate<Float>(...)` instead of `Expressions.numberTemplate(Float::class.java, ...)`.
 - **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` with null-safe branches.
 - **Bulk DML** -- `modifying { }` with auto flush/clear.

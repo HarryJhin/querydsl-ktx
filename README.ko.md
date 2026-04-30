@@ -87,6 +87,7 @@ class MemberRepository : QuerydslRepository<Member>() {
 - **fetchResults() 없는 페이지네이션** -- `fetchResults()`는 QueryDSL 5.0부터 deprecated입니다. `page()`는 단순한 경우 카운트 쿼리를 자동 생성하고, 복잡한 경우 람다를 받습니다. `slice()`와 `exactSlice()`는 카운트 쿼리를 완전히 회피합니다.
 - **타입 세이프 동적 정렬** -- `SortSpec`은 `Sort` 프로퍼티명에 대한 화이트리스트 매핑을 제공합니다. `?sort=password,asc` 보안 구멍이나 조인 컬럼 정렬 오류가 없습니다.
 - **8개 확장 인터페이스** -- Boolean, Simple, Comparable, Number, String, Temporal, Collection, SubQuery 표현식용 null-safe infix 연산자.
+- **서브쿼리 / 컬렉션 비교** -- `eqAll`, `gtAny`, `loeAll` 등 ALL/ANY 변형. `CollectionExpression`과 `SubQueryExpression` 인자 모두에 동일한 null-skip 시맨틱 적용.
 - **Reified 표현식 템플릿** -- `Expressions.numberTemplate(Float::class.java, ...)` 대신 `numberTemplate<Float>(...)`.
 - **Case/When DSL** -- `case<Int> { when(pred) then value; otherwise(default) }` null-safe 분기.
 - **Bulk DML** -- `modifying { }` 자동 flush/clear.
