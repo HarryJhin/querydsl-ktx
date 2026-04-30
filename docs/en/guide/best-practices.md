@@ -309,6 +309,52 @@ fun findActiveSales(now: LocalDateTime? = null): List<Product> =
 
 ---
 
+## Kotlin Operators for Computed Column Sort
+
+Sorting by a derived numeric value used to require a verbose
+`NumberExpression.add(...)` or a Querydsl `template`. With the Kotlin operator
+overloads on `NumberExpression`, expression building reads like ordinary
+arithmetic — no intermediate variables, no template placeholders.
+
+```kotlin
+// Sort products by gross price (price + tax) descending
+selectFrom(product)
+    .orderBy((product.price + product.tax).desc())
+    .fetch()
+
+// Top items by margin ratio
+selectFrom(product)
+    .orderBy(((product.price - product.cost) / product.cost).desc())
+    .fetch()
+```
+
+The arithmetic operators have a non-null contract — both operands must be
+non-null. Use them inside `orderBy`, `select` projections, and other places
+where the expression itself must always exist.
+
+For dynamic WHERE clauses where either side may be null, use the infix forms
+(`add`, `subtract`, `multiply`, `divide`, `mod`) which return `null` when
+either side is null:
+
+```kotlin
+where(product.price add discount gt 0)  // skipped if `discount` is null
+```
+
+::: tip
+Pair this with `SortSpec` to expose computed columns through dynamic sort:
+
+```kotlin
+private val productSort = sortSpec {
+    "grossPrice" by (product.price + product.tax)
+    "margin" by ((product.price - product.cost) / product.cost)
+}
+```
+
+Now `?sort=grossPrice,desc` works without changing the controller layer.
+:::
+
+---
+
 ## Putting It All Together
 
 A complete repository combining all the patterns above:

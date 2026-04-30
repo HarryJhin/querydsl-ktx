@@ -300,6 +300,116 @@ vip = true OR (age >= ? AND active = true)
 
 :::
 
+### vararg 오버로드
+
+`andAnyOf`와 `orAllOf`는 `BooleanExpression?`의 vararg도 받습니다. `listOf(...)`
+없이 인라인으로 더 간결하게 사용할 수 있습니다.
+
+```kotlin
+predicate.andAnyOf(
+    entity.role eq role,
+    entity.department eq department,
+)
+```
+
+null-skip 시맨틱은 동일합니다. 각 null predicate는 OR/AND 그룹 빌드 전에
+제거됩니다.
+
+---
+
+## 서브쿼리 비교
+
+`SimpleExpression`은 `JPAExpressions`로 만든 서브쿼리와의 null-safe 비교를
+지원합니다. `null`을 전달하면 조건 자체가 건너뛰어집니다.
+
+::: code-group
+
+```kotlin [Kotlin]
+import com.querydsl.jpa.JPAExpressions
+
+fun search(matchMaxPrice: Boolean): List<Product> {
+    val maxPrice = if (matchMaxPrice)
+        JPAExpressions.select(product.price.max()).from(product)
+    else null
+    return selectFrom(product)
+        .where(product.price eq maxPrice)  // null 서브쿼리 -> 건너뜀
+        .fetch()
+}
+```
+
+```sql [SQL]
+-- maxPrice 서브쿼리가 제공된 경우
+SELECT * FROM product WHERE price = (SELECT MAX(price) FROM product)
+
+-- maxPrice 서브쿼리가 null인 경우
+SELECT * FROM product
+```
+
+:::
+
+`eq`, `in`, `notIn`은 `SubQueryExpression<T>?`를 받습니다. 값/표현식 오버로드와
+동일한 null-skip 규칙이 적용됩니다.
+
+## ALL / Any 비교
+
+여러 서브쿼리 행 또는 컬렉션 원소와 비교하려면 `*All` / `*Any` 변형을 사용합니다.
+
+::: code-group
+
+```kotlin [Kotlin]
+// 카테고리의 모든 가격보다 큰 — 해당 카테고리의 모든 상품보다 비싼 상품
+val categoryPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.category.eq(targetCategory))
+selectFrom(product).where(product.price gtAll categoryPrices).fetch()
+
+// cheap 카테고리의 어떤 가격과도 일치 — 어떤 cheap 상품의 가격과 같은 상품
+val cheapPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.price.lt(threshold))
+selectFrom(product).where(product.price eqAny cheapPrices).fetch()
+```
+
+```sql [SQL]
+SELECT * FROM product WHERE price > ALL (SELECT price FROM product WHERE category = ?)
+SELECT * FROM product WHERE price = ANY (SELECT price FROM product WHERE price < ?)
+```
+
+:::
+
+지원 변형: `eqAll`/`eqAny`, `neAll`/`neAny` (Collection만), `gtAll`/`gtAny`,
+`goeAll`/`goeAny`, `ltAll`/`ltAny`, `loeAll`/`loeAny`. `NumberExpression`의
+정확한 커버리지는
+[All/Any 비대칭 표](./extensions.md#numberexpressionextensions)를 참고하세요.
+
+## ESCAPE를 사용한 LIKE
+
+`%` 또는 `_` 문자를 리터럴로 매칭해야 하는 패턴에서는 `like` / `notLike` /
+`likeIgnoreCase` 결과에 `escape`를 체이닝합니다.
+
+```kotlin
+entity.name like "10\\%off" escape '\\'  // 리터럴 "10%off"와 매칭
+```
+
+이스케이프 문자는 `notLike`, `likeIgnoreCase` 체인에서도 그대로 유지됩니다.
+유효하지 않은 receiver(LIKE가 아닌 표현식 등)에는
+`com.querydsl.core.types.ExpressionException`이 발생합니다.
+
+## Computed Column에서의 산술
+
+`NumberExpression`은 null-safe infix 산술
+(`add`/`subtract`/`multiply`/`divide`/`mod`)과 Kotlin 연산자 (`+`, `-`, `*`,
+`/`, `%`, 단항 `-`) 양쪽을 제공합니다. infix는 양쪽 중 하나가 null이면
+건너뛰고, 연산자는 non-null 계약이라 projection이나 `orderBy`에 적합합니다.
+
+```kotlin
+// 중간 변수 없이 computed column으로 정렬
+selectFrom(entity)
+    .orderBy((entity.price + entity.tax).desc())
+    .fetch()
+
+// 동적 WHERE에서 null-safe
+where(entity.discount add bonus gt 0)  // bonus가 null이면 건너뜀
+```
+
 ---
 
 ## 조건을 점진적으로 구성하기

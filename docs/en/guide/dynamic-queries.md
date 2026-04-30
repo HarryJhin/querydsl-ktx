@@ -300,6 +300,117 @@ vip = true OR (age >= ? AND active = true)
 
 :::
 
+### vararg overloads
+
+`andAnyOf` and `orAllOf` also accept a vararg of `BooleanExpression?` for terser
+inline use without `listOf(...)`:
+
+```kotlin
+predicate.andAnyOf(
+    entity.role eq role,
+    entity.department eq department,
+)
+```
+
+Identical null-skip semantics: each null predicate is dropped before the OR/AND
+group is built.
+
+---
+
+## Subquery Comparisons
+
+`SimpleExpression` supports null-safe comparison with subqueries built via
+`JPAExpressions`. Pass `null` to skip the predicate entirely.
+
+::: code-group
+
+```kotlin [Kotlin]
+import com.querydsl.jpa.JPAExpressions
+
+fun search(matchMaxPrice: Boolean): List<Product> {
+    val maxPrice = if (matchMaxPrice)
+        JPAExpressions.select(product.price.max()).from(product)
+    else null
+    return selectFrom(product)
+        .where(product.price eq maxPrice)  // null subquery -> skipped
+        .fetch()
+}
+```
+
+```sql [SQL]
+-- when maxPrice subquery is provided
+SELECT * FROM product WHERE price = (SELECT MAX(price) FROM product)
+
+-- when maxPrice subquery is null
+SELECT * FROM product
+```
+
+:::
+
+`eq`, `in`, `notIn` accept `SubQueryExpression<T>?`. The same null-skip rule
+applies as with value/expression overloads.
+
+## ALL / ANY Comparisons
+
+For comparing against multiple subquery rows or collection elements, use
+`*All` / `*Any` variants:
+
+::: code-group
+
+```kotlin [Kotlin]
+// Greater than ALL prices in a category — strictly more expensive than every item
+val categoryPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.category.eq(targetCategory))
+selectFrom(product).where(product.price gtAll categoryPrices).fetch()
+
+// Equal to ANY of the cheap-category prices — match any cheap item's price
+val cheapPrices = JPAExpressions.select(product.price).from(product)
+    .where(product.price.lt(threshold))
+selectFrom(product).where(product.price eqAny cheapPrices).fetch()
+```
+
+```sql [SQL]
+SELECT * FROM product WHERE price > ALL (SELECT price FROM product WHERE category = ?)
+SELECT * FROM product WHERE price = ANY (SELECT price FROM product WHERE price < ?)
+```
+
+:::
+
+Available variants: `eqAll`/`eqAny`, `neAll`/`neAny` (Collection only),
+`gtAll`/`gtAny`, `goeAll`/`goeAny`, `ltAll`/`ltAny`, `loeAll`/`loeAny`. See the
+[All/Any asymmetry table](./extensions.md#numberexpressionextensions) for the
+exact coverage on `NumberExpression`.
+
+## LIKE with ESCAPE
+
+For patterns that need to match literal `%` or `_` characters, chain `escape`
+on a `like` / `notLike` / `likeIgnoreCase` result:
+
+```kotlin
+entity.name like "10\\%off" escape '\\'  // matches the literal "10%off"
+```
+
+The escape character is preserved through `notLike` and `likeIgnoreCase` chains.
+Invalid receivers (e.g. `escape` on a non-LIKE expression) throw
+`com.querydsl.core.types.ExpressionException`.
+
+## Arithmetic in Computed Columns
+
+`NumberExpression` exposes both null-safe infix arithmetic
+(`add`/`subtract`/`multiply`/`divide`/`mod`) and Kotlin operators (`+`, `-`,
+`*`, `/`, `%`, unary `-`). The infix forms skip when either side is null;
+operators have a non-null contract for use in projections and `orderBy`:
+
+```kotlin
+// Sort by a computed column without intermediate variables
+selectFrom(entity)
+    .orderBy((entity.price + entity.tax).desc())
+    .fetch()
+
+// Null-safe in dynamic WHERE
+where(entity.discount add bonus gt 0)  // skipped if `bonus` is null
+```
+
 ---
 
 ## Building Conditions Incrementally

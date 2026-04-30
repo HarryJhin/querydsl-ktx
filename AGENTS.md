@@ -29,11 +29,11 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 ├── Expressions.kt       ← Reified template wrappers + value wrapping + constant
 ├── CaseDsl.kt           ← CASE/WHEN Kotlin DSL (searched & simple)
 ├── extensions/          ← 8 interfaces (no state, no dependencies)
-│   ├── BooleanExpressionExtensions.kt    — and, or, eq, nullif, coalesce
+│   ├── BooleanExpressionExtensions.kt    — and, or, andAnyOf (List + vararg), orAllOf (List + vararg), eq, nullif, coalesce
 │   ├── SimpleExpressionExtensions.kt     — eq, ne, in, notIn, inChunked (with SubQueryExpression overloads for eq/in/notIn), eqAll/eqAny/neAll/neAny (Collection + SubQuery for eq*; QueryDSL 5.1.0 has no SubQuery for ne*)
 │   ├── ComparableExpressionExtensions.kt — gt, goe, lt, loe, between, reverse between, rangeTo, gt/goe/lt/loe All/Any (Collection + SubQuery)
 │   ├── NumberExpressionExtensions.kt     — same as Comparable (separate hierarchy), includes rangeTo, arithmetic infix (add/subtract/multiply/divide/mod), Kotlin operators (+, -, *, /, %, unary -), gt/goe/lt/loe All/Any (Collection; SubQuery only for gtAll/gtAny per QueryDSL 5.1.0)
-│   ├── StringExpressionExtensions.kt     — contains, startsWith, endsWith, like, matches, nullif, coalesce
+│   ├── StringExpressionExtensions.kt     — contains, startsWith, endsWith, like, notLike, likeIgnoreCase, matches, escape (LIKE ESCAPE chain), equalsIgnoreCase, notEqualsIgnoreCase, nullif, coalesce
 │   ├── TemporalExpressionExtensions.kt   — after, before
 │   ├── CollectionExpressionExtensions.kt — contains
 │   └── SubQueryExtensions.kt            — exists, notExists
@@ -45,10 +45,11 @@ querydsl-ktx/src/main/kotlin/com/querydsl/ktx/
 
 ### Documentation Site
 
-- `docs/` — MkDocs Material source files (`*.md` English, `*.ko.md` Korean)
-- `mkdocs.yml` — site configuration
-- `.github/workflows/ci.yml` — Build + test on Java 17/21 matrix
-- `.github/workflows/docs.yml` — Dokka API docs + MkDocs → GitHub Pages
+- `docs/` — VitePress source files. `docs/en/` for English, `docs/ko/` for Korean
+- `docs/.vitepress/config.ts` — global config (locales, rewrites, plugins)
+- `package.json` — npm scripts (`docs:dev`, `docs:build`, `docs:preview`)
+- `.github/workflows/ci.yml` — Build + test on Java 17/21 matrix (Spring Boot 3.0/3.2/3.3/3.4/3.5 + OpenFeign QueryDSL 6.12)
+- `.github/workflows/docs.yml` — Dokka API docs + VitePress → GitHub Pages
 
 ### Publishing
 
@@ -79,8 +80,9 @@ This contract is the core design principle. Any new extension must follow it.
 ./gradlew :querydsl-ktx:dokkaHtml      # Generate API docs
 ./gradlew publishToMavenLocal             # Publish to local Maven repo (testing)
 ./gradlew publishAndReleaseToMavenCentral # Publish to Maven Central (requires GPG + Sonatype token)
-mkdocs serve                              # Local docs preview (requires pip install mkdocs-material)
-mkdocs build                              # Build docs site
+npm run docs:dev                          # Local docs preview (VitePress)
+npm run docs:build                        # Build docs site
+npm run docs:preview                      # Preview built docs site
 ```
 
 ## Code Style
@@ -102,7 +104,8 @@ mkdocs build                              # Build docs site
 ## Conventions
 
 - Dependencies: `compileOnly` for all external libraries (user provides versions)
-- Spring Data 내부 API 의존: `Querydsl` (`o.s.d.jpa.repository.support`), `SimpleEntityPathResolver` — Spring Boot 3.0~3.4 호환 검증됨. v2.0.0(Spring Boot 4) 마이그레이션 시 검토 필요
+- Spring Data 내부 API 의존: `Querydsl` (`o.s.d.jpa.repository.support`), `SimpleEntityPathResolver` — Spring Boot 3.0~3.5 호환 검증됨. v2.0.0(Spring Boot 4) 마이그레이션 시 검토 필요
 - Pagination: `slice()` (optimistic hasNext) and `exactSlice()` (exact hasNext) return Slice, `page()` returns Page, `fetch()` returns List
-- Bulk DML: wrap in `modifying { }` for flush + clear (requires active transaction; throws `IllegalStateException` otherwise)
+- Bulk DML: wrap in `modifying { }` for flush + clear (requires active transaction; throws `com.querydsl.core.QueryException` otherwise)
+- LIKE escape: `name like pattern escape '\\'` chains to existing like/notLike/likeIgnoreCase results. Invalid receivers throw `com.querydsl.core.types.ExpressionException`
 - Naming: verb form (slice, page, fetch), not gerund (slicing, paging, fetching)
