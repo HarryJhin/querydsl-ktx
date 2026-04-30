@@ -13,6 +13,10 @@ export default {
         link: '/ko/guide/extensions',
       },
       {
+        text: '왜?',
+        link: '/ko/why',
+      },
+      {
         text: 'API 레퍼런스',
         link: '/api/',
         target: '_self',
