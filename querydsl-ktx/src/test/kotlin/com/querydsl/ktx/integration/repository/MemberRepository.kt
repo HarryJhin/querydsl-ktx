@@ -108,6 +108,27 @@ class MemberRepository : QuerydslRepository<Member>() {
             .where(member.id inChunked ids)
             .fetch()
 
+    fun findVipInAnyOf(vararg departmentNames: String?): List<Member> =
+        selectFrom(member)
+            .leftJoin(member.department, department)
+            .where(
+                (member.status eq MemberStatus.VIP).andAnyOf(
+                    *departmentNames.map { department.name eq it }.toTypedArray(),
+                ),
+            )
+            .fetch()
+
+    fun findActiveOrAllOf(minAge: Int?, departmentName: String?): List<Member> =
+        selectFrom(member)
+            .leftJoin(member.department, department)
+            .where(
+                (member.status eq MemberStatus.VIP).orAllOf(
+                    member.age goe minAge,
+                    department.name eq departmentName,
+                ),
+            )
+            .fetch()
+
     // Non-SortSpec pagination — uses Pageable's own Sort
     fun findPageDirect(pageable: Pageable): Page<Member> =
         selectFrom(member).page(pageable)

@@ -74,6 +74,12 @@ active = true AND (role = ? OR department = ?)
 
 :::
 
+::: tip Vararg overload
+`andAnyOf` and `orAllOf` also accept a vararg of `BooleanExpression?`.
+Call with dot notation since Kotlin disallows vararg on infix functions:
+`predicate.andAnyOf(p1, p2, p3)`.
+:::
+
 ---
 
 ## SimpleExpressionExtensions

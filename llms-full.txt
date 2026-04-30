@@ -64,7 +64,9 @@ class MyRepo : QuerydslSupport<MyEntity>(), BooleanExpressionExtensions, StringE
 infix fun BooleanExpression?.and(right: BooleanExpression?): BooleanExpression?
 infix fun BooleanExpression?.or(right: BooleanExpression?): BooleanExpression?
 infix fun BooleanExpression?.andAnyOf(predicates: List<BooleanExpression?>): BooleanExpression?
+fun BooleanExpression?.andAnyOf(vararg predicates: BooleanExpression?): BooleanExpression?
 infix fun BooleanExpression?.orAllOf(predicates: List<BooleanExpression?>): BooleanExpression?
+fun BooleanExpression?.orAllOf(vararg predicates: BooleanExpression?): BooleanExpression?
 infix fun BooleanExpression?.eq(right: Boolean?): BooleanExpression?
 infix fun BooleanExpression?.nullif(other: Expression<Boolean>?): BooleanExpression?
 infix fun BooleanExpression?.nullif(other: Boolean?): BooleanExpression?
