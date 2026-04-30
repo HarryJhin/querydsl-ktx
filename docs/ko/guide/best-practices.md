@@ -308,6 +308,52 @@ fun findActiveSales(now: LocalDateTime? = null): List<Product> =
 
 ---
 
+## Computed Column 정렬을 위한 Kotlin 연산자
+
+파생 숫자 값으로 정렬할 때, 기존에는 `NumberExpression.add(...)`나 Querydsl
+`template`이 필요했습니다. `NumberExpression`의 Kotlin operator 오버로드를
+쓰면 표현식 빌딩이 일반 산술처럼 읽힙니다. 중간 변수도, template placeholder도
+필요 없습니다.
+
+```kotlin
+// 총 가격(price + tax) 내림차순 정렬
+selectFrom(product)
+    .orderBy((product.price + product.tax).desc())
+    .fetch()
+
+// 마진 비율 상위 정렬
+selectFrom(product)
+    .orderBy(((product.price - product.cost) / product.cost).desc())
+    .fetch()
+```
+
+산술 연산자는 non-null 계약입니다. 양쪽 피연산자 모두 non-null이어야 합니다.
+`orderBy`, `select` projection 등 표현식 자체가 항상 존재해야 하는 곳에
+사용하세요.
+
+어느 한쪽이 null일 수 있는 동적 WHERE에서는 infix 형태(`add`, `subtract`,
+`multiply`, `divide`, `mod`)를 사용합니다. 양쪽 중 하나가 null이면 `null`을
+반환합니다.
+
+```kotlin
+where(product.price add discount gt 0)  // discount가 null이면 건너뜀
+```
+
+::: tip
+`SortSpec`과 함께 사용하면 동적 정렬에서 computed column을 노출할 수 있습니다.
+
+```kotlin
+private val productSort = sortSpec {
+    "grossPrice" by (product.price + product.tax)
+    "margin" by ((product.price - product.cost) / product.cost)
+}
+```
+
+이제 컨트롤러 레이어 변경 없이 `?sort=grossPrice,desc`가 동작합니다.
+:::
+
+---
+
 ## 전체 조합 예제
 
 위 패턴을 모두 결합한 완성된 리포지토리:

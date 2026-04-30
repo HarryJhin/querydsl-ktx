@@ -34,10 +34,10 @@ Each optional filter adds 1-3 lines. Range filters need 3 branches. querydsl-ktx
 
 ```kotlin
 // Gradle Kotlin DSL — starter (includes AutoConfiguration for JPAQueryFactory)
-implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:1.1.0")
+implementation("io.github.harryjhin:querydsl-ktx-spring-boot-starter:1.2.0")
 
 // Or core only (extension interfaces + QuerydslRepository, no auto-config)
-implementation("io.github.harryjhin:querydsl-ktx:1.1.0")
+implementation("io.github.harryjhin:querydsl-ktx:1.2.0")
 ```
 
 ## Core Concept
