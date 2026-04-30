@@ -13,6 +13,10 @@ export default {
         link: '/guide/extensions',
       },
       {
+        text: 'Why',
+        link: '/why',
+      },
+      {
         text: 'API Reference',
         link: '/api/',
         target: '_self',
