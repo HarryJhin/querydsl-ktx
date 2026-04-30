@@ -2,6 +2,7 @@ package com.querydsl.ktx.extensions
 
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.ExpressionException
+import com.querydsl.core.types.SubQueryExpression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.SimpleExpression
 
@@ -171,5 +172,59 @@ interface SimpleExpressionExtensions {
                 .map { chunk -> this.`in`(chunk) }
                 .reduce { acc, expr -> acc.or(expr) }
         }
+    }
+
+    /**
+     * Null-safe equality check against a subquery.
+     *
+     * Skips the condition when either side is null.
+     *
+     * ```sql
+     * -- this = entity.price, right = (SELECT MAX(price) FROM ...)
+     * price = (SELECT MAX(price) FROM ...)
+     * ```
+     *
+     * @param right the subquery expression to compare against, or null to skip
+     * @return `this = (subquery)`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.eq(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.eq(right)
+    }
+
+    /**
+     * Null-safe IN check against a subquery.
+     *
+     * Skips the condition when either side is null.
+     *
+     * ```sql
+     * -- this = entity.id, right = (SELECT member_id FROM order WHERE ...)
+     * id IN (SELECT member_id FROM order WHERE ...)
+     * ```
+     *
+     * @param right the subquery expression to match against, or null to skip
+     * @return `this IN (subquery)`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.`in`(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.`in`(right)
+    }
+
+    /**
+     * Null-safe NOT IN check against a subquery.
+     *
+     * Skips the condition when either side is null.
+     *
+     * ```sql
+     * -- this = entity.id, right = (SELECT member_id FROM order WHERE ...)
+     * id NOT IN (SELECT member_id FROM order WHERE ...)
+     * ```
+     *
+     * @param right the subquery expression to exclude, or null to skip
+     * @return `this NOT IN (subquery)`, or null if either side is null
+     */
+    infix fun <T> SimpleExpression<T>?.notIn(right: SubQueryExpression<T>?): BooleanExpression? = when {
+        this == null || right == null -> null
+        else -> this.notIn(right)
     }
 }

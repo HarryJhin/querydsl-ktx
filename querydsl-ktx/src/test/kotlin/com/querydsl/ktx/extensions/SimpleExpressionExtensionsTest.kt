@@ -1,6 +1,9 @@
 package com.querydsl.ktx.extensions
 
+import com.querydsl.core.DefaultQueryMetadata
 import com.querydsl.core.types.ExpressionException
+import com.querydsl.core.types.SubQueryExpression
+import com.querydsl.core.types.Visitor
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.SimpleExpression
 import com.querydsl.core.types.dsl.StringExpression
@@ -287,5 +290,86 @@ class SimpleExpressionExtensionsTest : SimpleExpressionExtensions {
         val result = status.inChunked(listOf("A", "B", "C"), chunkSize = 1)
         assertNotNull(result)
         assertTrue(result.toString().contains(" || "))
+    }
+
+    // ── eq(SubQueryExpression) / in(SubQueryExpression) / notIn(SubQueryExpression) ──
+
+    private val subQuery: SubQueryExpression<String> = object : SubQueryExpression<String> {
+        override fun getMetadata() = DefaultQueryMetadata()
+        override fun <R, C> accept(v: Visitor<R, C>, context: C?): R = throw UnsupportedOperationException()
+        override fun getType(): Class<out String> = String::class.java
+    }
+    private val nullSubQuery: SubQueryExpression<String>? = null
+
+    @Test
+    fun `eq subquery - both non-null returns expression`() {
+        val result = status eq subQuery
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `eq subquery - this null returns null`() {
+        val result = nullExpr eq subQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `eq subquery - right null returns null`() {
+        val result = status eq nullSubQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `eq subquery - both null returns null`() {
+        val result = nullExpr eq nullSubQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `in subquery - both non-null returns expression`() {
+        val result = status `in` subQuery
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `in subquery - this null returns null`() {
+        val result = nullExpr `in` subQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `in subquery - right null returns null`() {
+        val result = status `in` nullSubQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `in subquery - both null returns null`() {
+        val result = nullExpr `in` nullSubQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `notIn subquery - both non-null returns expression`() {
+        val result = status notIn subQuery
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `notIn subquery - this null returns null`() {
+        val result = nullExpr notIn subQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `notIn subquery - right null returns null`() {
+        val result = status notIn nullSubQuery
+        assertNull(result)
+    }
+
+    @Test
+    fun `notIn subquery - both null returns null`() {
+        val result = nullExpr notIn nullSubQuery
+        assertNull(result)
     }
 }
