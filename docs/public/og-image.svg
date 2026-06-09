@@ -1,0 +1,24 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b1b1f"/>
+      <stop offset="1" stop-color="#101014"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7f52ff"/>
+      <stop offset="1" stop-color="#e44857"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="12" height="630" fill="url(#accent)"/>
+
+  <text x="80" y="250" font-family="Helvetica, Arial, sans-serif" font-size="92" font-weight="700" fill="#ffffff">querydsl-ktx</text>
+  <text x="80" y="330" font-family="Helvetica, Arial, sans-serif" font-size="42" font-weight="600" fill="#c8c8d0">Null-safe Kotlin Extensions for QueryDSL</text>
+  <text x="80" y="392" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="#8a8a96">Dynamic queries without BooleanBuilder or if-checks</text>
+
+  <rect x="80" y="450" width="760" height="84" rx="12" fill="#26262c"/>
+  <text x="108" y="502" font-family="Menlo, Monaco, monospace" font-size="28" fill="#9cdcfe">user.name <tspan fill="#c586c0">eq</tspan> <tspan fill="#ce9178">name</tspan> <tspan fill="#c586c0">and</tspan> user.age <tspan fill="#c586c0">goe</tspan> <tspan fill="#ce9178">age</tspan></text>
+
+  <text x="1120" y="582" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#6a6a76">github.com/HarryJhin/querydsl-ktx</text>
+</svg>

@@ -11,11 +11,11 @@ export default defineConfig({
 
   head: [
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'querydsl-ktx' }],
-    ['meta', { property: 'og:description', content: 'Null-safe infix Kotlin extensions for QueryDSL dynamic queries' }],
-    ['meta', { property: 'og:url', content: 'https://harryjhin.github.io/querydsl-ktx/' }],
-    ['meta', { name: 'twitter:card', content: 'summary' }],
-    ['link', { rel: 'canonical', href: 'https://harryjhin.github.io/querydsl-ktx/' }],
+    ['meta', { property: 'og:image', content: 'https://harryjhin.github.io/querydsl-ktx/og-image.png' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: 'https://harryjhin.github.io/querydsl-ktx/og-image.png' }],
     ['script', { type: 'application/ld+json' }, JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'SoftwareSourceCode',
@@ -28,6 +28,31 @@ export default defineConfig({
       license: 'https://opensource.org/licenses/MIT',
     })],
   ],
+
+  // 페이지별 canonical / og 태그. head 배열은 전역 정적이라 모든 페이지가
+  // 같은 값을 갖는다. rewrites(en/ -> root)를 반영해 선행 en/ 를 제거한다.
+  transformPageData(pageData) {
+    const siteBase = 'https://harryjhin.github.io/querydsl-ktx/'
+    const route = pageData.relativePath
+      .replace(/^en\//, '')
+      .replace(/(^|\/)index\.md$/, '$1')
+      .replace(/\.md$/, '.html')
+    const url = siteBase + route
+
+    const isHome = pageData.frontmatter.layout === 'home'
+    const title = isHome ? 'querydsl-ktx' : `${pageData.title} | querydsl-ktx`
+    const description = pageData.description
+      || pageData.frontmatter.description
+      || 'Null-safe infix Kotlin extensions for QueryDSL dynamic queries'
+
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.push(
+      ['link', { rel: 'canonical', href: url }],
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+    )
+  },
 
   sitemap: {
     hostname: 'https://harryjhin.github.io/querydsl-ktx/',
